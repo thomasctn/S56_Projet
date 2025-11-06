@@ -2,3 +2,10 @@ test/Prototype_FMSL/build/CMakeFiles
 test/Prototype_FMSL/build/cmake_install.cmake
 test/Prototype_FMSL/build/CMakeCache.txt
 test/Prototype_FMSL/build/Makefile
+test/Prototype_GF/build/log.txt
+
+test/Prototype_GF/build/CMakeFiles
+test/Prototype_GF/build/cmake_install.cmake
+test/Prototype_GF/build/log.txt
+test/Prototype_GF/build/CMakeCache.txt
+test/Prototype_GF/build/Makefile
