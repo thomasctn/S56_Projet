@@ -26,19 +26,25 @@ int main() {
     gf::RenderWindow window(mainWindow);
 
     char currentDir = 0;
-    char lastSentDir = 0;
-    auto lastSendTime = std::chrono::steady_clock::now();
-    const std::chrono::milliseconds repeatDelay(200); // 0,5s
-
     std::vector<ClientState> states;
     std::mutex statesMutex;
     bool running = true;
     socket.setNonBlocking();
 
-    std::thread receiver([&socket, &mainWindow, &states, &statesMutex]() {
-        uint8_t buffer[1024];
+    // ID local du client
+    uint32_t myId = 0;
 
-        while (mainWindow.isOpen()) {
+    // fonction pour générer une couleur basée sur l'ID
+    auto colorFromId = [](uint32_t id) -> gf::Color4f {
+        float r = float((id * 50) % 256) / 255.0f;
+        float g = float((id * 80) % 256) / 255.0f;
+        float b = float((id * 110) % 256) / 255.0f;
+        return gf::Color4f(r, g, b, 1.0f);
+    };
+
+    std::thread receiver([&]() {
+        uint8_t buffer[1024];
+        while (running && mainWindow.isOpen()) {
             gf::SocketDataResult result = socket.recvRawBytes({buffer, sizeof(buffer)});
 
             if (result.status == gf::SocketStatus::Data) {
@@ -46,12 +52,17 @@ int main() {
                 states.clear();
                 size_t offset = 0;
                 while (offset + sizeof(ClientState) <= result.length) {
-                    states.push_back(deserializeClientState(buffer, offset));
+                    ClientState s = deserializeClientState(buffer, offset);
+                    states.push_back(s);
+                    if (s.id == myId && myId == 0) {
+                        myId = s.id; // récupérer l'ID assigné par le serveur
+                    }
                 }
             } else if (result.status == gf::SocketStatus::Block) {
-                // Pas de donnée disponible, on continue la boucle
+                // pas de données disponibles, continue
             } else if (result.status == gf::SocketStatus::Close) {
                 gf::Log::info("Serveur déconnecté\n");
+                running = false;
                 mainWindow.close();
                 break;
             } else if (result.status == gf::SocketStatus::Error) {
@@ -62,6 +73,7 @@ int main() {
         }
     });
 
+    auto lastSend = std::chrono::steady_clock::now();
 
     while (running && mainWindow.isOpen()) {
         gf::Event event;
@@ -81,22 +93,18 @@ int main() {
                     default: currentDir = 0; break;
                 }
             } else if (event.type == gf::EventType::KeyReleased) {
-                if ((event.key.keycode == gf::Keycode::Up && currentDir == 'U') ||
-                    (event.key.keycode == gf::Keycode::Down && currentDir == 'D') ||
-                    (event.key.keycode == gf::Keycode::Left && currentDir == 'L') ||
-                    (event.key.keycode == gf::Keycode::Right && currentDir == 'R')) {
-                    currentDir = 0;
-                }
+                currentDir = 0;
             }
         }
 
-        // Envoi répété si touche maintenue
-        auto now = std::chrono::steady_clock::now();
-        if (currentDir != 0 && (currentDir != lastSentDir || now - lastSendTime >= repeatDelay)) {
-            socket.sendRawBytes({reinterpret_cast<uint8_t*>(&currentDir), 1});
-            lastSentDir = currentDir;
-            lastSendTime = now;
-            gf::Log::info("Envoi : touche '%c'\n", currentDir);
+        // envoyer la touche avec un délai si maintenue
+        if (currentDir != 0) {
+            auto now = std::chrono::steady_clock::now();
+            if (now - lastSend > std::chrono::milliseconds(100)) {
+                gf::Log::info("Envoi : touche '%c'\n", currentDir);
+                socket.sendRawBytes({reinterpret_cast<uint8_t*>(&currentDir), 1});
+                lastSend = now;
+            }
         }
 
         // Rendu
@@ -106,17 +114,14 @@ int main() {
             for (auto& s : states) {
                 gf::RectangleShape box({50.0f, 50.0f});
                 box.setPosition({s.x, s.y});
-                box.setColor({
-                    static_cast<uint8_t>((s.color >> 24) & 0xFF),
-                    static_cast<uint8_t>((s.color >> 16) & 0xFF),
-                    static_cast<uint8_t>((s.color >> 8) & 0xFF),
-                    static_cast<uint8_t>(s.color & 0xFF)
-                });
+                gf::Color4f c = (s.id == myId) ? gf::Color4f(1.0f, 0.0f, 0.0f, 1.0f) : colorFromId(s.id);
+                box.setColor(c);
                 window.draw(box);
             }
         }
         window.display();
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(8));
     }
 
     if (receiver.joinable()) {
