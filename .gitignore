@@ -9,3 +9,9 @@ test/Prototype_GF/build/cmake_install.cmake
 test/Prototype_GF/build/log.txt
 test/Prototype_GF/build/CMakeCache.txt
 test/Prototype_GF/build/Makefile
+
+code/build/CMakeFiles
+code/build/cmake_install.cmake
+code/build/log.txt
+code/build/CMakeCache.txt
+code/build/Makefile

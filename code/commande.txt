@@ -1,0 +1,4 @@
+dans build/ <-- IMPORTANT
+rm -rf *
+cmake ..
+make -j $(nproc) 2>log.txt
