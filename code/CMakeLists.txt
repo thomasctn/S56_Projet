@@ -3,13 +3,8 @@ project(PacMan)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(GF_CONFIG_FILE "/usr/local/lib/cmake/gf/gfConfig.cmake")
-
-if(NOT EXISTS ${GF_CONFIG_FILE})
-    set(GF_CONFIG_FILE "/usr/lib/cmake/gf/gfConfig.cmake")
-endif()
-
-include(${GF_CONFIG_FILE})
+# Trouver GF correctement
+find_package(gf CONFIG REQUIRED)
 
 include_directories(common)
 
