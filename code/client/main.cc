@@ -75,6 +75,36 @@ int main() {
 
     auto lastSend = std::chrono::steady_clock::now();
 
+    int map_size =27;
+    std::vector<std::vector<int>> map(map_size, std::vector<int>(map_size, 0)); //provisoire : 0=floor 1=wall 2=hut
+
+    map[0][0]=1;
+    map[1][0]=1;
+    map[2][0]=1;
+    map[3][0]=1;
+    map[4][0]=1;
+    map[5][0]=1;
+    map[6][0]=1;
+    map[7][0]=1;
+    map[8][0]=1;
+    map[9][0]=1;
+    map[10][0]=1;
+    map[11][0]=1;
+    map[12][0]=1;
+    map[13][0]=1;
+
+    map[0][1]=1;
+    map[0][2]=1;
+    map[0][3]=1;
+    map[0][4]=1;
+    map[0][5]=1;
+    map[0][6]=1;
+    map[0][7]=1;
+
+    map[2][3]=2;
+
+
+
     while (running && mainWindow.isOpen()) {
         gf::Event event;
 
@@ -97,6 +127,8 @@ int main() {
             }
         }
 
+
+
         // envoyer la touche avec un délai si maintenue
         if (currentDir != 0) {
             auto now = std::chrono::steady_clock::now();
@@ -117,6 +149,26 @@ int main() {
                 gf::Color4f c = (s.id == myId) ? gf::Color4f(1.0f, 0.0f, 0.0f, 1.0f) : colorFromId(s.id);
                 box.setColor(c);
                 window.draw(box);
+            }
+
+            for(int y =0; y<map_size;y++){
+                for(int x=0;x<map_size;x++){
+                    if(map[y][x]==1){
+                        gf::RectangleShape wall({50.0f,50.0f});
+                        wall.setPosition({float(x*50),float(y*50)});
+                        wall.setColor(gf::Color::White);
+                        window.draw(wall);
+
+                    }
+
+                    if(map[y][x]==2){
+                        gf::RectangleShape wall({50.0f,50.0f});
+                        wall.setPosition({float(x*50),float(y*50)});
+                        wall.setColor(gf::Color::Red);
+                        window.draw(wall);
+
+                    }
+                }
             }
         }
         window.display();
