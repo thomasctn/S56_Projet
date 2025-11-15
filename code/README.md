@@ -16,24 +16,24 @@ L’objectif final est d’obtenir un Pac-Man jouable en réseau local, avec un 
 code(src)/
 │
 ├── common/
-│ ├── Protocol.hpp
-│ ├── Serializable.hpp
-│ ├── Types.hpp
+│ ├── Protocol.h
+│ ├── Serializable.h
+│ ├── Types.h
 │
 ├── server/
-│ ├── Game.hpp / .cpp
-│ ├── Player.hpp / .cpp
-│ ├── Plateau.hpp / .cpp
-│ ├── Case.hpp / .cpp
-│ ├── PacGomme.hpp / .cpp
-│ ├── GameNetworkServer.hpp / .cpp
+│ ├── Game.h / .cc
+│ ├── Player.h / .cc
+│ ├── Plateau.h / .cc
+│ ├── Case.h / .cc
+│ ├── PacGomme.h / .cc
+│ ├── GameNetworkServer.h / .cc
 │
 └── client/
-├── GameClient.hpp / .cpp
-├── Renderer.hpp / .cpp
-├── ClientPlayer.hpp / .cpp
-├── ClientNetwork.hpp / .cpp
-├── InputHandler.hpp / .cpp
+├── GameClient.h / .cc
+├── Renderer.h / .cc
+├── ClientPlayer.h / .cc
+├── ClientNetwork.h / .cc
+├── InputHandler.h / .cc
 
 
 ---

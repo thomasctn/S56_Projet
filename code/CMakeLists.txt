@@ -8,7 +8,16 @@ find_package(gf CONFIG REQUIRED)
 
 include_directories(common)
 
-add_executable(server server/main.cc)
+# --- Serveur ---
+add_executable(server
+    server/main.cc
+    server/GameNetworkServer.cc
+    server/Game.cc
+    server/Player.cc
+    server/Plateau.cc
+    server/Case.cc
+    server/PacGomme.cc
+)
 target_link_libraries(server PRIVATE gf::core gf::graphics gf::net)
 
 add_executable(client client/main.cc)

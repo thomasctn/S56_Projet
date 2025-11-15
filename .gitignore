@@ -15,3 +15,5 @@ code/build/cmake_install.cmake
 code/build/log.txt
 code/build/CMakeCache.txt
 code/build/Makefile
+code/build/server
+code/build/client
