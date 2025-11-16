@@ -7,6 +7,7 @@
 GameNetworkServer::GameNetworkServer()
 : listener("5000")
 , nextId(1)
+, game(27, 27)
 {
     if (!listener) {
         gf::Log::error("Impossible de démarrer le serveur !");

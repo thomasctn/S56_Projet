@@ -4,6 +4,8 @@
 #include <mutex>
 #include <gf/TcpListener.h>
 #include <gf/SocketSelector.h>
+#include "Game.h"
+
 
 class GameNetworkServer {
 public:
@@ -17,6 +19,8 @@ private:
     std::vector<ClientInfo> clients;
     std::mutex clientsMutex;
     uint32_t nextId;
+
+    Game game;
 
     void handleNewClient();
     void handleClientData();

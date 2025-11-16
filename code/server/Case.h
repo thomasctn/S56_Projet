@@ -1,13 +1,18 @@
 #pragma once
 
-enum class CaseType {
+enum class CellType {
     Floor,
     Wall,
     Hut
 };
 
-struct Case {
-    CaseType type;
+class Case {
+public:
+    Case(CellType type = CellType::Floor) : type(type) {}
 
-    Case(CaseType t = CaseType::Floor) : type(t) {}
+    CellType getType() const { return type; }
+    void setType(CellType t) { type = t; }
+
+private:
+    CellType type;
 };
