@@ -15,9 +15,12 @@ GameNetworkServer::GameNetworkServer()
         gf::Log::error("Impossible de démarrer le serveur !");
     }
     selector.addSocket(listener);
-
+    /*
     std::cout << "Plateau initial :" << std::endl;
     game.getPlateau().print();
+    */
+    std::thread(&GameNetworkServer::plateauDisplayLoop, this).detach();
+
 }
 
 int GameNetworkServer::run() {
@@ -46,8 +49,11 @@ void GameNetworkServer::handleNewClient() {
     clients.push_back(std::move(ci));
     selector.addSocket(clients.back().socket);
 
+    game.addPlayer(clients.back().id, clients.back().state.x, clients.back().state.y);
+
     gf::Log::info("Client connecté, id=%d\n", clients.back().id);
 }
+
 
 void GameNetworkServer::handleClientData() {
     std::vector<size_t> toRemove;
@@ -63,15 +69,29 @@ void GameNetworkServer::handleClientData() {
         if (result.status == gf::SocketStatus::Data) {
             for (size_t j = 0; j < result.length; ++j) {
                 char dir = buffer[j];
+
+                float newX = c.state.x;
+                float newY = c.state.y;
+
                 switch (dir) {
-                    case 'U': c.state.y -= 50; break;
-                    case 'D': c.state.y += 50; break;
-                    case 'L': c.state.x -= 50; break;
-                    case 'R': c.state.x += 50; break;
+                    case 'U': newY -= 50; break;
+                    case 'D': newY += 50; break;
+                    case 'L': newX -= 50; break;
+                    case 'R': newX += 50; break;
                 }
-                gf::Log::info("Client %d moved %c -> position=(%.1f, %.1f)\n", c.id, dir, c.state.x, c.state.y);
+
+                game.movePlayer(c.id, newX, newY);
+
+                auto& gPlayer = game.getPlayerInfo(c.id);
+                c.state.x = gPlayer.x;
+                c.state.y = gPlayer.y;
+
+                gf::Log::info("Client %d moved %c -> position=(%.1f, %.1f)\n",
+                            c.id, dir, c.state.x, c.state.y);
             }
-        } else if (result.status == gf::SocketStatus::Close || result.status == gf::SocketStatus::Error) {
+        }
+
+        else if (result.status == gf::SocketStatus::Close || result.status == gf::SocketStatus::Error) {
             toRemove.push_back(i);
         }
     }
@@ -96,5 +116,28 @@ void GameNetworkServer::broadcastStates() {
         }
         c.socket.sendRawBytes({buffer.data(), buffer.size()});
         gf::Log::info("Envoi %zu octets au client %d\n", buffer.size(), c.id);
+    }
+}
+
+void GameNetworkServer::plateauDisplayLoop() {
+    while (true) {
+        {
+            std::lock_guard<std::mutex> lock(clientsMutex);
+
+            std::vector<Plateau::PlayerInfo> infos;
+            for (auto& c : clients) {
+                infos.push_back({
+                    static_cast<int>(c.state.x) / 50,
+                    static_cast<int>(c.state.y) / 50,
+                    static_cast<uint32_t>(c.id)
+                });
+            }
+
+            game.getPlateau().printWithPlayers(infos);
+        }
+
+        std::cout << "----------------------" << std::endl;
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }

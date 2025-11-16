@@ -26,4 +26,6 @@ private:
     void handleClientData();
     void removeDisconnectedClients(const std::vector<size_t>& toRemove);
     void broadcastStates();
+
+    void plateauDisplayLoop();
 };

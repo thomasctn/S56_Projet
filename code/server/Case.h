@@ -1,17 +1,17 @@
 #pragma once
 
-enum class CellType {
-    Floor,
-    Wall,
-    Hut
-};
+enum class CellType { Floor, Wall, Hut };
 
 class Case {
 public:
-    Case(CellType type = CellType::Floor) : type(type) {}
+    Case() : type(CellType::Floor) {}
+    Case(CellType t) : type(t) {}
 
     CellType getType() const { return type; }
-    void setType(CellType t) { type = t; }
+
+    bool isWalkable() const {
+        return type == CellType::Floor;
+    }
 
 private:
     CellType type;
