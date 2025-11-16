@@ -3,6 +3,8 @@
 #include <gf/Log.h>
 #include <thread>
 #include <chrono>
+#include <iostream>
+
 
 GameNetworkServer::GameNetworkServer()
 : listener("5000")
@@ -13,6 +15,9 @@ GameNetworkServer::GameNetworkServer()
         gf::Log::error("Impossible de démarrer le serveur !");
     }
     selector.addSocket(listener);
+
+    std::cout << "Plateau initial :" << std::endl;
+    game.getPlateau().print();
 }
 
 int GameNetworkServer::run() {

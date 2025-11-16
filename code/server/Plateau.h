@@ -12,6 +12,8 @@ public:
     int getWidth() const { return width; }
     int getHeight() const { return height; }
 
+    void print() const;
+
 private:
     int width;
     int height;
