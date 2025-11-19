@@ -1,0 +1,24 @@
+pouvoir de classe :
+-vitesse
+-invisiblite
+-remobter le temps
+-tp aléatoire 
+-modif labyrinthe
+-creuser labyrinthe 
+-cloner
+-paralyser
+-aveugler
+-tranverser les mur
+-invulnérabilité 
+
+lobby:
+map ou on peut sa balader
+quete ou ester egg
+
+labyrinthe :
+on peu ajouter des étage
+
+game:
+au lieu de juste survivre 
+on peut faire faire au pacman 
+des tache type among us qui alerte les fantômes
