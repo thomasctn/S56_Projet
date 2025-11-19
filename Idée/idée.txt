@@ -10,6 +10,9 @@ pouvoir de classe :
 -aveugler
 -tranverser les mur
 -invulnérabilité 
+-localisation
+-chasseur de fantômes
+-omniscience
 
 lobby:
 map ou on peut sa balader
@@ -22,3 +25,6 @@ game:
 au lieu de juste survivre 
 on peut faire faire au pacman 
 des tache type among us qui alerte les fantômes
+
+classe secrete avec action
+ou salle secrete
