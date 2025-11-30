@@ -20,5 +20,9 @@ add_executable(server
 )
 target_link_libraries(server PRIVATE gf::core gf::graphics gf::net)
 
-add_executable(client client/main.cc)
+add_executable(client
+    client/main.cc
+    client/Renderer.cc
+)
+
 target_link_libraries(client PRIVATE gf::core gf::graphics gf::net)

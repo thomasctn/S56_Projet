@@ -12,6 +12,11 @@
 #include <gf/Event.h>
 #include <mutex>
 #include "../common/Types.h"
+#include "Renderer.h"
+
+
+Renderer renderer;
+
 
 int main() {
     gf::Log::info("Démarrage du client...\n");
@@ -22,8 +27,6 @@ int main() {
         return -1;
     }
 
-    gf::Window mainWindow("GF Sync Boxes", {800, 600});
-    gf::RenderWindow window(mainWindow);
 
     char currentDir = 0;
     std::vector<ClientState> states;
@@ -44,7 +47,7 @@ int main() {
 
     std::thread receiver([&]() {
         uint8_t buffer[1024];
-        while (running && mainWindow.isOpen()) {
+        while (running && renderer.isOpen()) {
             gf::SocketDataResult result = socket.recvRawBytes({buffer, sizeof(buffer)});
 
             if (result.status == gf::SocketStatus::Data) {
@@ -63,7 +66,7 @@ int main() {
             } else if (result.status == gf::SocketStatus::Close) {
                 gf::Log::info("Serveur déconnecté\n");
                 running = false;
-                mainWindow.close();
+                renderer.getWindow().close();
                 break;
             } else if (result.status == gf::SocketStatus::Error) {
                 gf::Log::error("Erreur réseau côté client\n");
@@ -76,7 +79,7 @@ int main() {
     auto lastSend = std::chrono::steady_clock::now();
 
     int map_size =27;
-    std::vector<std::vector<int>> map(map_size, std::vector<int>(map_size, 0)); //provisoire : 0=floor 1=wall 2=hut
+    std::vector<std::vector<int>> map(map_size, std::vector<int>(map_size, -1)); //provisoire : 0=floor 1=wall 2=hut
 
     map[0][0]=1;
     map[1][0]=1;
@@ -103,17 +106,18 @@ int main() {
 
     map[2][3]=2;
 
+    map[4][4]=0;
 
 
-    while (running && mainWindow.isOpen()) {
+    while (running && renderer.isOpen()) {
         gf::Event event;
 
         // Gestion des événements
-        while (mainWindow.pollEvent(event)) {
+    while (renderer.getWindow().pollEvent(event)){
             if (event.type == gf::EventType::Closed) {
                 gf::Log::info("Fermeture demandée par l'utilisateur\n");
                 running = false;
-                mainWindow.close();
+                renderer.getWindow().close();
             } else if (event.type == gf::EventType::KeyPressed) {
                 switch (event.key.keycode) {
                     case gf::Keycode::Up:    currentDir = 'U'; break;
@@ -140,38 +144,8 @@ int main() {
         }
 
         // Rendu
-        window.clear(gf::Color::Black);
-        {
-            std::lock_guard<std::mutex> lock(statesMutex);
-            for (auto& s : states) {
-                gf::RectangleShape box({50.0f, 50.0f});
-                box.setPosition({s.x, s.y});
-                gf::Color4f c = (s.id == myId) ? gf::Color4f(1.0f, 0.0f, 0.0f, 1.0f) : colorFromId(s.id);
-                box.setColor(c);
-                window.draw(box);
-            }
+        renderer.render(states, myId, map);
 
-            for(int y =0; y<map_size;y++){
-                for(int x=0;x<map_size;x++){
-                    if(map[y][x]==1){
-                        gf::RectangleShape wall({50.0f,50.0f});
-                        wall.setPosition({float(x*50),float(y*50)});
-                        wall.setColor(gf::Color::White);
-                        window.draw(wall);
-
-                    }
-
-                    if(map[y][x]==2){
-                        gf::RectangleShape wall({50.0f,50.0f});
-                        wall.setPosition({float(x*50),float(y*50)});
-                        wall.setColor(gf::Color::Red);
-                        window.draw(wall);
-
-                    }
-                }
-            }
-        }
-        window.display();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(8));
     }
