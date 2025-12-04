@@ -4,6 +4,7 @@
 #include <mutex>
 #include <gf/TcpListener.h>
 #include <gf/SocketSelector.h>
+#include <gf/Packet.h>
 #include "Game.h"
 
 

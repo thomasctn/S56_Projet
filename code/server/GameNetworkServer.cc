@@ -5,13 +5,11 @@
 #include <chrono>
 #include <iostream>
 
-
 GameNetworkServer::GameNetworkServer()
-: listener("5000")
-, nextId(1)
-, game(27, 27)
+    : listener("5000"), nextId(1), game(27, 27)
 {
-    if (!listener) {
+    if (!listener)
+    {
         gf::Log::error("Impossible de démarrer le serveur !");
     }
     selector.addSocket(listener);
@@ -20,13 +18,15 @@ GameNetworkServer::GameNetworkServer()
     game.getPlateau().print();
     */
     std::thread(&GameNetworkServer::plateauDisplayLoop, this).detach();
-
 }
 
-int GameNetworkServer::run() {
+int GameNetworkServer::run()
+{
     gf::Log::info("Serveur démarré !");
-    while (true) {
-        if (selector.wait(gf::milliseconds(100)) == gf::v1::SocketSelectorStatus::Event) {
+    while (true)
+    {
+        if (selector.wait(gf::milliseconds(100)) == gf::v1::SocketSelectorStatus::Event)
+        {
             handleNewClient();
             handleClientData();
         }
@@ -35,11 +35,14 @@ int GameNetworkServer::run() {
     return 0;
 }
 
-void GameNetworkServer::handleNewClient() {
-    if (!selector.isReady(listener)) return;
+void GameNetworkServer::handleNewClient()
+{
+    if (!selector.isReady(listener))
+        return;
 
     gf::TcpSocket clientSocket = listener.accept();
-    if (!clientSocket) return;
+    if (!clientSocket)
+        return;
 
     std::lock_guard<std::mutex> lock(clientsMutex);
     ClientInfo ci;
@@ -54,83 +57,112 @@ void GameNetworkServer::handleNewClient() {
     gf::Log::info("Client connecté, id=%d\n", clients.back().id);
 }
 
-
-void GameNetworkServer::handleClientData() {
+void GameNetworkServer::handleClientData()
+{
     std::vector<size_t> toRemove;
 
     std::lock_guard<std::mutex> lock(clientsMutex);
-    for (size_t i = 0; i < clients.size(); ++i) {
-        auto& c = clients[i];
-        if (!selector.isReady(c.socket)) continue;
-
-        std::vector<uint8_t> buffer(1024);
-        gf::SocketDataResult result = c.socket.recvRawBytes({buffer.data(), buffer.size()});
-
-        if (result.status == gf::SocketStatus::Data) {
-            for (size_t j = 0; j < result.length; ++j) {
-                char dir = buffer[j];
+    for (size_t i = 0; i < clients.size(); ++i)
+    {
+        auto &c = clients[i];
+        if (!selector.isReady(c.socket))
+            continue;
+        gf::Packet packet;
+        switch (c.socket.recvPacket(packet))
+        {
+        case gf::SocketStatus::Data:
+            switch (packet.getType())
+            {
+            case ClientMove::type:
+                auto data = packet.as<ClientMove>();
+                char dir = data.moveDir;
 
                 float newX = c.state.x;
                 float newY = c.state.y;
 
-                switch (dir) {
-                    case 'U': newY -= 50; break;
-                    case 'D': newY += 50; break;
-                    case 'L': newX -= 50; break;
-                    case 'R': newX += 50; break;
+                switch (dir)
+                {
+                case 'U':
+                    newY -= 50;
+                    break;
+                case 'D':
+                    newY += 50;
+                    break;
+                case 'L':
+                    newX -= 50;
+                    break;
+                case 'R':
+                    newX += 50;
+                    break;
                 }
 
                 game.movePlayer(c.id, newX, newY);
 
-                auto& gPlayer = game.getPlayerInfo(c.id);
+                auto &gPlayer = game.getPlayerInfo(c.id);
                 c.state.x = gPlayer.x;
                 c.state.y = gPlayer.y;
 
                 gf::Log::info("Client %d moved %c -> position=(%.1f, %.1f)\n",
-                            c.id, dir, c.state.x, c.state.y);
+                              c.id, dir, c.state.x, c.state.y);
+                break;
             }
-        }
-
-        else if (result.status == gf::SocketStatus::Close || result.status == gf::SocketStatus::Error) {
+            break;
+        case gf::SocketStatus::Error:
             toRemove.push_back(i);
+            break;
+        case gf::SocketStatus::Close:
+            toRemove.push_back(i);
+            break;
+        case gf::SocketStatus::Block:
+
+            break;
         }
     }
-
     removeDisconnectedClients(toRemove);
     broadcastStates();
 }
 
-void GameNetworkServer::removeDisconnectedClients(const std::vector<size_t>& toRemove) {
-    for (auto it = toRemove.rbegin(); it != toRemove.rend(); ++it) {
+void GameNetworkServer::removeDisconnectedClients(const std::vector<size_t> &toRemove)
+{
+    for (auto it = toRemove.rbegin(); it != toRemove.rend(); ++it)
+    {
         selector.removeSocket(clients[*it].socket);
         gf::Log::info("Client %d déconnecté\n", clients[*it].id);
         clients.erase(clients.begin() + *it);
     }
 }
 
-void GameNetworkServer::broadcastStates() {
-    for (auto& c : clients) {
-        std::vector<uint8_t> buffer;
-        for (auto& other : clients) {
-            serialize(other.state, buffer);
+void GameNetworkServer::broadcastStates()
+{
+    for (auto &c : clients)
+    {
+        std::vector<ClientState> clientStates;
+        for (auto &other : clients)
+        {
+            clientStates.push_back(other.state);
         }
-        c.socket.sendRawBytes({buffer.data(), buffer.size()});
-        gf::Log::info("Envoi %zu octets au client %d\n", buffer.size(), c.id);
+        gf::Packet packet;
+        GameState gs;
+        gs.clientStates = clientStates;
+        packet.is(gs);
+        c.socket.sendPacket(packet);
+        gf::Log::info("Envoi des état au client %d\n", c.id);
     }
 }
 
-void GameNetworkServer::plateauDisplayLoop() {
-    while (true) {
+void GameNetworkServer::plateauDisplayLoop()
+{
+    while (true)
+    {
         {
             std::lock_guard<std::mutex> lock(clientsMutex);
 
             std::vector<Plateau::PlayerInfo> infos;
-            for (auto& c : clients) {
-                infos.push_back({
-                    static_cast<int>(c.state.x) / 50,
-                    static_cast<int>(c.state.y) / 50,
-                    static_cast<uint32_t>(c.id)
-                });
+            for (auto &c : clients)
+            {
+                infos.push_back({static_cast<int>(c.state.x) / 50,
+                                 static_cast<int>(c.state.y) / 50,
+                                 static_cast<uint32_t>(c.id)});
             }
 
             game.getPlateau().printWithPlayers(infos);

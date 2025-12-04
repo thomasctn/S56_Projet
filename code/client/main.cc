@@ -14,19 +14,18 @@
 #include "../common/Types.h"
 #include "Renderer.h"
 
-
 Renderer renderer;
 
-
-int main() {
+int main()
+{
     gf::Log::info("Démarrage du client...\n");
 
     gf::TcpSocket socket("127.0.0.1", "5000");
-    if (!socket) {
+    if (!socket)
+    {
         gf::Log::error("Impossible de se connecter au serveur !\n");
         return -1;
     }
-
 
     char currentDir = 0;
     std::vector<ClientState> states;
@@ -38,107 +37,129 @@ int main() {
     uint32_t myId = 0;
 
     // fonction pour générer une couleur basée sur l'ID
-    auto colorFromId = [](uint32_t id) -> gf::Color4f {
+    auto colorFromId = [](uint32_t id) -> gf::Color4f
+    {
         float r = float((id * 50) % 256) / 255.0f;
         float g = float((id * 80) % 256) / 255.0f;
         float b = float((id * 110) % 256) / 255.0f;
         return gf::Color4f(r, g, b, 1.0f);
     };
 
-    std::thread receiver([&]() {
-        uint8_t buffer[1024];
+    std::thread receiver([&]()
+                         {
         while (running && renderer.isOpen()) {
-            gf::SocketDataResult result = socket.recvRawBytes({buffer, sizeof(buffer)});
-
-            if (result.status == gf::SocketStatus::Data) {
-                std::lock_guard<std::mutex> lock(statesMutex);
-                states.clear();
-                size_t offset = 0;
-                while (offset + sizeof(ClientState) <= result.length) {
-                    ClientState s = deserializeClientState(buffer, offset);
-                    states.push_back(s);
-                    if (s.id == myId && myId == 0) {
-                        myId = s.id; // récupérer l'ID assigné par le serveur
-                    }
-                }
-            } else if (result.status == gf::SocketStatus::Block) {
-                // pas de données disponibles, continue
-            } else if (result.status == gf::SocketStatus::Close) {
-                gf::Log::info("Serveur déconnecté\n");
+            gf::Packet packet;
+        switch (socket.recvPacket(packet))
+        {
+        case gf::SocketStatus::Data:
+            switch (packet.getType())
+            {
+            case GameState::type:
+                auto data = packet.as<GameState>();
+                states = data.clientStates;
+                break;
+            }
+            break;
+        case gf::SocketStatus::Error:
+             gf::Log::error("Erreur réseau côté client\n");
+            break;
+        case gf::SocketStatus::Close:
+            gf::Log::info("Serveur déconnecté\n");
                 running = false;
                 renderer.getWindow().close();
-                break;
-            } else if (result.status == gf::SocketStatus::Error) {
-                gf::Log::error("Erreur réseau côté client\n");
-            }
+            break;
+        case gf::SocketStatus::Block:
+
+            break;
+        }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
-    });
-
+        } });
     auto lastSend = std::chrono::steady_clock::now();
 
-    int map_size =27;
-    std::vector<std::vector<int>> map(map_size, std::vector<int>(map_size, -1)); //provisoire : 0=floor 1=wall 2=hut
+    int map_size = 27;
+    std::vector<std::vector<int>> map(map_size, std::vector<int>(map_size, -1)); // provisoire : 0=floor 1=wall 2=hut
 
-    map[0][0]=1;
-    map[1][0]=1;
-    map[2][0]=1;
-    map[3][0]=1;
-    map[4][0]=1;
-    map[5][0]=1;
-    map[6][0]=1;
-    map[7][0]=1;
-    map[8][0]=1;
-    map[9][0]=1;
-    map[10][0]=1;
-    map[11][0]=1;
-    map[12][0]=1;
-    map[13][0]=1;
+    map[0][0] = 1;
+    map[1][0] = 1;
+    map[2][0] = 1;
+    map[3][0] = 1;
+    map[4][0] = 1;
+    map[5][0] = 1;
+    map[6][0] = 1;
+    map[7][0] = 1;
+    map[8][0] = 1;
+    map[9][0] = 1;
+    map[10][0] = 1;
+    map[11][0] = 1;
+    map[12][0] = 1;
+    map[13][0] = 1;
 
-    map[0][1]=1;
-    map[0][2]=1;
-    map[0][3]=1;
-    map[0][4]=1;
-    map[0][5]=1;
-    map[0][6]=1;
-    map[0][7]=1;
+    map[0][1] = 1;
+    map[0][2] = 1;
+    map[0][3] = 1;
+    map[0][4] = 1;
+    map[0][5] = 1;
+    map[0][6] = 1;
+    map[0][7] = 1;
 
-    map[2][3]=2;
+    map[2][3] = 2;
 
-    map[4][4]=0;
+    map[4][4] = 0;
 
-
-    while (running && renderer.isOpen()) {
+    while (running && renderer.isOpen())
+    {
         gf::Event event;
 
         // Gestion des événements
-    while (renderer.getWindow().pollEvent(event)){
-            if (event.type == gf::EventType::Closed) {
+        while (renderer.getWindow().pollEvent(event))
+        {
+            if (event.type == gf::EventType::Closed)
+            {
                 gf::Log::info("Fermeture demandée par l'utilisateur\n");
                 running = false;
                 renderer.getWindow().close();
-            } else if (event.type == gf::EventType::KeyPressed) {
-                switch (event.key.keycode) {
-                    case gf::Keycode::Up:    currentDir = 'U'; break;
-                    case gf::Keycode::Down:  currentDir = 'D'; break;
-                    case gf::Keycode::Left:  currentDir = 'L'; break;
-                    case gf::Keycode::Right: currentDir = 'R'; break;
-                    default: currentDir = 0; break;
+            }
+            else if (event.type == gf::EventType::KeyPressed)
+            {
+                switch (event.key.keycode)
+                {
+                case gf::Keycode::Up:
+                    currentDir = 'U';
+                    break;
+                case gf::Keycode::Down:
+                    currentDir = 'D';
+                    break;
+                case gf::Keycode::Left:
+                    currentDir = 'L';
+                    break;
+                case gf::Keycode::Right:
+                    currentDir = 'R';
+                    break;
+                default:
+                    currentDir = 0;
+                    break;
                 }
-            } else if (event.type == gf::EventType::KeyReleased) {
+            }
+            else if (event.type == gf::EventType::KeyReleased)
+            {
                 currentDir = 0;
             }
         }
 
-
-
         // envoyer la touche avec un délai si maintenue
-        if (currentDir != 0) {
+        if (currentDir != 0)
+        {
             auto now = std::chrono::steady_clock::now();
-            if (now - lastSend > std::chrono::milliseconds(100)) {
+            if (now - lastSend > std::chrono::milliseconds(100))
+            {
                 gf::Log::info("Envoi : touche '%c'\n", currentDir);
-                socket.sendRawBytes({reinterpret_cast<uint8_t*>(&currentDir), 1});
+                gf::Packet packet;
+                ClientMove cm;
+                cm.moveDir = currentDir;
+                packet.is(cm);
+                socket.sendPacket(packet);
+                // socket.sendRawBytes({reinterpret_cast<uint8_t*>(&currentDir), 1});
                 lastSend = now;
             }
         }
@@ -146,11 +167,10 @@ int main() {
         // Rendu
         renderer.render(states, myId, map);
 
-
         std::this_thread::sleep_for(std::chrono::milliseconds(8));
     }
-
-    if (receiver.joinable()) {
+    if (receiver.joinable())
+    {
         receiver.join();
     }
 

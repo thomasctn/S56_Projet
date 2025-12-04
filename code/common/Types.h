@@ -1,26 +1,37 @@
 #pragma once
 #include <cstdint>
 #include <vector>
+#include <gf/Id.h>
+#include <gf/SerializationOps.h>
+
+using namespace gf::literals;
 
 struct ClientState {
+    static constexpr gf::Id type = "ClientState"_id;
     uint32_t id;
     float x, y;
     uint32_t color; // RGBA
 };
 
-// Pour sérialisation manuelle dans Packet
-inline void serialize(const ClientState& cs, std::vector<uint8_t>& buffer) {
-    buffer.insert(buffer.end(), reinterpret_cast<const uint8_t*>(&cs.id), reinterpret_cast<const uint8_t*>(&cs.id) + sizeof(cs.id));
-    buffer.insert(buffer.end(), reinterpret_cast<const uint8_t*>(&cs.x), reinterpret_cast<const uint8_t*>(&cs.x) + sizeof(cs.x));
-    buffer.insert(buffer.end(), reinterpret_cast<const uint8_t*>(&cs.y), reinterpret_cast<const uint8_t*>(&cs.y) + sizeof(cs.y));
-    buffer.insert(buffer.end(), reinterpret_cast<const uint8_t*>(&cs.color), reinterpret_cast<const uint8_t*>(&cs.color) + sizeof(cs.color));
+template<typename Archive>
+  Archive& operator|(Archive& ar, ClientState& data) {
+    return ar | data.id | data.x | data.y | data.color;
 }
 
-inline ClientState deserializeClientState(const uint8_t* data, size_t& offset) {
-    ClientState cs;
-    cs.id = *reinterpret_cast<const uint32_t*>(data + offset); offset += sizeof(uint32_t);
-    cs.x = *reinterpret_cast<const float*>(data + offset); offset += sizeof(float);
-    cs.y = *reinterpret_cast<const float*>(data + offset); offset += sizeof(float);
-    cs.color = *reinterpret_cast<const uint32_t*>(data + offset); offset += sizeof(uint32_t);
-    return cs;
+struct ClientMove {
+    static constexpr gf::Id type = "ClientMove"_id;
+    char moveDir;
+};
+template<typename Archive>
+  Archive& operator|(Archive& ar, ClientMove& data) {
+    return ar | data.moveDir;
+}
+
+struct GameState {
+    static constexpr gf::Id type = "GameState"_id;
+    std::vector<ClientState> clientStates;
+};
+template<typename Archive>
+  Archive& operator|(Archive& ar, GameState& data) {
+    return ar | data.clientStates;
 }
