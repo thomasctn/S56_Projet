@@ -6,7 +6,7 @@
 #include <iostream>
 
 GameNetworkServer::GameNetworkServer()
-    : listener("5000"), nextId(1), game(27, 27)
+    : listener("5000"), nextId(1), game(27, 27), running(true)
 {
     if (!listener)
     {
@@ -22,15 +22,14 @@ GameNetworkServer::GameNetworkServer()
 int GameNetworkServer::run()
 {
     gf::Log::info("Serveur démarré !");
-    while (true)
-    {
-        if (selector.wait(gf::milliseconds(100)) == gf::v1::SocketSelectorStatus::Event)
-        {
+    while (running) {
+        if (selector.wait(gf::milliseconds(100)) == gf::v1::SocketSelectorStatus::Event) {
             handleNewClient();
             handleClientData();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
+    gf::Log::info("Serveur arrêté proprement\n");
     return 0;
 }
 
