@@ -17,7 +17,6 @@ GameNetworkServer::GameNetworkServer()
     std::cout << "Plateau initial :" << std::endl;
     game.getPlateau().print();
     */
-    std::thread(&GameNetworkServer::plateauDisplayLoop, this).detach();
 }
 
 int GameNetworkServer::run()
@@ -150,26 +149,14 @@ void GameNetworkServer::broadcastStates()
     }
 }
 
-void GameNetworkServer::plateauDisplayLoop()
-{
-    while (true)
-    {
-        {
-            std::lock_guard<std::mutex> lock(clientsMutex);
+Game& GameNetworkServer::getGame() {
+    return game;
+}
 
-            std::vector<Plateau::PlayerInfo> infos;
-            for (auto &c : clients)
-            {
-                infos.push_back({static_cast<int>(c.state.x) / 50,
-                                 static_cast<int>(c.state.y) / 50,
-                                 static_cast<uint32_t>(c.id)});
-            }
+std::vector<ClientInfo>& GameNetworkServer::getClients() {
+    return clients;
+}
 
-            game.getPlateau().printWithPlayers(infos);
-        }
-
-        std::cout << "----------------------" << std::endl;
-
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
+std::mutex& GameNetworkServer::getClientsMutex() {
+    return clientsMutex;
 }

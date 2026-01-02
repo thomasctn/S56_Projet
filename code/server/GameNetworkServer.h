@@ -13,6 +13,10 @@ public:
     GameNetworkServer();
     int run();
 
+    Game& getGame();
+    std::vector<ClientInfo>& getClients();
+    std::mutex& getClientsMutex();
+
 private:
     gf::TcpListener listener;
     gf::SocketSelector selector;
@@ -28,5 +32,4 @@ private:
     void removeDisconnectedClients(const std::vector<size_t>& toRemove);
     void broadcastStates();
 
-    void plateauDisplayLoop();
 };
