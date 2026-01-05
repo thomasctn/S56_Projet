@@ -9,7 +9,7 @@
 #include <gf/Texture.h>
 #include <gf/Sprite.h>
 
-#include "../common/Types.h"
+#include "../common/Protocol.h"
 
 class Renderer{
     public:

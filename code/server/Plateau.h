@@ -4,6 +4,7 @@
 #include <gf/Vector.h>
 #include <vector>
 #include <cstdint>
+#include <iostream>
 
 #include "Case.h"
 #include "Player.h"
@@ -27,9 +28,11 @@ public:
 
     int getWidth() const { return width; }
     int getHeight() const { return height; }
+    BoardData toData() const;
 
 private:
     int width;
     int height;
     gf::Array2D<Case> grid;
+
 };
