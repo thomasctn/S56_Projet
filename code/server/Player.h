@@ -2,6 +2,9 @@
 #include <gf/TcpSocket.h>
 #include "../common/Types.h"
 
+enum class PlayerRole { Ghost, PacMan };
+
+
 class Player {
 public:
     Player(uint32_t id = 0)

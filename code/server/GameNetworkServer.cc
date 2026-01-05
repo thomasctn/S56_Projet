@@ -19,12 +19,14 @@ GameNetworkServer::GameNetworkServer()
 int GameNetworkServer::run()
 {
     gf::Log::info("Serveur démarré !");
+    game.startGameLoop(50);
     while (running) {
         if (selector.wait(gf::milliseconds(SPEED)) == gf::v1::SocketSelectorStatus::Event) {
             handleNewClient();
             handleClientData();
         }
     }
+    game.startGameLoop();
     gf::Log::info("Serveur arrêté proprement\n");
     return 0;
 }
