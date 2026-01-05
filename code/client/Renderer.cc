@@ -4,9 +4,8 @@
 #include <gf/Log.h>
 
 Renderer::Renderer() : main_window("GF Sync Boxes", {800,600}), rendered_window(main_window){
-     m_view.setSize({m_worldSize, m_worldSize});
-    m_view.setCenter({m_worldSize / 2.f, m_worldSize / 2.f});
-
+    m_view.setSize({m_worldSize, m_worldSize});
+    m_view.setCenter({m_worldSize/ 2.f, m_worldSize / 2.f});
     rendered_window.setView(m_view);
 }
 
@@ -62,26 +61,6 @@ void Renderer::renderMap(const std::vector<ClientState>& states, uint32_t myId, 
 
 
 
-
-    //tests responsive
-  /*  auto winSize= rendered_window.getSize();
-    float winW= float(winSize.x);
-    float winH= float(winSize.y);
-
-    float padding = 20.0f;
-
-    float tileSizeX= (winW-padding)/mapPerso.width;
-    float tileSizeY = (winH-padding)/mapPerso.height;
-    float tileSize = std::floor(std::min(tileSizeX, tileSizeY)); //le minimum en fonction de le cote le plus petit
-
-    // Centrer mis en comm pour les tests
-    //float offsetX = std::round((winW - tileSize * mapPerso.width) / 2.0f);
-    //float offsetY = std::round((winH - tileSize * mapPerso.height) / 2.0f);
-
-    float offsetX = 0.0f;
-    float offsetY = 0.0f; // ne marche pas ? la map ne reste pas collé en haut...*/
-
-
     for (int y = 0; y < mapPerso.height; ++y) {
                 for (int x = 0; x < mapPerso.width; ++x) {
                     const CaseRec& cell = mapPerso.grid[y][x];
@@ -106,11 +85,9 @@ void Renderer::handleResize(unsigned int winW, unsigned int winH)
     float worldRatio  = 1.0f; // monde carré
 
     if (windowRatio > worldRatio) {
-        // fenêtre trop large
-        m_view.setSize({m_worldSize * windowRatio, m_worldSize});
+        m_view.setSize({m_worldSize* windowRatio, m_worldSize}); // fenêtre trop large
     } else {
-        // fenêtre trop haute
-        m_view.setSize({m_worldSize, m_worldSize / windowRatio});
+        m_view.setSize({m_worldSize, m_worldSize/windowRatio}); // fenêtre trop haute
     }
 
     m_view.setCenter({m_worldSize / 2.f, m_worldSize / 2.f});
