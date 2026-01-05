@@ -58,5 +58,5 @@ private:
     // Boucle de jeu
     std::thread gameThread;
     std::atomic<bool> running{false};
-    int tickMs{50}; // intervalle en millisecondes
+    int tickMs{50};
 };

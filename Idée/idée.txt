@@ -36,9 +36,8 @@ on peut essayer de faire en sorte quil y ai des role secret.
 
 SERVER a dev :
 
--boucle de jeu 
 -attribution de role et placement et methode
--timer
+
 -voir pour map
 
 

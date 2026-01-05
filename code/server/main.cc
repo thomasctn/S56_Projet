@@ -4,6 +4,10 @@
 #include <gf/RenderWindow.h>
 #include <gf/Event.h>
 #include <gf/Shapes.h>
+#include <gf/Text.h>
+#include <gf/Font.h>
+
+
 #include <thread>
 #include <chrono>
 #include <csignal>
@@ -12,6 +16,7 @@
 
 // Savoir si on dev. A DESACTIVER en cas PUBLICATION sur un SERVER
 #define DEV true
+#define T_GAME 300
 
 GameNetworkServer* gServer = nullptr;
 std::atomic<bool> gRunning{true}; // drapeau global pour ctrl+c
@@ -82,7 +87,7 @@ int main() {
                     }
                 }
 
-                // Joueurs
+                // --- Joueurs ---
                 for (auto& p : server.getGame().getPlayers()) {
                     gf::RectangleShape player({tileSize, tileSize});
                     float px = p.x / 50.0f * tileSize + offsetX;
@@ -91,6 +96,19 @@ int main() {
                     player.setColor(gf::Color::Green);
                     window.draw(player);
                 }
+
+                // --- Affichage du chrono ---
+                double elapsed = server.getGame().getElapsedSeconds();
+                int seconds = static_cast<int>(elapsed);
+
+                static gf::Font font("../common/fonts/arial.ttf");
+                gf::Text chronoText;
+                chronoText.setFont(font);
+                chronoText.setCharacterSize(24); // taille texte
+                chronoText.setColor(gf::Color::White);
+                chronoText.setString("Temps restant : " + std::to_string(T_GAME - seconds) + "s");
+                chronoText.setPosition({12.0f, 20.0f}); // coin haut gauche
+                window.draw(chronoText);
             }
 
             window.display();
