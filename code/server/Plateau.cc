@@ -1,10 +1,10 @@
 #include "Plateau.h"
 
 
-Plateau::Plateau(size_t w, size_t h): width(w), height(h), grid({w, h})
+Plateau::Plateau(unsigned int w, unsigned int h): width(w), height(h), grid({w, h})
 {
-    for (size_t y = 0; y < height; ++y) {
-        for (size_t x = 0; x < width; ++x) {
+    for (unsigned int y = 0; y < height; ++y) {
+        for (unsigned int x = 0; x < width; ++x) {
             if (y == 0 || y == height - 1 || x == 0 || x == width - 1) {
                 grid({x, y}) = Case(CellType::Wall);
             }
@@ -18,19 +18,19 @@ Plateau::Plateau(size_t w, size_t h): width(w), height(h), grid({w, h})
     }
 }
 
-Case& Plateau::getCase(size_t x, size_t y) {
+Case& Plateau::getCase(unsigned int x, unsigned int y) {
     return grid({x, y});
 }
 
-const Case& Plateau::getCase(size_t x, size_t y) const {
+const Case& Plateau::getCase(unsigned int x, unsigned int y) const {
     return grid({x, y});
 }
 
-bool Plateau::isInside(size_t x, size_t y) const {
+bool Plateau::isInside(unsigned int x, unsigned int y) const {
     return x >= 0 && y >= 0 && x < width && y < height;
 }
 
-bool Plateau::isWalkable(size_t x, size_t y) const {
+bool Plateau::isWalkable(unsigned int x, unsigned int y) const {
     if (x < 0 || y < 0 || x >= width || y >= height)
         return false;
 
@@ -39,7 +39,7 @@ bool Plateau::isWalkable(size_t x, size_t y) const {
 }
 
 
-bool Plateau::isOccupied(size_t x, size_t y, uint32_t excludeId, const std::vector<Player>& players) const {
+bool Plateau::isOccupied(unsigned int x, unsigned int y, uint32_t excludeId, const std::vector<Player>& players) const {
     for (auto& p : players) {
         if (p.id != excludeId && p.x == x && p.y == y) return true;
     }
@@ -49,8 +49,8 @@ bool Plateau::isOccupied(size_t x, size_t y, uint32_t excludeId, const std::vect
 
 /******PRINT*****/
 void Plateau::print() const {
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+    for (unsigned int y = 0; y < height; ++y) {
+        for (unsigned int x = 0; x < width; ++x) {
             switch (grid({x, y}).getType()) {
                 case CellType::Floor: std::cout << "."; break;
                 case CellType::Wall:  std::cout << "#"; break;
@@ -63,8 +63,8 @@ void Plateau::print() const {
 
 
 void Plateau::printWithPlayers(const std::vector<Player>& players) const {
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+    for (unsigned int y = 0; y < height; ++y) {
+        for (unsigned int x = 0; x < width; ++x) {
 
             bool playerHere = false;
 
