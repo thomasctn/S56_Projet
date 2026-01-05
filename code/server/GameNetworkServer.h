@@ -6,7 +6,6 @@
 #include <gf/SocketSelector.h>
 #include <gf/Packet.h>
 #include "Game.h"
-#include "ClientInfo.h"
 
 class GameNetworkServer {
 public:
@@ -18,23 +17,20 @@ public:
     bool isRunning() const { return running; }
 
     Game& getGame();
-    std::vector<ClientInfo>& getClients();
-    std::mutex& getClientsMutex();
+    std::mutex& getPlayersMutex();
 
 private:
     gf::TcpListener listener;
     gf::SocketSelector selector;
 
-    std::vector<ClientInfo> clients;
-    std::mutex clientsMutex;
-    uint32_t nextId;
-
     Game game;
+    std::mutex playersMutex;
+    uint32_t nextId;
 
     std::atomic<bool> running;
 
     void handleNewClient();
     void handleClientData();
-    void removeDisconnectedClients(const std::vector<size_t>& toRemove);
+    void removeDisconnectedPlayers(const std::vector<size_t>& toRemove);
     void broadcastStates();
 };

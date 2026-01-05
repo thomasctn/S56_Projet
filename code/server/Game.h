@@ -26,9 +26,13 @@ public:
     const Plateau& getPlateau() const { return plateau; }
 
     Player& getPlayerInfo(uint32_t playerId);
-    const std::vector<Player>& getPlayers() const { return players; }
 
     void addPlayer(uint32_t id, float x, float y);
+
+    // Accès aux joueurs
+    std::vector<Player>& getPlayers() { return players; }
+    const std::vector<Player>& getPlayers() const { return players; }
+
 
 private:
     Plateau plateau;

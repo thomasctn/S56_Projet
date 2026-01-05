@@ -55,7 +55,7 @@ int main() {
             window.clear(gf::Color::Black);
 
             {
-                std::lock_guard<std::mutex> lock(server.getClientsMutex());
+                std::lock_guard<std::mutex> lock(server.getPlayersMutex());
 
                 auto& plateau = server.getGame().getPlateau();
                 int mapWidth  = plateau.getWidth();
@@ -83,10 +83,10 @@ int main() {
                 }
 
                 // Joueurs
-                for (auto& c : server.getClients()) {
+                for (auto& p : server.getGame().getPlayers()) {
                     gf::RectangleShape player({tileSize, tileSize});
-                    float px = c.state.x / 50.0f * tileSize + offsetX;
-                    float py = c.state.y / 50.0f * tileSize + offsetY;
+                    float px = p.x / 50.0f * tileSize + offsetX;
+                    float py = p.y / 50.0f * tileSize + offsetY;
                     player.setPosition({px, py});
                     player.setColor(gf::Color::Green);
                     window.draw(player);
