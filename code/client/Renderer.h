@@ -22,9 +22,14 @@ class Renderer{
         return main_window;
     }
 
+    void handleResize(unsigned int winW, unsigned int winH);
+
     private:
     gf::Window main_window;
     gf::RenderWindow rendered_window;
     gf::Color4f colorFromId(uint32_t id);
+    gf::View m_view; // la view que l'on manipule
+    float m_worldSize = 500.f;  //taille de la map basique
+
 
 };
