@@ -121,7 +121,6 @@ void GameNetworkServer::broadcastStates()
 
         GameState gs;
         gs.clientStates = states;
-        gs.bd = game.getPlateau().toData();
         gf::Packet packet;
         packet.is(gs);
         p.socket.sendPacket(packet);

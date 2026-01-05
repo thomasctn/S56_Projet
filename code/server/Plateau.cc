@@ -87,16 +87,3 @@ void Plateau::printWithPlayers(const std::vector<Player>& players) const {
         std::cout << "\n";
     }
 }
-
-BoardData Plateau::toData() const
-{
-    BoardData res;
-    res.width = width;
-    res.height = height;
-    for (unsigned y = 0; y < height; ++y) {
-        for (unsigned x = 0; x < width; ++x) {
-            res.grid({x, y}) = grid({x, y}).toData();
-        }
-    }
-    return res;
-}

@@ -29,35 +29,12 @@ template<typename Archive>
     return ar | data.moveDir;
 }
 
-struct CaseData {
-    static constexpr gf::Id type = "CaseData"_id;
-    CellType celltype;
-    CaseData() : celltype(CellType::Floor) {}
-    CaseData(CellType t) {celltype = t;}
-};
-template<typename Archive>
-  Archive& operator|(Archive& ar, CaseData& data) {
-    return ar | data.celltype;
-}
-
-struct BoardData {
-    static constexpr gf::Id type = "BoardData"_id;
-    int width;
-    int height;
-    gf::Array2D<CaseData> grid;
-};
-
-template<typename Archive>
-  Archive& operator|(Archive& ar, BoardData& data) {
-    return ar | data.width | data.height | data.grid;
-}
 
 struct GameState {
     static constexpr gf::Id type = "GameState"_id;
     std::vector<ClientState> clientStates;
-    BoardData bd;
 };
 template<typename Archive>
   Archive& operator|(Archive& ar, GameState& data) {
-    return ar | data.clientStates | data.bd;
+    return ar | data.clientStates;
 }

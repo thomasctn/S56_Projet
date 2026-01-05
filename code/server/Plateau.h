@@ -28,7 +28,6 @@ public:
 
     unsigned int getWidth() const { return width; }
     unsigned int getHeight() const { return height; }
-    BoardData toData() const;
 
 private:
     unsigned int width;
