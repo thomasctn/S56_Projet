@@ -21,7 +21,6 @@ int GameNetworkServer::run()
             handleClientData();
         }
     }
-    game.startGameLoop();
     gf::Log::info("Serveur arrêté proprement\n");
     return 0;
 }
