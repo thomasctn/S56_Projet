@@ -21,7 +21,6 @@ public:
     bool isOccupied(int x, int y, uint32_t excludeId,
                     const std::vector<Player>& players) const;
     bool isInside(int x, int y) const;
-    const Plateau& getPlateau() const { return plateau; }
 
 
     void print() const;
