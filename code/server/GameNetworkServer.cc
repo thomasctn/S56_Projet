@@ -5,6 +5,8 @@
 #include <chrono>
 #include <iostream>
 
+#define SPEED 30
+
 GameNetworkServer::GameNetworkServer()
     : listener("5000"), nextId(1), game(27, 27), running(true)
 {
@@ -23,7 +25,7 @@ int GameNetworkServer::run()
 {
     gf::Log::info("Serveur démarré !");
     while (running) {
-        if (selector.wait(gf::milliseconds(100)) == gf::v1::SocketSelectorStatus::Event) {
+        if (selector.wait(gf::milliseconds(SPEED)) == gf::v1::SocketSelectorStatus::Event) {
             handleNewClient();
             handleClientData();
         }

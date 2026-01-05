@@ -1,8 +1,8 @@
 #include "Game.h"
 #include <stdexcept>
 
-Game::Game(int width, int height)
-: plateau(width, height) {}
+Game::Game(int width, int height) : plateau(width, height) {}
+
 
 bool Game::canMove(uint32_t playerId, float newX, float newY) const {
     const auto& plateauRef = getPlateau();
@@ -55,6 +55,7 @@ Player& Game::getPlayerInfo(uint32_t playerId) {
     }
     throw std::runtime_error("Player not found");
 }
+
 
 void Game::addPlayer(uint32_t id, float x, float y) {
     players.emplace_back(id);
