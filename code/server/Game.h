@@ -9,12 +9,22 @@ struct Player {
     float x, y;
 };
 
+enum class Direction {
+    Up,
+    Down,
+    Left,
+    Right
+};
+
+
 class Game {
 public:
     Game(int width, int height);
 
     bool canMove(uint32_t playerId, float newX, float newY) const;
     void movePlayer(uint32_t playerId, float newX, float newY);
+    void requestMove(uint32_t playerId, Direction dir);
+
 
     Plateau& getPlateau() { return plateau; }
     const Plateau& getPlateau() const { return plateau; }

@@ -38,6 +38,32 @@ void Game::movePlayer(uint32_t playerId, float newX, float newY) {
     }
 }
 
+void Game::requestMove(uint32_t playerId, Direction dir)
+{
+    constexpr float step = 50.0f;
+
+    for (auto& p : players) {
+        if (p.id != playerId) continue;
+
+        float newX = p.x;
+        float newY = p.y;
+
+        switch (dir) {
+        case Direction::Up:    newY -= step; break;
+        case Direction::Down:  newY += step; break;
+        case Direction::Left:  newX -= step; break;
+        case Direction::Right: newX += step; break;
+        }
+
+        if (canMove(playerId, newX, newY)) {
+            p.x = newX;
+            p.y = newY;
+        }
+        return;
+    }
+}
+
+
 Player& Game::getPlayerInfo(uint32_t playerId) {
     for (auto& p : players) {
         if (p.id == playerId)

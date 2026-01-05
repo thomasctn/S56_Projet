@@ -27,7 +27,6 @@ int GameNetworkServer::run()
             handleNewClient();
             handleClientData();
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
     gf::Log::info("Serveur arrêté proprement\n");
     return 0;
@@ -65,6 +64,7 @@ void GameNetworkServer::handleClientData()
         auto &c = clients[i];
         if (!selector.isReady(c.socket))
             continue;
+
         gf::Packet packet;
         switch (c.socket.recvPacket(packet))
         {
@@ -72,50 +72,46 @@ void GameNetworkServer::handleClientData()
             switch (packet.getType())
             {
             case ClientMove::type:
+            {
                 auto data = packet.as<ClientMove>();
                 char dir = data.moveDir;
 
-                float newX = c.state.x;
-                float newY = c.state.y;
-
+                Direction direction;
                 switch (dir)
                 {
-                case 'U':
-                    newY -= 50;
-                    break;
-                case 'D':
-                    newY += 50;
-                    break;
-                case 'L':
-                    newX -= 50;
-                    break;
-                case 'R':
-                    newX += 50;
+                case 'U': direction = Direction::Up;    break;
+                case 'D': direction = Direction::Down;  break;
+                case 'L': direction = Direction::Left;  break;
+                case 'R': direction = Direction::Right; break;
+                default:
                     break;
                 }
 
-                game.movePlayer(c.id, newX, newY);
+                game.requestMove(c.id, direction);
 
                 auto &gPlayer = game.getPlayerInfo(c.id);
                 c.state.x = gPlayer.x;
                 c.state.y = gPlayer.y;
 
-                gf::Log::info("Client %d moved %c -> position=(%.1f, %.1f)\n",
-                              c.id, dir, c.state.x, c.state.y);
+                gf::Log::info(
+                    "Client %d moved %c -> position=(%.1f, %.1f)\n",
+                    c.id, dir, c.state.x, c.state.y
+                );
                 break;
             }
+            }
             break;
+
         case gf::SocketStatus::Error:
-            toRemove.push_back(i);
-            break;
         case gf::SocketStatus::Close:
             toRemove.push_back(i);
             break;
-        case gf::SocketStatus::Block:
 
+        case gf::SocketStatus::Block:
             break;
         }
     }
+
     removeDisconnectedClients(toRemove);
     broadcastStates();
 }
