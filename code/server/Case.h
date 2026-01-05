@@ -1,6 +1,5 @@
 #pragma once
-
-enum class CellType { Floor, Wall, Hut };
+#include "../common/Types.h"
 
 class Case {
 public:

@@ -1,10 +1,8 @@
 #pragma once
 #include <vector>
 #include <cstdint>
+#include "../common/Types.h"
 
-
-
-enum class CellType { Floor, Wall, Hut };
 
 struct CaseRec{
     CellType type;

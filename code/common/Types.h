@@ -4,6 +4,17 @@
 #include <gf/Id.h>
 #include <gf/SerializationOps.h>
 
+
+
+
+enum class CellType { Floor, Wall, Hut };
+
+
+
+
+
+//A déplacer dans un autre fichier
+
 using namespace gf::literals;
 
 struct ClientState {
