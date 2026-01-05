@@ -2,20 +2,30 @@
 #include <gf/TcpSocket.h>
 #include "../common/Types.h"
 
-enum class PlayerRole { Ghost, PacMan };
-
+enum class PlayerRole {
+    PacMan,
+    Ghost,
+    Spectator
+};
 
 class Player {
 public:
-    Player(uint32_t id = 0)
-        : id(id), x(0), y(0), color(0xFFFFFFFF) {}
+    Player(uint32_t id = 0, PlayerRole role = PlayerRole::Spectator)
+    : id(id)
+    , role(role)
+    , x(0.0f)
+    , y(0.0f)
+    , color(0xFFFFFFFF)
+    {}
+
     uint32_t id;
+
     float x, y;
     uint32_t color;
     gf::TcpSocket socket;
 
     ClientState getState() const {
-        return {id, x, y, color};
+        return { id, x, y, color };
     }
 
     void setState(const ClientState& state) {
