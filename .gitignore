@@ -20,3 +20,5 @@ code/build/client
 code/build/*
 *.o
 *.exe
+code/.vscode/*
+code/.vscode
