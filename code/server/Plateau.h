@@ -12,27 +12,27 @@
 
 class Plateau {
 public:
-    Plateau(int width, int height);
+    Plateau(size_t width, size_t height);
 
-    Case& getCase(int x, int y);
-    const Case& getCase(int x, int y) const;
+    Case& getCase(size_t x, size_t y);
+    const Case& getCase(size_t x, size_t y) const;
 
-    bool isWalkable(int x, int y) const;
-    bool isOccupied(int x, int y, uint32_t excludeId,
+    bool isWalkable(size_t x, size_t y) const;
+    bool isOccupied(size_t x, size_t y, uint32_t excludeId,
                     const std::vector<Player>& players) const;
-    bool isInside(int x, int y) const;
+    bool isInside(size_t x, size_t y) const;
 
 
     void print() const;
     void printWithPlayers(const std::vector<Player>& players) const;
 
-    int getWidth() const { return width; }
-    int getHeight() const { return height; }
+    size_t getWidth() const { return width; }
+    size_t getHeight() const { return height; }
     BoardData toData() const;
 
 private:
-    int width;
-    int height;
+    size_t width;
+    size_t height;
     gf::Array2D<Case> grid;
 
 };
