@@ -3,6 +3,8 @@
 #include <gf/Window.h>
 #include <gf/RenderWindow.h>
 #include <gf/Shapes.h>
+
+#include <gf/Action.h>
 #include <gf/Color.h>
 #include <gf/Log.h>
 #include <thread>
@@ -29,7 +31,7 @@ int main()
         return -1;
     }
 
-    char currentDir = 0;
+    //char currentDir = 0;
     std::vector<ClientState> states;
     std::mutex statesMutex;
     bool running = true;
@@ -46,6 +48,30 @@ int main()
         float b = float((id * 110) % 256) / 255.0f;
         return gf::Color4f(r, g, b, 1.0f);
     };
+
+    gf::ActionContainer actions;
+
+    //directions
+    gf::Action upAction("Up");
+    upAction.addKeycodeKeyControl(gf::Keycode::Up);
+    upAction.setContinuous();
+    actions.addAction(upAction);
+
+    gf::Action downAction("Down");
+    downAction.addKeycodeKeyControl(gf::Keycode::Down);
+    downAction.setContinuous();
+    actions.addAction(downAction);
+
+    gf::Action leftAction("Left");
+    leftAction.addKeycodeKeyControl(gf::Keycode::Left);
+    leftAction.setContinuous();
+    actions.addAction(leftAction);
+
+    gf::Action rightAction("Right");
+    rightAction.addKeycodeKeyControl(gf::Keycode::Right);
+    rightAction.setContinuous();
+    actions.addAction(rightAction);
+
 
     std::thread receiver([&]()
                          {
@@ -143,7 +169,8 @@ int main()
 
         // Gestion des événements
         while (renderer.getWindow().pollEvent(event))
-        {
+        {   
+            actions.processEvent(event); //important actions
             if (event.type == gf::EventType::Closed)
             {
                 gf::Log::info("Fermeture demandée par l'utilisateur\n");
@@ -154,49 +181,38 @@ int main()
                 auto size = renderer.getWindow().getSize();
                 renderer.handleResize(size.x, size.y);
             }
-            else if (event.type == gf::EventType::KeyPressed)
-            {
-                switch (event.key.keycode)
-                {
-                case gf::Keycode::Up:
-                    currentDir = 'U';
-                    break;
-                case gf::Keycode::Down:
-                    currentDir = 'D';
-                    break;
-                case gf::Keycode::Left:
-                    currentDir = 'L';
-                    break;
-                case gf::Keycode::Right:
-                    currentDir = 'R';
-                    break;
-                default:
-                    currentDir = 0;
-                    break;
-                }
+            
+        }
+
+        
+        //envoi réseau de la touche
+        auto now = std::chrono::steady_clock::now();
+        if (now-lastSend > std::chrono::milliseconds(100)) {
+
+            char dir=0;
+
+            if (upAction.isActive()) {
+                dir = 'U';
+            } else if (downAction.isActive()) {
+                dir = 'D';
+            } else if (leftAction.isActive()) {
+                dir = 'L';
+            } else if (rightAction.isActive()) {
+                dir = 'R';
             }
-            else if (event.type == gf::EventType::KeyReleased)
-            {
-                currentDir = 0;
+
+            if(dir != 0){
+                gf::Log::info("Envoi : touche '%c'\n", dir);
+            
+                gf::Packet packet;
+                ClientMove cm;
+                cm.moveDir = dir;
+                packet.is(cm);
+                socket.sendPacket(packet);
+                lastSend=now;
             }
         }
 
-        // envoyer la touche avec un délai si maintenue
-        if (currentDir != 0)
-        {
-            auto now = std::chrono::steady_clock::now();
-            if (now - lastSend > std::chrono::milliseconds(100))
-            {
-                gf::Log::info("Envoi : touche '%c'\n", currentDir);
-                gf::Packet packet;
-                ClientMove cm;
-                cm.moveDir = currentDir;
-                packet.is(cm);
-                socket.sendPacket(packet);
-                // socket.sendRawBytes({reinterpret_cast<uint8_t*>(&currentDir), 1});
-                lastSend = now;
-            }
-        }
 
         // Rendu
         renderer.render(states, myId, mapS);
