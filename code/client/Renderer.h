@@ -5,12 +5,16 @@
 #include <gf/Shapes.h>
 #include <gf/Color.h>
 #include <vector>
+#include "Structures.h"
+
 #include "../common/Types.h"
 
 class Renderer{
     public:
     Renderer();
-    void render(const std::vector<ClientState>& states, uint32_t myId, const std::vector<std::vector<int>>& map);
+    void render(const std::vector<ClientState>& states, uint32_t myId, const mapRec map);
+    void renderMap(const std::vector<ClientState>& states, uint32_t myId, const mapRec map);
+
     bool isOpen() {
         return main_window.isOpen();
     }
