@@ -3,7 +3,12 @@
 #include "Structures.h"
 #include <gf/Log.h>
 
-Renderer::Renderer() : main_window("GF Sync Boxes", {800,600}), rendered_window(main_window){}
+Renderer::Renderer() : main_window("GF Sync Boxes", {800,600}), rendered_window(main_window){
+     m_view.setSize({m_worldSize, m_worldSize});
+    m_view.setCenter({m_worldSize / 2.f, m_worldSize / 2.f});
+
+    rendered_window.setView(m_view);
+}
 
 gf::Color4f Renderer::colorFromId(uint32_t id) {
     float r = float((id * 50) % 256) / 255.0f;
@@ -50,15 +55,16 @@ void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, con
 void Renderer::renderMap(const std::vector<ClientState>& states, uint32_t myId, const mapRec map){
     mapRec mapPerso = map;
     //sans le responsive:
-    //const float RENDER_SIZE = 500.0f;
-    //float tileSize = std::min(RENDER_SIZE / mapPerso.width, RENDER_SIZE / mapPerso.height);
-          //  float offsetX = (800  - tileSize * mapPerso.width) / 2.0f;
-            //float offsetY = (600 - tileSize * mapPerso.height) / 2.0f;
+    const float RENDER_SIZE = 500.0f;
+    float tileSize = std::min(RENDER_SIZE / mapPerso.width, RENDER_SIZE / mapPerso.height);
+    float offsetX = (m_worldSize - tileSize * mapPerso.width) / 2.f;
+    float offsetY = (m_worldSize - tileSize * mapPerso.height) / 2.f;
+
 
 
 
     //tests responsive
-    auto winSize= rendered_window.getSize();
+  /*  auto winSize= rendered_window.getSize();
     float winW= float(winSize.x);
     float winH= float(winSize.y);
 
@@ -73,7 +79,7 @@ void Renderer::renderMap(const std::vector<ClientState>& states, uint32_t myId, 
     //float offsetY = std::round((winH - tileSize * mapPerso.height) / 2.0f);
 
     float offsetX = 0.0f;
-    float offsetY = 0.0f; // ne marche pas ? la map ne reste pas collé en haut...
+    float offsetY = 0.0f; // ne marche pas ? la map ne reste pas collé en haut...*/
 
 
     for (int y = 0; y < mapPerso.height; ++y) {
@@ -93,3 +99,21 @@ void Renderer::renderMap(const std::vector<ClientState>& states, uint32_t myId, 
                 }
             }
 }
+
+void Renderer::handleResize(unsigned int winW, unsigned int winH)
+{
+    float windowRatio = float(winW) / float(winH);
+    float worldRatio  = 1.0f; // monde carré
+
+    if (windowRatio > worldRatio) {
+        // fenêtre trop large
+        m_view.setSize({m_worldSize * windowRatio, m_worldSize});
+    } else {
+        // fenêtre trop haute
+        m_view.setSize({m_worldSize, m_worldSize / windowRatio});
+    }
+
+    m_view.setCenter({m_worldSize / 2.f, m_worldSize / 2.f});
+    rendered_window.setView(m_view);
+}
+

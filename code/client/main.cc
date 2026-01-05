@@ -150,6 +150,10 @@ int main()
                 running = false;
                 renderer.getWindow().close();
             }
+            else if (event.type == gf::EventType::Resized) { //changement taille
+                auto size = renderer.getWindow().getSize();
+                renderer.handleResize(size.x, size.y);
+            }
             else if (event.type == gf::EventType::KeyPressed)
             {
                 switch (event.key.keycode)
@@ -196,6 +200,7 @@ int main()
 
         // Rendu
         renderer.render(states, myId, mapS);
+        
 
         std::this_thread::sleep_for(std::chrono::milliseconds(8));
     }
