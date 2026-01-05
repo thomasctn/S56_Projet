@@ -1,5 +1,7 @@
 #include "Game.h"
 
+#define T_GAME 10
+
 Game::Game(int width, int height) : plateau(width, height) {}
 
 
@@ -94,8 +96,12 @@ void Game::startGameLoop(int tickMs_) {
 
             // Log uniquement si on change de seconde
             if (currentSecond != lastLoggedSecond) {
+                if (T_GAME - currentSecond <=0){
+                    gf::Log::info("Partie terminé !\n");
+                    break;
+                }
                 lastLoggedSecond = currentSecond;
-                gf::Log::info("Temps restant: %d secondes\n", 300 - currentSecond);
+                gf::Log::info("Temps restant: %d secondes\n", T_GAME - currentSecond);
             }
 
             // Pause pour le prochain tick
