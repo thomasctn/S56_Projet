@@ -32,3 +32,13 @@ ou salle secrete
 on peut essayer de faire en sorte quil y ai des role secret.
  genre un traite parmis les fantome qui doit manger tout les fantomes.
   ou un truc du genre
+
+
+
+
+AUTRE :
+
+voir pour flag dev :
+
+#ifdef DEV_FLAG
+#end

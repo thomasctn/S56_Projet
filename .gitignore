@@ -17,3 +17,4 @@ code/build/CMakeCache.txt
 code/build/Makefile
 code/build/server
 code/build/client
+code/build/*
