@@ -1,11 +1,12 @@
 #pragma once
 
 #include <gf/Array2D.h>
+#include <gf/Log.h>
 #include <gf/Vector.h>
 #include <vector>
 #include <cstdint>
 #include <iostream>
-
+#include "../common/Protocol.h"
 #include "Case.h"
 #include "Player.h"
 
@@ -28,6 +29,7 @@ public:
 
     unsigned int getWidth() const { return width; }
     unsigned int getHeight() const { return height; }
+    BoardCommon toCommonData();
 
 private:
     unsigned int width;

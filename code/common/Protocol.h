@@ -29,12 +29,39 @@ template<typename Archive>
     return ar | data.moveDir;
 }
 
+struct CaseCommon {
+    static constexpr gf::Id type = "CaseCommon"_id;
+    CellType celltype;
+    CaseCommon() : celltype(CellType::Floor) {}
+    CaseCommon(CellType t) {celltype = t;}
+};
+template<typename Archive>
+  Archive& operator|(Archive& ar, CaseCommon& data) {
+    return ar | data.celltype;
+}
+
+struct BoardCommon {
+    BoardCommon() {};
+    BoardCommon(unsigned int w, unsigned int h) : grid({w, h}), width(w), height(h) {}
+    static constexpr gf::Id type = "BoardCommon"_id;
+    unsigned int width;
+    unsigned int height;
+    gf::Array2D<CaseCommon> grid;
+};
+template<typename Archive>
+  Archive& operator|(Archive& ar, BoardCommon& data) {
+    return ar | data.width | data.height | data.grid;
+}
+
 
 struct GameState {
     static constexpr gf::Id type = "GameState"_id;
     std::vector<ClientState> clientStates;
+    BoardCommon board;
 };
 template<typename Archive>
   Archive& operator|(Archive& ar, GameState& data) {
-    return ar | data.clientStates;
+    return ar | data.clientStates | data.board;
 }
+
+

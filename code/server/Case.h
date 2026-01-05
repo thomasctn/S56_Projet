@@ -1,5 +1,6 @@
 #pragma once
 #include "../common/Types.h"
+#include "../common/Protocol.h"
 
 class Case {
 public:
@@ -11,6 +12,7 @@ public:
     bool isWalkable() const {
         return type == CellType::Floor;
     }
+    CaseCommon toCommonData() const {return CaseCommon(type);}
 
 private:
     CellType type;

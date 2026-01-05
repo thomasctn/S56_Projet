@@ -120,6 +120,7 @@ void GameNetworkServer::broadcastStates()
 
         GameState gs;
         gs.clientStates = states;
+        gs.board = game.getPlateau().toCommonData();
         gf::Packet packet;
         packet.is(gs);
         p.socket.sendPacket(packet);
