@@ -57,7 +57,7 @@ Player& Game::getPlayerInfo(uint32_t playerId) {
 }
 
 void Game::addPlayer(uint32_t id, float x, float y) {
-    players.emplace_back(id); // construit Player(id) directement dans le vecteur
+    players.emplace_back(id);
     Player& p = players.back();
     p.x = x;
     p.y = y;

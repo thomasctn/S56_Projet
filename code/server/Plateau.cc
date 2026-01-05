@@ -30,7 +30,24 @@ bool Plateau::isInside(int x, int y) const {
     return x >= 0 && y >= 0 && x < width && y < height;
 }
 
+bool Plateau::isWalkable(int x, int y) const {
+    if (x < 0 || y < 0 || x >= width || y >= height)
+        return false;
 
+    CellType type = grid({static_cast<unsigned>(x), static_cast<unsigned>(y)}).getType();
+    return type == CellType::Floor || type == CellType::Hut;
+}
+
+
+bool Plateau::isOccupied(int x, int y, uint32_t excludeId, const std::vector<Player>& players) const {
+    for (auto& p : players) {
+        if (p.id != excludeId && p.x == x && p.y == y) return true;
+    }
+    return false;
+}
+
+
+/******PRINT*****/
 void Plateau::print() const {
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
@@ -69,21 +86,4 @@ void Plateau::printWithPlayers(const std::vector<Player>& players) const {
         }
         std::cout << "\n";
     }
-}
-
-
-bool Plateau::isWalkable(int x, int y) const {
-    if (x < 0 || y < 0 || x >= width || y >= height)
-        return false;
-
-    CellType type = grid({static_cast<unsigned>(x), static_cast<unsigned>(y)}).getType();
-    return type == CellType::Floor || type == CellType::Hut;
-}
-
-
-bool Plateau::isOccupied(int x, int y, uint32_t excludeId, const std::vector<Player>& players) const {
-    for (auto& p : players) {
-        if (p.id != excludeId && p.x == x && p.y == y) return true;
-    }
-    return false;
 }
