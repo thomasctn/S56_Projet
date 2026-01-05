@@ -19,7 +19,7 @@ public:
     {}
 
     uint32_t id;
-
+    PlayerRole role;
     float x, y;
     uint32_t color;
     gf::TcpSocket socket;
