@@ -1,4 +1,6 @@
 #include "Renderer.h"
+
+#include "Structures.h"
 #include <gf/Log.h>
 
 Renderer::Renderer() : main_window("GF Sync Boxes", {800,600}), rendered_window(main_window){}
@@ -10,7 +12,7 @@ gf::Color4f Renderer::colorFromId(uint32_t id) {
     return gf::Color4f(r, g, b, 1.0f);
 }
 
-void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, const std::vector<std::vector<int>>& map){
+void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, const mapRec map){
     rendered_window.clear(gf::Color::Black);
 
     for (auto& s : states) {
@@ -20,7 +22,7 @@ void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, con
         box.setColor(c);
         rendered_window.draw(box);
     }
-
+/* VIELLE MAP PERSO
     int map_size = map.size();
     for (int y = 0; y < map_size; y++) {
         for (int x = 0; x < map_size; x++) {
@@ -36,9 +38,58 @@ void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, con
 
             rendered_window.draw(tileRect);
         }
-    }
-
+    }*/
+    renderMap(states,myId,map);
     rendered_window.display();
 
 
+}
+
+
+
+void Renderer::renderMap(const std::vector<ClientState>& states, uint32_t myId, const mapRec map){
+    mapRec mapPerso = map;
+    //sans le responsive:
+    //const float RENDER_SIZE = 500.0f;
+    //float tileSize = std::min(RENDER_SIZE / mapPerso.width, RENDER_SIZE / mapPerso.height);
+          //  float offsetX = (800  - tileSize * mapPerso.width) / 2.0f;
+            //float offsetY = (600 - tileSize * mapPerso.height) / 2.0f;
+
+
+
+    //tests responsive
+    auto winSize= rendered_window.getSize();
+    float winW= float(winSize.x);
+    float winH= float(winSize.y);
+
+    float padding = 20.0f;
+
+    float tileSizeX= (winW-padding)/mapPerso.width;
+    float tileSizeY = (winH-padding)/mapPerso.height;
+    float tileSize = std::floor(std::min(tileSizeX, tileSizeY)); //le minimum en fonction de le cote le plus petit
+
+    // Centrer mis en comm pour les tests
+    //float offsetX = std::round((winW - tileSize * mapPerso.width) / 2.0f);
+    //float offsetY = std::round((winH - tileSize * mapPerso.height) / 2.0f);
+
+    float offsetX = 0.0f;
+    float offsetY = 0.0f; // ne marche pas ? la map ne reste pas collé en haut...
+
+
+    for (int y = 0; y < mapPerso.height; ++y) {
+                for (int x = 0; x < mapPerso.width; ++x) {
+                    const CaseRec& cell = mapPerso.grid[y][x];
+
+                    gf::RectangleShape tile({tileSize, tileSize});
+                    tile.setPosition({x * tileSize + offsetX, y * tileSize + offsetY});
+
+                    switch (cell.type) {
+                        case CellType::Wall: tile.setColor(gf::Color::White); break;
+                        case CellType::Hut:  tile.setColor(gf::Color::Red); break;
+                        case CellType::Floor:
+                        default: continue;
+                    }
+                    rendered_window.draw(tile);
+                }
+            }
 }

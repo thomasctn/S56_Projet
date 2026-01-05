@@ -13,6 +13,8 @@
 #include <mutex>
 #include "../common/Types.h"
 #include "Renderer.h"
+#include "Structures.h"
+
 
 Renderer renderer;
 
@@ -57,6 +59,8 @@ int main()
             case GameState::type:
                 auto data = packet.as<GameState>();
                 states = data.clientStates;
+                //ici, je suis censée récupérer le plateau(?)
+                //mapS= data.plateau;
                 break;
             }
             break;
@@ -106,6 +110,32 @@ int main()
     map[2][3] = 2;
 
     map[4][4] = 0;
+
+    mapRec mapS; //fausse map de serveur
+    mapS.width = 27;
+    mapS.height=27;
+    int height =27;
+    int width =27;
+    mapS.grid.resize(mapS.height, std::vector<CaseRec>(mapS.width));
+
+
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            if (y == 0 || y == height-1 || x == 0 || x == width-1) {
+                CaseRec newC;
+                newC.type=CellType::Wall;
+                mapS.grid[y][x] = newC;
+            } else if (y == height/2 && x == width/2) {
+                CaseRec newC;
+                newC.type=CellType::Hut;
+                mapS.grid[y][x] = newC;
+            } else {
+                CaseRec newC;
+                newC.type=CellType::Floor;
+                mapS.grid[y][x] = newC;
+            }
+        }
+    }
 
     while (running && renderer.isOpen())
     {
@@ -165,7 +195,7 @@ int main()
         }
 
         // Rendu
-        renderer.render(states, myId, map);
+        renderer.render(states, myId, mapS);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(8));
     }
