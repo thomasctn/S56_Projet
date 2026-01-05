@@ -3,11 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include "Plateau.h"
-
-struct Player {
-    uint32_t id;
-    float x, y;
-};
+#include "Player.h"
 
 enum class Direction {
     Up,

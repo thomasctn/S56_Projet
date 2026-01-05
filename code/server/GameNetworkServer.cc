@@ -141,6 +141,13 @@ void GameNetworkServer::broadcastStates()
         packet.is(gs);
         c.socket.sendPacket(packet);
         gf::Log::info("Envoi des état au client %d\n", c.id);
+
+        /* TODO
+        PLATEAU A ENVOYER
+        const Plateau& p = game.getPlateau();
+        */
+
+
     }
 }
 

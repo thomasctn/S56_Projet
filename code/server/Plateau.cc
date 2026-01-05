@@ -1,32 +1,40 @@
 #include "Plateau.h"
 #include <iostream>
 
-Plateau::Plateau(int w, int h) : width(w), height(h), grid(h, std::vector<Case>(w)) {
+Plateau::Plateau(int w, int h): width(w), height(h), grid({static_cast<unsigned>(w), static_cast<unsigned>(h)})
+{
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            if (y == 0 || y == height-1 || x == 0 || x == width-1) {
-                grid[y][x] = Case(CellType::Wall);
-            } else if (y == height/2 && x == width/2) {
-                grid[y][x] = Case(CellType::Hut);
-            } else {
-                grid[y][x] = Case(CellType::Floor);
+            if (y == 0 || y == height - 1 || x == 0 || x == width - 1) {
+                grid({static_cast<unsigned>(x), static_cast<unsigned>(y)}) = Case(CellType::Wall);
+            }
+            else if (y == height / 2 && x == width / 2) {
+                grid({static_cast<unsigned>(x), static_cast<unsigned>(y)}) = Case(CellType::Hut);
+            }
+            else {
+                grid({static_cast<unsigned>(x), static_cast<unsigned>(y)}) = Case(CellType::Floor);
             }
         }
     }
 }
 
 Case& Plateau::getCase(int x, int y) {
-    return grid[y][x];
+    return grid({static_cast<unsigned>(x), static_cast<unsigned>(y)});
 }
 
 const Case& Plateau::getCase(int x, int y) const {
-    return grid[y][x];
+    return grid({static_cast<unsigned>(x), static_cast<unsigned>(y)});
 }
+
+bool Plateau::isInside(int x, int y) const {
+    return x >= 0 && y >= 0 && x < width && y < height;
+}
+
 
 void Plateau::print() const {
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            switch (grid[y][x].getType()) {
+            switch (grid({static_cast<unsigned>(x), static_cast<unsigned>(y)}).getType()) {
                 case CellType::Floor: std::cout << "."; break;
                 case CellType::Wall:  std::cout << "#"; break;
                 case CellType::Hut:   std::cout << "H"; break;
@@ -36,19 +44,23 @@ void Plateau::print() const {
     }
 }
 
-void Plateau::printWithPlayers(const std::vector<PlayerInfo>& players) const {
+
+void Plateau::printWithPlayers(const std::vector<Player>& players) const {
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
+
             bool playerHere = false;
-            for (auto& p : players) {
+
+            for (const auto& p : players) {
                 if (p.x == x && p.y == y) {
                     std::cout << p.id;
                     playerHere = true;
                     break;
                 }
             }
+
             if (!playerHere) {
-                switch (grid[y][x].getType()) {
+                switch (grid({static_cast<unsigned>(x), static_cast<unsigned>(y)}).getType()) {
                     case CellType::Floor: std::cout << "."; break;
                     case CellType::Wall:  std::cout << "#"; break;
                     case CellType::Hut:   std::cout << "H"; break;
@@ -59,13 +71,17 @@ void Plateau::printWithPlayers(const std::vector<PlayerInfo>& players) const {
     }
 }
 
+
 bool Plateau::isWalkable(int x, int y) const {
-    if (x < 0 || y < 0 || x >= width || y >= height) return false;
-    CellType type = grid[y][x].getType();
+    if (x < 0 || y < 0 || x >= width || y >= height)
+        return false;
+
+    CellType type = grid({static_cast<unsigned>(x), static_cast<unsigned>(y)}).getType();
     return type == CellType::Floor || type == CellType::Hut;
 }
 
-bool Plateau::isOccupied(int x, int y, uint32_t excludeId, const std::vector<PlayerInfo>& players) const {
+
+bool Plateau::isOccupied(int x, int y, uint32_t excludeId, const std::vector<Player>& players) const {
     for (auto& p : players) {
         if (p.id != excludeId && p.x == x && p.y == y) return true;
     }

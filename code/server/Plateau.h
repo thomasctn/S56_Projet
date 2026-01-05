@@ -1,7 +1,14 @@
 #pragma once
-#include "Case.h"
+
+#include <gf/Array2D.h>
+#include <gf/Vector.h>
 #include <vector>
 #include <cstdint>
+
+#include "Case.h"
+#include "ClientInfo.h"
+#include "Player.h"
+
 
 class Plateau {
 public:
@@ -10,21 +17,21 @@ public:
     Case& getCase(int x, int y);
     const Case& getCase(int x, int y) const;
 
-    int getWidth() const { return width; }
-    int getHeight() const { return height; }
+    bool isWalkable(int x, int y) const;
+    bool isOccupied(int x, int y, uint32_t excludeId,
+                    const std::vector<Player>& players) const;
+    bool isInside(int x, int y) const;
+    const Plateau& getPlateau() const { return plateau; }
 
-    struct PlayerInfo {
-        int x, y;
-        uint32_t id;
-    };
 
     void print() const;
-    void printWithPlayers(const std::vector<PlayerInfo>& players) const;
-    bool isWalkable(int x, int y) const;
-    bool isOccupied(int x, int y, uint32_t excludeId, const std::vector<PlayerInfo>& players) const;
+    void printWithPlayers(const std::vector<Player>& players) const;
+
+    int getWidth() const { return width; }
+    int getHeight() const { return height; }
 
 private:
     int width;
     int height;
-    std::vector<std::vector<Case>> grid;
+    gf::Array2D<Case> grid;
 };
