@@ -6,8 +6,10 @@
 #include <gf/Color.h>
 #include <vector>
 #include "Structures.h"
+#include <gf/Texture.h>
+#include <gf/Sprite.h>
 
-#include "../common/Types.h"
+#include "../common/Protocol.h"
 
 class Renderer{
     public:
@@ -30,6 +32,9 @@ class Renderer{
     gf::Color4f colorFromId(uint32_t id);
     gf::View m_view; // la view que l'on manipule
     float m_worldSize = 500.f;  //taille de la map basique
+
+    gf::Texture m_inkyTexture;
+    gf::Sprite  m_inkySprite;
 
 
 };

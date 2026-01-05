@@ -1,5 +1,5 @@
 #include "Plateau.h"
-#include <iostream>
+
 
 Plateau::Plateau(int w, int h): width(w), height(h), grid({static_cast<unsigned>(w), static_cast<unsigned>(h)})
 {
@@ -86,4 +86,17 @@ void Plateau::printWithPlayers(const std::vector<Player>& players) const {
         }
         std::cout << "\n";
     }
+}
+
+BoardData Plateau::toData() const
+{
+    BoardData res;
+    res.width = width;
+    res.height = height;
+    for (unsigned y = 0; y < height; ++y) {
+        for (unsigned x = 0; x < width; ++x) {
+            res.grid({x, y}) = grid({x, y}).toData();
+        }
+    }
+    return res;
 }
