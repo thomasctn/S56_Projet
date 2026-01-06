@@ -89,15 +89,34 @@ int main() {
 
                 // --- Joueurs ---
                 for (auto& [id, playerPtr] : server.getGame().getPlayers()) {
+                    if (!playerPtr) continue;
                     Player& p = *playerPtr;
 
-                    gf::RectangleShape player({tileSize, tileSize});
+                    gf::RectangleShape playerRect({tileSize, tileSize});
                     float px = p.x / 50.0f * tileSize + offsetX;
                     float py = p.y / 50.0f * tileSize + offsetY;
-                    player.setPosition({px, py});
-                    player.setColor(gf::Color::Green);
-                    window.draw(player);
+                    playerRect.setPosition({px, py});
+
+                    // couleur selon le rôle
+                    switch (p.getRole()) {
+                        case PlayerRole::PacMan:    playerRect.setColor(gf::Color::Yellow); break;
+                        case PlayerRole::Ghost:     playerRect.setColor(gf::Color::Violet); break; // violet
+                        case PlayerRole::Spectator: playerRect.setColor(gf::Color::Cyan); break; // gris
+                    }
+
+                    window.draw(playerRect);
+
+                    // Affichage du score au-dessus du joueur
+                    static gf::Font font("../common/fonts/arial.ttf"); // une seule fois
+                    gf::Text scoreText;
+                    scoreText.setFont(font);
+                    scoreText.setCharacterSize(16);
+                    scoreText.setColor(gf::Color::White);
+                    scoreText.setString(std::to_string(p.score));
+                    scoreText.setPosition({px, py - 18}); // juste au-dessus du joueur
+                    window.draw(scoreText);
                 }
+
 
 
                 // --- Affichage du chrono ---

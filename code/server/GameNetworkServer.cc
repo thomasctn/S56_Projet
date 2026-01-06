@@ -38,14 +38,23 @@ void GameNetworkServer::handleNewClient()
 
     uint32_t id = nextId++;
 
-    auto player = std::make_unique<Player>(id);
-    player->socket = std::move(clientSocket);
-    player->x = 100.0f;
-    player->y = 100.0f;
-    player->color = 0xFF0000FF;
+    game.getPlayers().emplace(id, std::make_unique<Player>(id));
+    auto& newPlayer = *game.getPlayers()[id];
+    newPlayer.socket = std::move(clientSocket);
+    newPlayer.x = 100.0f;
+    newPlayer.y = 100.0f;
+    newPlayer.color = 0xFF0000FF;
 
-    selector.addSocket(player->socket);
-    game.getPlayers().emplace(id, std::move(player));
+    selector.addSocket(newPlayer.socket);
+    if (id==1){
+        newPlayer.setRole(PlayerRole::PacMan);
+    }
+    else{
+        newPlayer.setRole(PlayerRole::Ghost);
+    }
+    game.spawnPlayer(newPlayer);
+
+
 
     gf::Log::info("Client connecté, id=%d\n", id);
 

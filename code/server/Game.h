@@ -30,6 +30,7 @@ public:
     Player& getPlayerInfo(uint32_t playerId);
     void addPlayer(uint32_t id, float x, float y);
     bool canMove(uint32_t playerId, float newX, float newY) const;
+    void spawnPlayer(Player& p);
 
 
     // --- Plateau ---

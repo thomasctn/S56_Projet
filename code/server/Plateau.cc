@@ -43,7 +43,7 @@ bool Plateau::isWalkable(unsigned int x, unsigned int y) const
         return false;
 
     CellType type = grid({x, y}).getType();
-    return type == CellType::Floor || type == CellType::Hut;
+    return type == CellType::Floor;
 }
 
 bool Plateau::isOccupied(unsigned int x, unsigned int y, uint32_t excludeId, const std::vector<Player> &players) const

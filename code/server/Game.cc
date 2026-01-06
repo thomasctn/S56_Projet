@@ -14,21 +14,32 @@ bool Game::canMove(uint32_t playerId, float newX, float newY) const {
     if (!plateauRef.isInside(gridX, gridY)) return false;
     if (!plateauRef.getCase(gridX, gridY).isWalkable()) return false;
 
+    // Récupère le joueur courant
+    auto itCurrent = players.find(playerId);
+    if (itCurrent == players.end()) return false;
+    const Player& currentPlayer = *itCurrent->second;
+
     for (const auto& [id, playerPtr] : players) {
         if (id == playerId) continue;
 
-        const Player& p = *playerPtr;
+        const Player& other = *playerPtr;
 
-        int px = static_cast<int>(p.x) / 50;
-        int py = static_cast<int>(p.y) / 50;
+        int px = static_cast<int>(other.x) / 50;
+        int py = static_cast<int>(other.y) / 50;
 
+        // Fantômes peuvent marcher sur PacMan
         if (px == gridX && py == gridY) {
-            return false;
+            if (currentPlayer.getRole() == PlayerRole::Ghost &&
+                other.getRole() == PlayerRole::PacMan) {
+                continue; // autorisé
+            }
+            return false; // sinon bloqué
         }
     }
 
     return true;
 }
+
 
 
 void Game::requestMove(uint32_t playerId, Direction dir) {
@@ -49,11 +60,31 @@ void Game::requestMove(uint32_t playerId, Direction dir) {
         case Direction::Right: newX += step; break;
     }
 
-    if (canMove(playerId, newX, newY)) {
-        p.x = newX;
-        p.y = newY;
+    if (!canMove(playerId, newX, newY)) return;
+
+    // Déplacement effectif
+    p.x = newX;
+    p.y = newY;
+
+    // --- Gestion collisions joueurs ---
+    for (auto& [otherId, otherPtr] : players) {
+        if (otherId == playerId) continue;
+
+        Player& other = *otherPtr;
+
+        int px = static_cast<int>(other.x) / 50;
+        int py = static_cast<int>(other.y) / 50;
+        int cx = static_cast<int>(p.x) / 50;
+        int cy = static_cast<int>(p.y) / 50;
+
+        if (px == cx && py == cy) {
+            // Si c'est un fantôme qui marche sur PacMan
+            p.eat(false, &other);
+            other.eat(false, &p); // dans l'autre sens si PacMan marche sur fantôme mais pas possible normalement
+        }
     }
 }
+
 
 
 Player& Game::getPlayerInfo(uint32_t playerId) {
@@ -131,3 +162,18 @@ void Game::stopGameLoop() {
         gameThread.join();
 }
 
+void Game::spawnPlayer(Player& p) {
+    if (p.getRole() == PlayerRole::Ghost) {
+        // coordonnées de la cabane fantôme
+        p.x = (plateau.getWidth() / 2) * 50.0f;
+        p.y = (plateau.getHeight() / 2) * 50.0f;
+    } else if (p.getRole() == PlayerRole::PacMan) {
+        // spawn PacMan dans une zone libre (exemple : coin en haut à gauche)
+        p.x = 50.0f;
+        p.y = 50.0f;
+    } else {
+        // Spectator spawn
+        p.x = 30.0f;
+        p.y = 30.0f;
+    }
+}
