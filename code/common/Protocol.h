@@ -32,12 +32,13 @@ template<typename Archive>
 struct CaseCommon {
     static constexpr gf::Id type = "CaseCommon"_id;
     CellType celltype;
+    bool pacGomme = false;
     CaseCommon() : celltype(CellType::Floor) {}
-    CaseCommon(CellType t) {celltype = t;}
+    CaseCommon(CellType t, bool pg) {celltype = t; pacGomme = pg;}
 };
 template<typename Archive>
   Archive& operator|(Archive& ar, CaseCommon& data) {
-    return ar | data.celltype;
+    return ar | data.celltype | data.pacGomme;
 }
 
 struct BoardCommon {

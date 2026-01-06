@@ -19,7 +19,7 @@ public:
     void removePacGomme() { pacGomme = false; }
 
     CaseCommon toCommonData() const {
-        CaseCommon cc(type);
+        CaseCommon cc(type, pacGomme);
         return cc;
     }
 
