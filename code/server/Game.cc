@@ -14,56 +14,66 @@ bool Game::canMove(uint32_t playerId, float newX, float newY) const {
     if (!plateauRef.isInside(gridX, gridY)) return false;
     if (!plateauRef.getCase(gridX, gridY).isWalkable()) return false;
 
-    for (const auto& p : players) {
-        if (p.id != playerId) {
-            int px = static_cast<int>(p.x) / 50;
-            int py = static_cast<int>(p.y) / 50;
-            if (px == gridX && py == gridY) return false;
+    for (const auto& [id, playerPtr] : players) {
+        if (id == playerId) continue;
+
+        const Player& p = *playerPtr;
+
+        int px = static_cast<int>(p.x) / 50;
+        int py = static_cast<int>(p.y) / 50;
+
+        if (px == gridX && py == gridY) {
+            return false;
         }
     }
 
     return true;
 }
 
-void Game::requestMove(uint32_t playerId, Direction dir)
-{
+
+void Game::requestMove(uint32_t playerId, Direction dir) {
     constexpr float step = 50.0f;
 
-    for (auto& p : players) {
-        if (p.id == playerId) {
-            float newX = p.x;
-            float newY = p.y;
+    auto it = players.find(playerId);
+    if (it == players.end()) return;
 
-            switch (dir) {
-            case Direction::Up:    newY -= step; break;
-            case Direction::Down:  newY += step; break;
-            case Direction::Left:  newX -= step; break;
-            case Direction::Right: newX += step; break;
-            }
+    Player& p = *it->second;
 
-            if (canMove(playerId, newX, newY)) {
-                p.x = newX;
-                p.y = newY;
-            }
-            return;
-        }
+    float newX = p.x;
+    float newY = p.y;
+
+    switch (dir) {
+        case Direction::Up:    newY -= step; break;
+        case Direction::Down:  newY += step; break;
+        case Direction::Left:  newX -= step; break;
+        case Direction::Right: newX += step; break;
+    }
+
+    if (canMove(playerId, newX, newY)) {
+        p.x = newX;
+        p.y = newY;
     }
 }
+
 
 Player& Game::getPlayerInfo(uint32_t playerId) {
-    for (auto& p : players) {
-        if (p.id == playerId) return p;
+    auto it = players.find(playerId);
+    if (it == players.end()) {
+        throw std::runtime_error("Player not found");
     }
-    throw std::runtime_error("Player not found");
+    return *it->second;
 }
+
 
 
 void Game::addPlayer(uint32_t id, float x, float y) {
-    players.emplace_back(id);
-    Player& p = players.back();
-    p.x = x;
-    p.y = y;
+    auto player = std::make_unique<Player>(id, PlayerRole::Spectator);
+    player->x = x;
+    player->y = y;
+
+    players.emplace(id, std::move(player));
 }
+
 
 void Game::startChrono() {
     chronoStart = std::chrono::steady_clock::now();

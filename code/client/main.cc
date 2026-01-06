@@ -85,6 +85,8 @@ int main()
             case GameState::type:
                 auto data = packet.as<GameState>();
                 states = data.clientStates;
+                gf::Log::info("Donnée reçu\n");
+
                 //ici, je suis censée récupérer le plateau(?)
                 //mapS= data.plateau;
                 break;

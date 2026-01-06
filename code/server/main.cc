@@ -88,7 +88,9 @@ int main() {
                 }
 
                 // --- Joueurs ---
-                for (auto& p : server.getGame().getPlayers()) {
+                for (auto& [id, playerPtr] : server.getGame().getPlayers()) {
+                    Player& p = *playerPtr;
+
                     gf::RectangleShape player({tileSize, tileSize});
                     float px = p.x / 50.0f * tileSize + offsetX;
                     float py = p.y / 50.0f * tileSize + offsetY;
@@ -96,6 +98,7 @@ int main() {
                     player.setColor(gf::Color::Green);
                     window.draw(player);
                 }
+
 
                 // --- Affichage du chrono ---
                 double elapsed = server.getGame().getElapsedSeconds();

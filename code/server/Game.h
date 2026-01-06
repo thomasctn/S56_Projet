@@ -35,8 +35,12 @@ public:
     // --- Plateau ---
     Plateau& getPlateau() { return plateau; }
     const Plateau& getPlateau() const { return plateau; }
-    std::vector<Player>& getPlayers() { return players; }
-    const std::vector<Player>& getPlayers() const { return players; }
+    std::unordered_map<uint32_t, std::unique_ptr<Player>>& getPlayers() {
+        return players;
+    }
+    const std::unordered_map<uint32_t, std::unique_ptr<Player>>& getPlayers() const {
+        return players;
+    }
 
     // --- Chrono ---
     void startChrono();
@@ -50,7 +54,7 @@ public:
 
 private:
     Plateau plateau;
-    std::vector<Player> players;
+    std::unordered_map<uint32_t, std::unique_ptr<Player>> players;
 
     // Chrono
     std::chrono::steady_clock::time_point chronoStart;

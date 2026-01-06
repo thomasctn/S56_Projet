@@ -36,6 +36,6 @@ private:
 
     void handleNewClient();
     void handleClientData();
-    void removeDisconnectedPlayers(const std::vector<size_t>& toRemove);
+    void removeDisconnectedPlayers(const std::vector<uint32_t>& disconnectedIds);
     void broadcastStates();
 };

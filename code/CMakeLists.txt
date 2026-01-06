@@ -15,8 +15,6 @@ add_executable(server
     server/Game.cc
     server/Player.cc
     server/Plateau.cc
-    server/Case.cc
-    server/PacGomme.cc
 )
 target_link_libraries(server PRIVATE gf::core gf::graphics gf::net)
 
