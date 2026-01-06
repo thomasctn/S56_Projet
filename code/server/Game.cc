@@ -123,7 +123,7 @@ void Game::resetChrono() {
     chronoStart = std::chrono::steady_clock::now();
 }
 
-void Game::startGameLoop(int tickMs_) {
+void Game::startGameLoop(int tickMs_, InputQueue& inputQueue) {
     tickMs = tickMs_;
     running.store(true);
     gameStarted.store(false);
@@ -132,8 +132,9 @@ void Game::startGameLoop(int tickMs_) {
 
     preGameStart = std::chrono::steady_clock::now();
 
-    gameThread = std::thread([this]() {
+    gameThread = std::thread([this, &inputQueue]() {
         while (running.load()) {
+            processInputs(inputQueue);
             auto now = std::chrono::steady_clock::now();
             std::chrono::duration<double> elapsed = now - preGameStart;
 
@@ -184,6 +185,13 @@ void Game::spawnPlayer(Player& p) {
         // Spectator spawn
         p.x = 30.0f;
         p.y = 30.0f;
+    }
+}
+
+void Game::processInputs(InputQueue& queue) {
+    while (auto inputOpt = queue.pop()) {
+        auto& input = *inputOpt;
+        requestMove(input.playerId, input.dir);
     }
 }
 

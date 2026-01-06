@@ -1,5 +1,4 @@
 #include "GameNetworkServer.h"
-#include "../common/Constants.h"
 
 
 GameNetworkServer::GameNetworkServer()
@@ -14,7 +13,7 @@ GameNetworkServer::GameNetworkServer()
 int GameNetworkServer::run()
 {
     gf::Log::info("Serveur démarré !");
-    game.startGameLoop(50);
+    game.startGameLoop(50, inputQueue);
     while (running) {
         if (selector.wait(gf::milliseconds(SPEED)) == gf::v1::SocketSelectorStatus::Event) {
             handleNewClient();
@@ -66,33 +65,29 @@ void GameNetworkServer::handleClientData() {
     std::vector<uint32_t> toRemove;
 
     std::lock_guard<std::mutex> lock(playersMutex);
-    auto& players = game.getPlayers(); // accès centralisé
+    auto& players = game.getPlayers();
 
-    for (auto& [id, playerPtr] : game.getPlayers()) {
+    for (auto& [id, playerPtr] : players) {
         Player& p = *playerPtr;
 
         if (!selector.isReady(p.socket))
             continue;
-
 
         gf::Packet packet;
         switch (p.socket.recvPacket(packet)) {
             case gf::SocketStatus::Data: {
                 if (packet.getType() == ClientMove::type) {
                     auto data = packet.as<ClientMove>();
-                    Direction direction;
+                    Direction dir;
                     switch (data.moveDir) {
-                        case 'U': direction = Direction::Up; break;
-                        case 'D': direction = Direction::Down; break;
-                        case 'L': direction = Direction::Left; break;
-                        case 'R': direction = Direction::Right; break;
+                        case 'U': dir = Direction::Up; break;
+                        case 'D': dir = Direction::Down; break;
+                        case 'L': dir = Direction::Left; break;
+                        case 'R': dir = Direction::Right; break;
                         default: continue;
                     }
-                    if (game.requestMove(id, direction)){
-                        gf::Log::info("Client %d moved %c -> position=(%.1f, %.1f)\n",
-                        p.id, data.moveDir, p.x, p.y);
-                    }
 
+                    inputQueue.push({id, dir});
                 }
                 break;
             }
@@ -110,6 +105,7 @@ void GameNetworkServer::handleClientData() {
     removeDisconnectedPlayers(toRemove);
     broadcastStates();
 }
+
 
 
 void GameNetworkServer::removeDisconnectedPlayers(const std::vector<uint32_t>& disconnectedIds) {

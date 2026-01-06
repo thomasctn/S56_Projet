@@ -1,19 +1,18 @@
 #pragma once
 
+#include <gf/Log.h>
+
 #include <thread>
 #include <chrono>
 #include <unordered_map>
 #include <memory>
-#include <gf/Log.h>
 #include <atomic> 
 
+#include "../common/Constants.h"
 #include "Player.h"
 #include "Board.h"
-#include "../common/Constants.h"
+#include "InputQueue.h"
 
-enum class Direction {
-    Up, Down, Left, Right
-};
 
 class Game {
 public:
@@ -37,16 +36,17 @@ public:
     // --- Chrono ---
     double getElapsedSeconds() const { return gameElapsed; }
     double getPreGameElapsed() const { return preGameElapsed; }
+    void startChrono();
+    void resetChrono();
 
-
-    void startGameLoop(int tickMs_);
+    // --- GameLoop ---
+    void startGameLoop(int tickMs_, InputQueue& inputQueue);
     void stopGameLoop();
     bool isGameStarted() const { return gameStarted; }
     bool isPreGame() const { return !gameStarted && preGameElapsed < preGameDelay; }
     bool isGameOver() const { return gameStarted && gameElapsed >= T_GAME; }
 
-    void startChrono();
-    void resetChrono();
+
 
     
 private:
@@ -62,9 +62,11 @@ private:
     double gameElapsed = 0.0;
     const int preGameDelay = PRE_GAME_DELAY;
 
-    // --- Boucle de jeu ---
+    // --- GameLoop ---
     int tickMs = 50;
     std::thread gameThread;
     std::atomic<bool> running{false};
     std::atomic<bool> gameStarted{false};
+
+    void processInputs(InputQueue& queue);
 };

@@ -12,3 +12,10 @@ enum class PlayerRole {
     Ghost,
     Spectator
 };
+
+enum class Direction {
+    Up,
+    Down,
+    Left,
+    Right
+};

@@ -1,17 +1,27 @@
 #pragma once
-#include <vector>
-#include <mutex>
-#include <atomic>
+
 #include <gf/TcpListener.h>
 #include <gf/SocketSelector.h>
 #include <gf/Packet.h>
 #include <gf/Log.h>
+
+#include <vector>
+#include <mutex>
+#include <atomic>
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <queue>
+#include <mutex>
+#include <optional>
+
 #include "../common/Serializable.h"
+#include "../common/Constants.h"
 #include "../common/Protocol.h"
 #include "Game.h"
+#include "InputQueue.h"
+
+
 
 class GameNetworkServer
 {
@@ -25,6 +35,9 @@ public:
 
     Game &getGame();
     std::mutex &getPlayersMutex();
+
+    InputQueue inputQueue;
+
 
 private:
     gf::TcpListener listener;
@@ -53,3 +66,5 @@ private:
     }
     void broadcastStates();
 };
+
+
