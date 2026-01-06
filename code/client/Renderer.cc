@@ -64,7 +64,7 @@ gf::Color4f Renderer::colorFromId(uint32_t id) {
 
 
 
-void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, const BoardCommon map){
+void Renderer::render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map){
     rendered_window.clear(gf::Color::Black);
     renderMap(states,myId,map);
     //AVANT : LES PXIELS JOUEURS
@@ -168,7 +168,7 @@ void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, con
 
 
 
-void Renderer::renderMap(const std::vector<ClientState>& states, uint32_t myId, const BoardCommon map){
+void Renderer::renderMap(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map){
     BoardCommon mapPerso = map;
     //sans le responsive:
     float tileSize = std::min(m_worldSize / mapPerso.width, m_worldSize / mapPerso.height); //a remplacer par ma fonction utilistaire

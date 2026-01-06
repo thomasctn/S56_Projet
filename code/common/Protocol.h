@@ -45,17 +45,17 @@ Serveur (envoyé)
 
 */
 struct PlayerData {
-    static constexpr gf::Id type = "PlayerSettigns"_id;
-    gf::Id id;
+    static constexpr gf::Id type = "PlayerData"_id;
+    uint32_t id;
+    float x, y;
+    uint32_t color; // RGBA
     std::string name;
     PlayerRole role;
     bool ready = false;
-
-    int duration = 0;
 };
 template<typename Archive>
   Archive& operator|(Archive& ar, PlayerData& data) {
-    return ar | data.id | data.name | data.role | data.ready;
+    return ar | data.id | data.x | data.y | data.color | data.name | data.role | data.ready;
 }
 struct GameSettigns {
     static constexpr gf::Id type = "GameSettigns"_id;
@@ -157,17 +157,7 @@ template<typename Archive>
     return ar;
 }
 
-struct ClientState {
-    static constexpr gf::Id type = "ClientState"_id;
-    uint32_t id;
-    float x, y;
-    uint32_t color; // RGBA
-};
-
-template<typename Archive>
-  Archive& operator|(Archive& ar, ClientState& data) {
-    return ar | data.id | data.x | data.y | data.color;
-}
+//
 
 struct ClientMove {
     static constexpr gf::Id type = "ClientMove"_id;
@@ -206,7 +196,7 @@ template<typename Archive>
 
 struct GameState {
     static constexpr gf::Id type = "GameState"_id;
-    std::vector<ClientState> clientStates;
+    std::vector<PlayerData> clientStates;
     BoardCommon board;
 };
 template<typename Archive>

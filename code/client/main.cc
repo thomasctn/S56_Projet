@@ -33,7 +33,7 @@ int main()
 
     //char currentDir = 0;
     //STRCUTURES DE DONNÉES RECUES
-    std::vector<ClientState> states;
+    std::vector<PlayerData> states;
     BoardCommon board;
 
     //std::mutex statesMutex;
@@ -90,7 +90,7 @@ int main()
             {
             case GameState::type:
                 auto data = packet.as<GameState>();
-                states = data.clientStates;
+                states = data.PlayerDatas;
                 gf::Log::info("Donnée reçu\n");
 
                 //ici, je suis censée récupérer le plateau(?)

@@ -134,13 +134,13 @@ void GameNetworkServer::broadcastStates()
 
     for (auto& [id, playerPtr] : players)
     {
-        std::vector<ClientState> states;
+        std::vector<PlayerData> states;
 
         for (auto& [otherId, otherPtr] : players) {
             states.push_back(otherPtr->getState());
         }
 
-        std::sort(states.begin(), states.end(), [](const ClientState &a, const ClientState &b){
+        std::sort(states.begin(), states.end(), [](const PlayerData &a, const PlayerData &b){
             return a.id < b.id;
         });
 

@@ -24,11 +24,11 @@ public:
     PlayerRole getRole() const { return role; }
     void setRole(PlayerRole r) { role = r; }
 
-    ClientState getState() const {
-        return { id, x, y, color };
+    PlayerData getState() const {
+        return { id, x, y, color, "moi", role, true };
     }
 
-    void setState(const ClientState& state) {
+    void setState(const PlayerData& state) {
         x = state.x;
         y = state.y;
         color = state.color;
