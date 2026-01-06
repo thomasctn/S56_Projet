@@ -22,8 +22,8 @@ public:
     PlayerRole getRole() const;
     void setRole(PlayerRole r);
 
-    ClientState getState() const;
-    void setState(const ClientState& state);
+    PlayerData getState() const;
+    void setState(const PlayerData& state);
 
     // --- Gameplay ---
     // Retourne true si quelque chose a été mangé

@@ -28,11 +28,11 @@ void Player::setRole(PlayerRole r) {
 // ------------------
 // État réseau
 // ------------------
-ClientState Player::getState() const {
+PlayerData Player::getState() const {
     return { id, x, y, color };
 }
 
-void Player::setState(const ClientState& state) {
+void Player::setState(const PlayerData& state) {
     x = state.x;
     y = state.y;
     color = state.color;
