@@ -13,9 +13,9 @@
 #include <gf/Keyboard.h>
 #include <gf/Event.h>
 #include <mutex>
+#include <queue>
 #include "../common/Types.h"
 #include "Renderer.h"
-#include "Structures.h"
 
 
 Renderer renderer;
@@ -32,8 +32,11 @@ int main()
     }
 
     //char currentDir = 0;
+    //STRCUTURES DE DONNÉES RECUES
     std::vector<ClientState> states;
-    std::mutex statesMutex;
+    BoardCommon board;
+
+    //std::mutex statesMutex;
     bool running = true;
     socket.setNonBlocking();
 
@@ -72,6 +75,9 @@ int main()
     rightAction.setContinuous();
     actions.addAction(rightAction);
 
+    std::queue<gf::Packet> packetQueue;
+    std::mutex packetMutex;
+    
 
     std::thread receiver([&]()
                          {
@@ -79,8 +85,8 @@ int main()
             gf::Packet packet;
         switch (socket.recvPacket(packet))
         {
-        case gf::SocketStatus::Data:
-            switch (packet.getType())
+        case gf::SocketStatus::Data:{
+            /*switch (packet.getType())
             {
             case GameState::type:
                 auto data = packet.as<GameState>();
@@ -90,8 +96,11 @@ int main()
                 //ici, je suis censée récupérer le plateau(?)
                 //mapS= data.plateau;
                 break;
-            }
+            }*/
+            std::lock_guard<std::mutex> lock(packetMutex);
+            packetQueue.push(std::move(packet));
             break;
+        }
         case gf::SocketStatus::Error:
              gf::Log::error("Erreur réseau côté client\n");
             break;
@@ -111,31 +120,6 @@ int main()
 
     
 
-    mapRec mapS; //fausse map de serveur
-    mapS.width = 27;
-    mapS.height=27;
-    int height =27;
-    int width =27;
-    mapS.grid.resize(mapS.height, std::vector<CaseRec>(mapS.width));
-
-
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            if (y == 0 || y == height-1 || x == 0 || x == width-1) {
-                CaseRec newC;
-                newC.type=CellType::Wall;
-                mapS.grid[y][x] = newC;
-            } else if (y == height/2 && x == width/2) {
-                CaseRec newC;
-                newC.type=CellType::Hut;
-                mapS.grid[y][x] = newC;
-            } else {
-                CaseRec newC;
-                newC.type=CellType::Floor;
-                mapS.grid[y][x] = newC;
-            }
-        }
-    }
 
     while (running && renderer.isOpen())
     {
@@ -186,10 +170,25 @@ int main()
                 lastSend=now;
             }
         }
-
+        //dépiler les packets du réseau
+        {
+            std::lock_guard<std::mutex> lock(packetMutex);
+            while (!packetQueue.empty()) {
+                gf::Packet packet = std::move(packetQueue.front());
+                packetQueue.pop();
+                switch (packet.getType()) {
+                    case GameState::type: {
+                        auto data = packet.as<GameState>();
+                        states = data.clientStates;
+                        board=data.board;
+                        break;
+                    }
+                }
+            }
+        }
 
         // Rendu
-        renderer.render(states, myId, mapS);
+        renderer.render(states, myId, board);
         
 
         std::this_thread::sleep_for(std::chrono::milliseconds(8));

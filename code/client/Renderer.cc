@@ -1,6 +1,5 @@
 #include "Renderer.h"
 
-#include "Structures.h"
 #include <gf/Log.h>
 
 Renderer::Renderer() : main_window("GF Sync Boxes", {800,600}), rendered_window(main_window){
@@ -28,7 +27,7 @@ gf::Color4f Renderer::colorFromId(uint32_t id) {
 
 
 
-void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, const mapRec map){
+void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, const BoardCommon map){
     rendered_window.clear(gf::Color::Black);
     
     //AVANT : LES PXIELS JOUEURS
@@ -75,8 +74,8 @@ void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, con
 
 
 
-void Renderer::renderMap(const std::vector<ClientState>& states, uint32_t myId, const mapRec map){
-    mapRec mapPerso = map;
+void Renderer::renderMap(const std::vector<ClientState>& states, uint32_t myId, const BoardCommon map){
+    BoardCommon mapPerso = map;
     //sans le responsive:
     float tileSize = std::min(m_worldSize / mapPerso.width, m_worldSize / mapPerso.height); //a remplacer par ma fonction utilistaire
     float offsetX = (m_worldSize - tileSize * mapPerso.width) / 2.f;
@@ -86,12 +85,12 @@ void Renderer::renderMap(const std::vector<ClientState>& states, uint32_t myId, 
 
     for (int y = 0; y < mapPerso.height; ++y) {
                 for (int x = 0; x < mapPerso.width; ++x) {
-                    const CaseRec& cell = mapPerso.grid[y][x];
+                    const CaseCommon& cell = mapPerso.grid({ x, y });
 
                     gf::RectangleShape tile({tileSize, tileSize});
                     tile.setPosition({x * tileSize + offsetX, y * tileSize + offsetY});
 
-                    switch (cell.type) {
+                    switch (cell.celltype) {
                         case CellType::Wall: tile.setColor(gf::Color::White); break;
                         case CellType::Hut:  tile.setColor(gf::Color::Red); break;
                         case CellType::Floor:
@@ -118,7 +117,7 @@ void Renderer::handleResize(unsigned int winW, unsigned int winH)
 }
 
 
-void Renderer::calculateMovement(float worldSize, const mapRec &map, float &tileSize, float &offsetX, float &offsetY) {
+void Renderer::calculateMovement(float worldSize, const BoardCommon &map, float &tileSize, float &offsetX, float &offsetY) {
     tileSize = std::min(worldSize / float(map.width), worldSize / float(map.height));
 
     offsetX = (worldSize - tileSize *float(map.width)) / 2.f;
