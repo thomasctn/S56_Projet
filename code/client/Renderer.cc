@@ -66,7 +66,7 @@ gf::Color4f Renderer::colorFromId(uint32_t id) {
 
 void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, const BoardCommon map){
     rendered_window.clear(gf::Color::Black);
-    
+    renderMap(states,myId,map);
     //AVANT : LES PXIELS JOUEURS
     /*for (auto& s : states) {
         gf::RectangleShape box({50.0f, 50.0f});
@@ -160,7 +160,7 @@ void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, con
     }*/
 
   
-    renderMap(states,myId,map);
+    
     rendered_window.display();
 
 
@@ -176,7 +176,7 @@ void Renderer::renderMap(const std::vector<ClientState>& states, uint32_t myId, 
     float offsetY = (m_worldSize - tileSize * mapPerso.height) / 2.f;
 
 
-
+    bool isFloor = false;
     for (unsigned int y = 0; y < mapPerso.height; ++y) {
                 for (unsigned int x = 0; x < mapPerso.width; ++x) {
                     const CaseCommon& cell = mapPerso.grid({ x, y });
@@ -187,10 +187,24 @@ void Renderer::renderMap(const std::vector<ClientState>& states, uint32_t myId, 
                     switch (cell.celltype) {
                         case CellType::Wall: tile.setColor(gf::Color::White); break;
                         case CellType::Hut:  tile.setColor(gf::Color::Red); break;
-                        case CellType::Floor:
+                        case CellType::Floor: isFloor = true; tile.setColor(gf::Color::fromRgb(0.3f, 0.3f, 0.3f)); break;
                         default: continue;
                     }
                     rendered_window.draw(tile);
+
+                    //affichage pac gomme
+                    if (isFloor && cell.pacGomme) {
+                        gf::CircleShape pacGomme(tileSize / 6.0f);
+                        pacGomme.setOrigin({tileSize/12.0f, tileSize/12.0f });
+
+                        pacGomme.setPosition({
+                            x * tileSize + offsetX + tileSize/2.0f,
+                            y * tileSize + offsetY + tileSize/2.0f
+                        });
+
+                        pacGomme.setColor(gf::Color::Yellow);
+                        rendered_window.draw(pacGomme);
+                    }
                 }
             }
 }
