@@ -16,6 +16,7 @@ class Renderer{
     Renderer();
     void render(const std::vector<ClientState>& states, uint32_t myId, const mapRec map);
     void renderMap(const std::vector<ClientState>& states, uint32_t myId, const mapRec map);
+    void calculateMovement(float worldSize, const mapRec& map,float& tileSize, float& offsetX, float& offsetY);
 
     bool isOpen() {
         return main_window.isOpen();

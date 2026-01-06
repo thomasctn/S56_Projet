@@ -7,8 +7,8 @@ Renderer::Renderer() : main_window("GF Sync Boxes", {800,600}), rendered_window(
     //POUR LE SPRITE 
     m_inkyTexture = gf::Texture("../client/assets/ghosts/inky.png"); 
     m_inkySprite.setTexture(m_inkyTexture);
-    m_inkySprite.setOrigin({m_inkyTexture.getSize().x/ 2.f, m_inkyTexture.getSize().y / 2.f}); //la ou le sprite demarre
-    m_inkySprite.setScale({2.f, 2.f}); //sa taille
+    m_inkySprite.setOrigin({0.f, 0.f}); //en haut a gauche
+    m_inkySprite.setScale({2.f, 2.f}); //sa taille (temp ce sera recalculé norùalement)
 
     
     
@@ -25,6 +25,9 @@ gf::Color4f Renderer::colorFromId(uint32_t id) {
     return gf::Color4f(r, g, b, 1.0f);
 }
 
+
+
+
 void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, const mapRec map){
     rendered_window.clear(gf::Color::Black);
     
@@ -38,11 +41,30 @@ void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, con
     }*/
 
     //apres, test sprit:
+    float tileSize, offsetX, offsetY;
+    calculateMovement(m_worldSize, map, tileSize, offsetX, offsetY);
 
-    for (const auto& s : states) {
-        m_inkySprite.setPosition({s.x, s.y});
+    //TEMPORAIRE calculer correctement la taille du sprite!
+    auto texSize=m_inkyTexture.getSize();
+    if (texSize.x>0 && texSize.y>0){
+        float scaleX= tileSize/float(texSize.x);
+        float scaleY= tileSize/float(texSize.y);
+        m_inkySprite.setScale({scaleX, scaleY });
+    }
+
+    for (const auto &s : states) {
+        float px = s.x / 50.0f * tileSize + offsetX;
+        float py = s.y / 50.0f * tileSize + offsetY;
+
+        m_inkySprite.setPosition({ px, py });
         rendered_window.draw(m_inkySprite);
     }
+
+
+    /*for (const auto& s : states) {
+        m_inkySprite.setPosition({s.x, s.y});
+        rendered_window.draw(m_inkySprite);
+    }*/
 
   
     renderMap(states,myId,map);
@@ -56,8 +78,7 @@ void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, con
 void Renderer::renderMap(const std::vector<ClientState>& states, uint32_t myId, const mapRec map){
     mapRec mapPerso = map;
     //sans le responsive:
-    const float RENDER_SIZE = 500.0f;
-    float tileSize = std::min(RENDER_SIZE / mapPerso.width, RENDER_SIZE / mapPerso.height);
+    float tileSize = std::min(m_worldSize / mapPerso.width, m_worldSize / mapPerso.height); //a remplacer par ma fonction utilistaire
     float offsetX = (m_worldSize - tileSize * mapPerso.width) / 2.f;
     float offsetY = (m_worldSize - tileSize * mapPerso.height) / 2.f;
 
@@ -96,3 +117,10 @@ void Renderer::handleResize(unsigned int winW, unsigned int winH)
     rendered_window.setView(m_view);
 }
 
+
+void Renderer::calculateMovement(float worldSize, const mapRec &map, float &tileSize, float &offsetX, float &offsetY) {
+    tileSize = std::min(worldSize / float(map.width), worldSize / float(map.height));
+
+    offsetX = (worldSize - tileSize *float(map.width)) / 2.f;
+    offsetY = (worldSize - tileSize *float(map.height)) / 2.f;
+}
