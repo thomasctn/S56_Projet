@@ -8,6 +8,22 @@ Renderer::Renderer() : main_window("GF Sync Boxes", {800,600}), rendered_window(
     m_inkySprite.setTexture(m_inkyTexture);
     m_inkySprite.setOrigin({0.f, 0.f}); //en haut a gauche
     m_inkySprite.setScale({2.f, 2.f}); //sa taille (temp ce sera recalculé norùalement)
+    
+    m_clydeTexture = gf::Texture("../client/assets/ghosts/clyde.png"); 
+    m_clydeSprite.setTexture(m_clydeTexture);
+    m_clydeSprite.setOrigin({0.f, 0.f}); //en haut a gauche
+    m_clydeSprite.setScale({2.f, 2.f}); //sa taille (temp ce sera recalculé norùalement)
+
+    //tests pacman animé
+    m_pacmanTexture = gf::Texture("../client/assets/pacman/right_pacman_sheet.png");
+    m_pacmanAnimation.addTileset(m_pacmanTexture, {4,1}, gf::seconds(0.1f), 4); 
+    m_pacmanAnimation.setLoop(true);
+
+    // Lier l'animation au sprite
+    m_pacmanSprite.setAnimation(m_pacmanAnimation);
+
+    // Centrer ou placer l'origine si nécessaire
+    m_pacmanSprite.setOrigin({0.f, 0.f});
 
     
     
@@ -49,15 +65,32 @@ void Renderer::render(const std::vector<ClientState>& states, uint32_t myId, con
         float scaleX= tileSize/float(texSize.x);
         float scaleY= tileSize/float(texSize.y);
         m_inkySprite.setScale({scaleX, scaleY });
+        m_clydeSprite.setScale({scaleX, scaleY });
     }
 
     for (const auto &s : states) {
         float px = s.x / 50.0f * tileSize + offsetX;
         float py = s.y / 50.0f * tileSize + offsetY;
+        if(s.id == 1){
+            m_pacmanSprite.setPosition({ px, py });
 
-        m_inkySprite.setPosition({ px, py });
-        rendered_window.draw(m_inkySprite);
+            auto texSize = m_pacmanTexture.getSize();
+            float scaleX = tileSize / float(texSize.x / 4); //divisé par 4 frames
+            float scaleY = tileSize / float(texSize.y);     
+            m_pacmanSprite.setScale({scaleX, scaleY});
+
+            m_pacmanSprite.update(gf::seconds(0.008f));  //maj de l'anim
+            rendered_window.draw(m_pacmanSprite);
+        }
+        else{
+            m_inkySprite.setPosition({ px, py });
+            rendered_window.draw(m_inkySprite);
+        }
     }
+
+    /*Pour clyde
+    m_clydeSprite.setPosition({ px, py });
+            rendered_window.draw(m_clydeSprite);*/
 
 
     /*for (const auto& s : states) {
@@ -83,8 +116,8 @@ void Renderer::renderMap(const std::vector<ClientState>& states, uint32_t myId, 
 
 
 
-    for (int y = 0; y < mapPerso.height; ++y) {
-                for (int x = 0; x < mapPerso.width; ++x) {
+    for (unsigned int y = 0; y < mapPerso.height; ++y) {
+                for (unsigned int x = 0; x < mapPerso.width; ++x) {
                     const CaseCommon& cell = mapPerso.grid({ x, y });
 
                     gf::RectangleShape tile({tileSize, tileSize});

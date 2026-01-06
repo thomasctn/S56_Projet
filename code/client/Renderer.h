@@ -8,6 +8,9 @@
 
 #include <gf/Texture.h>
 #include <gf/Sprite.h>
+#include <gf/AnimatedSprite.h>
+#include <gf/Animation.h>
+
 
 #include "../common/Protocol.h"
 
@@ -36,6 +39,12 @@ class Renderer{
 
     gf::Texture m_inkyTexture;
     gf::Sprite  m_inkySprite;
+    gf::Texture m_clydeTexture;
+    gf::Sprite  m_clydeSprite;
+
+    gf::Texture m_pacmanTexture;
+    gf::Animation m_pacmanAnimation;
+    gf::AnimatedSprite m_pacmanSprite;   
 
 
 };
