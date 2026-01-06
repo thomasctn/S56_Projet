@@ -78,14 +78,29 @@ int main() {
                         tile.setPosition({x * tileSize + offsetX, y * tileSize + offsetY});
 
                         switch (cell.getType()) {
-                            case CellType::Wall: tile.setColor(gf::Color::White); break;
-                            case CellType::Hut:  tile.setColor(gf::Color::Red); break;
-                            case CellType::Floor:
+                            case CellType::Wall:  tile.setColor(gf::Color::White); break;
+                            case CellType::Hut:   tile.setColor(gf::Color::Red); break;
+                            case CellType::Floor: tile.setColor(gf::Color::fromRgb(0.3f, 0.3f, 0.3f)); break; // gris foncé
                             default: continue;
                         }
+
                         window.draw(tile);
+
+                        // --- Affichage des pac-gommes ---
+                        if (cell.hasPacGomme()) {
+                            gf::CircleShape pacGommeShape(tileSize / 6.0f); 
+                            pacGommeShape.setOrigin({tileSize/12.0f, tileSize/12.0f});
+                            pacGommeShape.setPosition(gf::vec(
+                                x * tileSize + offsetX + tileSize/2,
+                                y * tileSize + offsetY + tileSize/2
+                            ));
+                            pacGommeShape.setColor(gf::Color::Yellow);
+                            window.draw(pacGommeShape);
+                        }
+
                     }
                 }
+
 
                 // --- Joueurs ---
                 for (auto& [id, playerPtr] : server.getGame().getPlayers()) {
@@ -107,13 +122,13 @@ int main() {
                     window.draw(playerRect);
 
                     // Affichage du score au-dessus du joueur
-                    static gf::Font font("../common/fonts/arial.ttf"); // une seule fois
+                    static gf::Font font("../common/fonts/arial.ttf");
                     gf::Text scoreText;
                     scoreText.setFont(font);
                     scoreText.setCharacterSize(16);
                     scoreText.setColor(gf::Color::White);
                     scoreText.setString(std::to_string(p.score));
-                    scoreText.setPosition({px, py - 18}); // juste au-dessus du joueur
+                    scoreText.setPosition({px + 5 , py - 18});
                     window.draw(scoreText);
                 }
 
@@ -126,7 +141,7 @@ int main() {
                 static gf::Font font("../common/fonts/arial.ttf");
                 gf::Text chronoText;
                 chronoText.setFont(font);
-                chronoText.setCharacterSize(24); // taille texte
+                chronoText.setCharacterSize(24);
                 chronoText.setColor(gf::Color::White);
                 chronoText.setString("Temps restant : " + std::to_string(T_GAME - seconds) + "s");
                 chronoText.setPosition({12.0f, 20.0f}); // coin haut gauche

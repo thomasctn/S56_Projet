@@ -9,6 +9,7 @@
 #include "../common/Protocol.h"
 #include "Case.h"
 #include "Player.h"
+#include <random>
 
 
 class Plateau {
@@ -22,6 +23,7 @@ public:
     bool isOccupied(unsigned int x, unsigned int y, uint32_t excludeId,
                     const std::vector<Player>& players) const;
     bool isInside(unsigned int x, unsigned int y) const;
+    void placeRandomPacGommes(int count);
 
 
     void print() const;

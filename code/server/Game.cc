@@ -2,7 +2,9 @@
 
 #define T_GAME 10
 
-Game::Game(int width, int height) : plateau(width, height) {}
+Game::Game(int width, int height) : plateau(width, height) {
+    plateau.placeRandomPacGommes(10);
+}
 
 
 bool Game::canMove(uint32_t playerId, float newX, float newY) const {
@@ -60,27 +62,34 @@ void Game::requestMove(uint32_t playerId, Direction dir) {
         case Direction::Right: newX += step; break;
     }
 
-    if (!canMove(playerId, newX, newY)) return;
+    if (!canMove(playerId, newX, newY))
+        return;
 
-    // Déplacement effectif
+    // Déplacement
     p.x = newX;
     p.y = newY;
 
-    // --- Gestion collisions joueurs ---
-    for (auto& [otherId, otherPtr] : players) {
-        if (otherId == playerId) continue;
+    int gridX = static_cast<int>(p.x) / 50;
+    int gridY = static_cast<int>(p.y) / 50;
+    Case& cell = plateau.getCase(gridX, gridY);
 
-        Player& other = *otherPtr;
+    // PacMan mange pac-gomme
+    if (p.getRole() == PlayerRole::PacMan && cell.hasPacGomme()) {
+        p.eat(true, nullptr);
+        cell.removePacGomme();
+    }
 
-        int px = static_cast<int>(other.x) / 50;
-        int py = static_cast<int>(other.y) / 50;
-        int cx = static_cast<int>(p.x) / 50;
-        int cy = static_cast<int>(p.y) / 50;
-
-        if (px == cx && py == cy) {
-            // Si c'est un fantôme qui marche sur PacMan
-            p.eat(false, &other);
-            other.eat(false, &p); // dans l'autre sens si PacMan marche sur fantôme mais pas possible normalement
+    // Fantôme mange PacMan
+    if (p.getRole() == PlayerRole::Ghost) {
+        for (auto& [otherId, otherPtr] : players) {
+            Player& other = *otherPtr;
+            if (other.getRole() == PlayerRole::PacMan) {
+                int otherX = static_cast<int>(other.x) / 50;
+                int otherY = static_cast<int>(other.y) / 50;
+                if (otherX == gridX && otherY == gridY) {
+                    p.eat(false, &other);
+                }
+            }
         }
     }
 }

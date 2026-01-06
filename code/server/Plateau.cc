@@ -56,6 +56,28 @@ bool Plateau::isOccupied(unsigned int x, unsigned int y, uint32_t excludeId, con
     return false;
 }
 
+
+
+void Plateau::placeRandomPacGommes(int count) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distX(0, getWidth() - 1);
+    std::uniform_int_distribution<> distY(0, getHeight() - 1);
+
+    int placed = 0;
+    while (placed < count) {
+        int x = distX(gen);
+        int y = distY(gen);
+        Case& c = getCase(x, y);
+
+        if (c.getType() == CellType::Floor && !c.hasPacGomme()) {
+            c.placePacGomme();
+            ++placed;
+        }
+    }
+}
+
+
 /******PRINT*****/
 void Plateau::print() const
 {

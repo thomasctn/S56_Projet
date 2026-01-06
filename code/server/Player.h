@@ -53,7 +53,7 @@ public:
 
             case PlayerRole::Ghost:
                 if (otherPlayer && otherPlayer->getRole() == PlayerRole::PacMan) {
-                    // Réinitialisation de PacMan à sa position de départ
+                    // respawn de PacMan
                     otherPlayer->x = 50.0f;
                     otherPlayer->y = 50.0f;
                     otherPlayer->score = 0;
@@ -63,7 +63,6 @@ public:
                 break;
 
             default:
-                // Spectator ne mange rien
                 break;
         }
 
