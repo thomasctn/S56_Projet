@@ -41,6 +41,10 @@ class Renderer{
     gf::Sprite  m_inkySprite;
     gf::Texture m_clydeTexture;
     gf::Sprite  m_clydeSprite;
+    gf::Texture m_pinkyTexture;
+    gf::Sprite  m_pinkySprite;
+    gf::Texture m_blinkyTexture;
+    gf::Sprite  m_blinkySprite;
 
     //gf::Texture m_pacmanTexture;
     //gf::Animation m_pacmanAnimation;

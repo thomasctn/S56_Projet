@@ -1,6 +1,8 @@
 #include "Renderer.h"
 
 #include <gf/Log.h>
+#include <gf/Text.h>
+#include <gf/Font.h>
 
 Renderer::Renderer() : main_window("GF Sync Boxes", {800,600}), rendered_window(main_window){
     //POUR LE SPRITE 
@@ -13,6 +15,16 @@ Renderer::Renderer() : main_window("GF Sync Boxes", {800,600}), rendered_window(
     m_clydeSprite.setTexture(m_clydeTexture);
     m_clydeSprite.setOrigin({0.f, 0.f}); //en haut a gauche
     m_clydeSprite.setScale({2.f, 2.f}); //sa taille (temp ce sera recalculé norùalement)
+
+    m_pinkyTexture = gf::Texture("../client/assets/ghosts/pinky.png"); 
+    m_pinkySprite.setTexture(m_pinkyTexture);
+    m_pinkySprite.setOrigin({0.f, 0.f}); //en haut a gauche
+    m_pinkySprite.setScale({2.f, 2.f}); //sa taille (temp ce sera recalculé norùalement)
+
+    m_blinkyTexture = gf::Texture("../client/assets/ghosts/blinky.png"); 
+    m_blinkySprite.setTexture(m_blinkyTexture);
+    m_blinkySprite.setOrigin({0.f, 0.f}); //en haut a gauche
+    m_blinkySprite.setScale({2.f, 2.f}); //sa taille (temp ce sera recalculé norùalement)
 
     /*tests pacman animé
     m_pacmanTexture = gf::Texture("../client/assets/pacman/right_pacman_sheet.png");
@@ -87,12 +99,17 @@ void Renderer::render(const std::vector<PlayerData>& states, uint32_t myId, cons
         float scaleY= tileSize/float(texSize.y);
         m_inkySprite.setScale({scaleX, scaleY });
         m_clydeSprite.setScale({scaleX, scaleY });
+        m_pinkySprite.setScale({scaleX, scaleY});
+        m_blinkySprite.setScale({scaleX, scaleY});
+
     }
+
+    int ghostIndex = 0;
 
     for (const auto &s : states) {
         float px = s.x / 50.0f * tileSize + offsetX;
         float py = s.y / 50.0f * tileSize + offsetY;
-        if(s.id == 1){ //joueur 1 est pacman. a remplacer par es roles
+        if(s.role == PlayerRole::PacMan){ //joueur 1 est pacman. a remplacer par es roles
 
             if (m_hasLastPacmanPos){                
                 if(px > m_lastPacmanX){ //droite
@@ -138,15 +155,44 @@ void Renderer::render(const std::vector<PlayerData>& states, uint32_t myId, cons
             m_pacmanSprite.update(gf::seconds(0.008f));  //maj de l'anim
             rendered_window.draw(m_pacmanSprite);
 
+            //score
+            static gf::Font font("../common/fonts/arial.ttf");
+            gf::Text scoreText;
+            scoreText.setFont(font);
+            scoreText.setCharacterSize(16);
+            scoreText.setColor(gf::Color::White);
+            scoreText.setString(std::to_string(s.score));
+            scoreText.setPosition({px + 5 , py - 18});
+            rendered_window.draw(scoreText);
+
             m_lastPacmanX = px;
             m_lastPacmanY = py;
             m_hasLastPacmanPos = true;
 
         }
-        else{
-            m_inkySprite.setPosition({ px, py });
-            rendered_window.draw(m_inkySprite);
+        else if(s.role == PlayerRole::Ghost) {
+
+
+            if(ghostIndex == 0) {
+                m_inkySprite.setPosition({px, py }); 
+                rendered_window.draw(m_inkySprite);
+            }
+            else if(ghostIndex == 1) {
+                m_clydeSprite.setPosition({px, py }); 
+                rendered_window.draw(m_clydeSprite);
+            }
+            else if(ghostIndex == 2) {
+                m_pinkySprite.setPosition({px, py }); 
+                rendered_window.draw(m_pinkySprite);
+            }
+            else{
+                m_blinkySprite.setPosition({px, py }); 
+                rendered_window.draw(m_blinkySprite);
+            }
+
+            ghostIndex++;
         }
+
     }
 
     /*Pour clyde
