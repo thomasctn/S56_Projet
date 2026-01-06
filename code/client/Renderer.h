@@ -5,7 +5,7 @@
 #include <gf/Shapes.h>
 #include <gf/Color.h>
 #include <vector>
-#include "Structures.h"
+
 #include <gf/Texture.h>
 #include <gf/Sprite.h>
 
@@ -14,9 +14,9 @@
 class Renderer{
     public:
     Renderer();
-    void render(const std::vector<ClientState>& states, uint32_t myId, const mapRec map);
-    void renderMap(const std::vector<ClientState>& states, uint32_t myId, const mapRec map);
-    void calculateMovement(float worldSize, const mapRec& map,float& tileSize, float& offsetX, float& offsetY);
+    void render(const std::vector<ClientState>& states, uint32_t myId, const BoardCommon map);
+    void renderMap(const std::vector<ClientState>& states, uint32_t myId, const BoardCommon map);
+    void calculateMovement(float worldSize, const BoardCommon& map,float& tileSize, float& offsetX, float& offsetY);
 
     bool isOpen() {
         return main_window.isOpen();

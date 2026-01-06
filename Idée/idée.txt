@@ -33,6 +33,8 @@ on peut essayer de faire en sorte quil y ai des role secret.
  genre un traite parmis les fantome qui doit manger tout les fantomes.
   ou un truc du genre
 
+random : 
+- chaque fantome peut voir ou sont les autres fantomes et/ou leur vision
 
 SERVER a dev :
 
