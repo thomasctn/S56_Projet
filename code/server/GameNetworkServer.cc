@@ -88,11 +88,11 @@ void GameNetworkServer::handleClientData() {
                         case 'R': direction = Direction::Right; break;
                         default: continue;
                     }
-                    game.requestMove(id, direction);
-
-                    // mettre à jour l'état si nécessaire
-                    gf::Log::info("Client %d moved %c -> position=(%.1f, %.1f)\n",
+                    if (game.requestMove(id, direction)){
+                        gf::Log::info("Client %d moved %c -> position=(%.1f, %.1f)\n",
                         p.id, data.moveDir, p.x, p.y);
+                    }
+
                 }
                 break;
             }

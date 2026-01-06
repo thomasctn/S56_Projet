@@ -1,4 +1,6 @@
 #include "GameNetworkServer.h"
+#include "../common/Constants.h"
+
 #include <gf/Log.h>
 #include <gf/Window.h>
 #include <gf/RenderWindow.h>
@@ -14,9 +16,7 @@
 #include <atomic>
 
 
-// Savoir si on dev. A DESACTIVER en cas PUBLICATION sur un SERVER
-#define DEV true
-#define T_GAME 300
+
 
 GameNetworkServer* gServer = nullptr;
 std::atomic<bool> gRunning{true}; // drapeau global pour ctrl+c
@@ -33,13 +33,13 @@ int main() {
     gServer = &server;
     std::signal(SIGINT, sigintHandler);  // ctrl+c stoppe le serveur et déclenche gRunning = false
 
-    // Thread réseau
+    // --- Thread réseau ---
     std::thread serverThread([&server]() {
         server.run();
     });
 
 
-    // Fenêtre serveur
+    // --- Fenêtre serveur ---
     if (DEV){
         const int windowWidth = 800;
         const int windowHeight = 600;
@@ -70,7 +70,7 @@ int main() {
                 float offsetX = (windowWidth  - tileSize * mapWidth) / 2.0f;
                 float offsetY = (windowHeight - tileSize * mapHeight) / 2.0f;
 
-                // Cases
+                // --- Cases ---
                 for (int y = 0; y < mapHeight; ++y) {
                     for (int x = 0; x < mapWidth; ++x) {
                         const Case& cell = plateau.getCase(x, y);
@@ -112,7 +112,7 @@ int main() {
                     float py = p.y / 50.0f * tileSize + offsetY;
                     playerRect.setPosition({px, py});
 
-                    // couleur selon le rôle
+                    // --- couleur rôle ---
                     switch (p.getRole()) {
                         case PlayerRole::PacMan:    playerRect.setColor(gf::Color::Yellow); break;
                         case PlayerRole::Ghost:     playerRect.setColor(gf::Color::Violet); break; // violet
@@ -121,7 +121,7 @@ int main() {
 
                     window.draw(playerRect);
 
-                    // Affichage du score au-dessus du joueur
+                    // --- Affichage du score ---
                     static gf::Font font("../common/fonts/arial.ttf");
                     gf::Text scoreText;
                     scoreText.setFont(font);
@@ -135,17 +135,34 @@ int main() {
 
 
                 // --- Affichage du chrono ---
-                double elapsed = server.getGame().getElapsedSeconds();
-                int seconds = static_cast<int>(elapsed);
+                std::string chronoMessage;
+                int remainingTime = 0;
+
+                if (server.getGame().isPreGame()) {
+                    remainingTime = PRE_GAME_DELAY - static_cast<int>(server.getGame().getPreGameElapsed());
+                    if (remainingTime < 0) remainingTime = 0;
+                    chronoMessage = "Début de la partie dans : " + std::to_string(remainingTime) + "s";
+
+                } else if (server.getGame().isGameStarted()) {
+                    remainingTime = T_GAME - static_cast<int>(server.getGame().getElapsedSeconds());
+                    if (remainingTime < 0) remainingTime = 0;
+                    chronoMessage = "Temps restant : " + std::to_string(remainingTime) + "s";
+
+                } else if (server.getGame().isGameOver()) {
+                    remainingTime = 0;
+                    chronoMessage = "Partie terminée !";
+                }
 
                 static gf::Font font("../common/fonts/arial.ttf");
                 gf::Text chronoText;
                 chronoText.setFont(font);
                 chronoText.setCharacterSize(24);
                 chronoText.setColor(gf::Color::White);
-                chronoText.setString("Temps restant : " + std::to_string(T_GAME - seconds) + "s");
+                chronoText.setString(chronoMessage);
                 chronoText.setPosition({12.0f, 20.0f}); // coin haut gauche
                 window.draw(chronoText);
+
+
             }
 
             window.display();

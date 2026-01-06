@@ -1,6 +1,6 @@
 #include "Game.h"
 
-#define T_GAME 10
+
 
 Game::Game(int width, int height) : plateau(width, height) {
     plateau.placeRandomPacGommes(10);
@@ -44,11 +44,13 @@ bool Game::canMove(uint32_t playerId, float newX, float newY) const {
 
 
 
-void Game::requestMove(uint32_t playerId, Direction dir) {
+bool Game::requestMove(uint32_t playerId, Direction dir) {
+    if (!gameStarted) return false;
+
     constexpr float step = 50.0f;
 
     auto it = players.find(playerId);
-    if (it == players.end()) return;
+    if (it == players.end()) return false;
 
     Player& p = *it->second;
 
@@ -62,10 +64,8 @@ void Game::requestMove(uint32_t playerId, Direction dir) {
         case Direction::Right: newX += step; break;
     }
 
-    if (!canMove(playerId, newX, newY))
-        return;
+    if (!canMove(playerId, newX, newY)) return false;
 
-    // Déplacement
     p.x = newX;
     p.y = newY;
 
@@ -73,14 +73,10 @@ void Game::requestMove(uint32_t playerId, Direction dir) {
     int gridY = static_cast<int>(p.y) / 50;
     Case& cell = plateau.getCase(gridX, gridY);
 
-    // PacMan mange pac-gomme
     if (p.getRole() == PlayerRole::PacMan && cell.hasPacGomme()) {
         p.eat(true, nullptr);
         cell.removePacGomme();
-    }
-
-    // Fantôme mange PacMan
-    if (p.getRole() == PlayerRole::Ghost) {
+    } else if (p.getRole() == PlayerRole::Ghost) {
         for (auto& [otherId, otherPtr] : players) {
             Player& other = *otherPtr;
             if (other.getRole() == PlayerRole::PacMan) {
@@ -92,7 +88,10 @@ void Game::requestMove(uint32_t playerId, Direction dir) {
             }
         }
     }
+
+    return true;
 }
+
 
 
 
@@ -119,11 +118,6 @@ void Game::startChrono() {
     chronoStart = std::chrono::steady_clock::now();
 }
 
-double Game::getElapsedSeconds() const {
-    auto now = std::chrono::steady_clock::now();
-    std::chrono::duration<double> elapsed = now - chronoStart;
-    return elapsed.count();
-}
 
 void Game::resetChrono() {
     chronoStart = std::chrono::steady_clock::now();
@@ -131,38 +125,52 @@ void Game::resetChrono() {
 
 void Game::startGameLoop(int tickMs_) {
     tickMs = tickMs_;
-    running = true;
-    startChrono();
+    running.store(true);
+    gameStarted.store(false);
+    preGameElapsed = 0.0;
+    gameElapsed = 0.0;
+
+    preGameStart = std::chrono::steady_clock::now();
 
     gameThread = std::thread([this]() {
-        int lastLoggedSecond = -1; // aucune seconde affichée au début
+        while (running.load()) {
+            auto now = std::chrono::steady_clock::now();
+            std::chrono::duration<double> elapsed = now - preGameStart;
 
-        while (running) {
-            auto loopStart = std::chrono::steady_clock::now();
+            preGameElapsed = elapsed.count();
 
-            // --- Ici la logique de mise à jour ---
-            double elapsed = getElapsedSeconds();
-            int currentSecond = static_cast<int>(elapsed);
-
-            // Log uniquement si on change de seconde
-            if (currentSecond != lastLoggedSecond) {
-                if (T_GAME - currentSecond <=0){
-                    gf::Log::info("Partie terminé !\n");
+            // --- debug du pré-jeu ---
+            if (!gameStarted.load()) {
+                if (preGameElapsed >= preGameDelay) {
+                    gameStarted.store(true);
+                    chronoStart = now;
+                    gf::Log::info("Début de la partie !\n");
+                }
+            } else {
+                // --- phase de jeu actif ---
+                std::chrono::duration<double> gameTime = now - chronoStart;
+                gameElapsed = gameTime.count();
+                if (gameElapsed >= T_GAME) {
+                    gf::Log::info("Partie terminée !\n");
+                    running.store(false);
+                    gameStarted.store(false);
                     break;
                 }
-                lastLoggedSecond = currentSecond;
-                gf::Log::info("Temps restant: %d secondes\n", T_GAME - currentSecond);
+
+                // --- logique ---
             }
 
-            // Pause pour le prochain tick
-            auto loopEnd = std::chrono::steady_clock::now();
-            std::chrono::duration<double, std::milli> loopDuration = loopEnd - loopStart;
-            int sleepMs = tickMs - static_cast<int>(loopDuration.count());
-            if (sleepMs > 0)
-                std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
+            std::this_thread::sleep_for(std::chrono::milliseconds(tickMs));
         }
     });
 }
+
+
+
+
+
+
+
 
 
 void Game::stopGameLoop() {
@@ -173,11 +181,11 @@ void Game::stopGameLoop() {
 
 void Game::spawnPlayer(Player& p) {
     if (p.getRole() == PlayerRole::Ghost) {
-        // coordonnées de la cabane fantôme
+        // spawn Fantome
         p.x = (plateau.getWidth() / 2) * 50.0f;
         p.y = (plateau.getHeight() / 2) * 50.0f;
     } else if (p.getRole() == PlayerRole::PacMan) {
-        // spawn PacMan dans une zone libre (exemple : coin en haut à gauche)
+        // spawn PacMan
         p.x = 50.0f;
         p.y = 50.0f;
     } else {
@@ -186,3 +194,6 @@ void Game::spawnPlayer(Player& p) {
         p.y = 30.0f;
     }
 }
+
+
+
