@@ -10,9 +10,11 @@
 #include <chrono>
 #include <iostream>
 #include "../common/Serializable.h"
+#include "../common/Protocol.h"
 #include "Game.h"
 
-class GameNetworkServer {
+class GameNetworkServer
+{
 public:
     GameNetworkServer();
 
@@ -21,8 +23,8 @@ public:
     void stop() { running = false; }
     bool isRunning() const { return running; }
 
-    Game& getGame();
-    std::mutex& getPlayersMutex();
+    Game &getGame();
+    std::mutex &getPlayersMutex();
 
 private:
     gf::TcpListener listener;
@@ -36,6 +38,18 @@ private:
 
     void handleNewClient();
     void handleClientData();
-    void removeDisconnectedPlayers(const std::vector<uint32_t>& disconnectedIds);
+    void removeDisconnectedPlayers(const std::vector<uint32_t> &disconnectedIds);
+    template <typename T>
+    void broadcast(const T &data)
+    {
+        gf::Packet packet;
+        packet.is(data);
+        auto &players = game.getPlayers();
+
+        for (auto &[id, playerPtr] : players)
+        {
+            playerPtr->socket.sendPacket(packet);
+        }
+    }
     void broadcastStates();
 };
