@@ -29,7 +29,7 @@ void Player::setRole(PlayerRole r) {
 // État réseau
 // ------------------
 PlayerData Player::getState() const {
-    return { id, x, y, color };
+    return { id, x, y, color, "moi", role, score, true };
 }
 
 void Player::setState(const PlayerData& state) {
