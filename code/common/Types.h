@@ -7,3 +7,8 @@
 enum class CellType { Floor, Wall, Hut};
 
 
+enum class PlayerRole {
+    PacMan,
+    Ghost,
+    Spectator
+};

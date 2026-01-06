@@ -8,6 +8,43 @@
 
 using namespace gf::literals;
 
+
+/*
+Liste des échanges client <-> serveur
+
+Client (envoyé)
+- Tentative de connexion au lobby
+- Tentative de modification des paramètres de la partie
+- Tentative de démarrage de la partie
+- Tentative de déplacement
+- Tentative d'activation de pouvoir
+
+
+Serveur (envoyé)
+- Réponse à la tentative de connexion au lobby
+- Nouveau joueur dans le lobby (Tous les client)
+
+- Réponse à la tentative de modification des paramètres
+- Modification des paramètres de la partie (Tous les client)
+
+- Réponse à la tentative de démarrage de la partie
+- Démarrage de la partie (Tous les client)
+
+- Réponde à la tentative de déplacement (Ex : s'il a ramassé un pouvoir / toucher qlq)
+- Déplacement d'un joueur (Tous les client)
+-- Joueur x mangé (Tous les client)
+-- Pacgomme mangé (Tous les client)
+
+- Réponse à la tentative d'activation d'un pouvoir
+- Activation d'un pouvoir (Tous les client)
+
+- Modification de l'environnement (destruction de mur) (Tous les client) ?
+
+- Fin de partie (Tous les client)
+
+
+*/
+
 struct ClientState {
     static constexpr gf::Id type = "ClientState"_id;
     uint32_t id;

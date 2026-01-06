@@ -1,12 +1,7 @@
 #pragma once
 #include <gf/TcpSocket.h>
 #include "../common/Protocol.h"
-
-enum class PlayerRole {
-    PacMan,
-    Ghost,
-    Spectator
-};
+#include "../common/Types.h"
 
 class Player {
 public:
