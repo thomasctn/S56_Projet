@@ -1,6 +1,6 @@
 #include "GameNetworkServer.h"
+#include "../common/Constants.h"
 
-#define SPEED 30
 
 GameNetworkServer::GameNetworkServer()
     : listener("5000"), nextId(1), game(27, 27), running(true)
