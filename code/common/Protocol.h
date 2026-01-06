@@ -51,11 +51,12 @@ struct PlayerData {
     uint32_t color; // RGBA
     std::string name;
     PlayerRole role;
+    int score;
     bool ready = false;
 };
 template<typename Archive>
   Archive& operator|(Archive& ar, PlayerData& data) {
-    return ar | data.id | data.x | data.y | data.color | data.name | data.role | data.ready;
+    return ar | data.id | data.x | data.y | data.color | data.name | data.role | data.score| data.ready;
 }
 struct GameSettigns {
     static constexpr gf::Id type = "GameSettigns"_id;

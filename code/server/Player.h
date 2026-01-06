@@ -25,7 +25,7 @@ public:
     void setRole(PlayerRole r) { role = r; }
 
     PlayerData getState() const {
-        return { id, x, y, color, "moi", role, true };
+        return { id, x, y, color, "moi", role, score, true };
     }
 
     void setState(const PlayerData& state) {
