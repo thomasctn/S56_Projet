@@ -119,17 +119,21 @@ void GameNetworkServer::removeDisconnectedPlayers(const std::vector<uint32_t>& d
 }
 
 
-void GameNetworkServer::broadcastStates() {
+void GameNetworkServer::broadcastStates()
+{
     auto& players = game.getPlayers();
 
-    for (auto& [id, playerPtr] : players) {
-        Player& player = *playerPtr;
-
+    for (auto& [id, playerPtr] : players)
+    {
         std::vector<ClientState> states;
+
         for (auto& [otherId, otherPtr] : players) {
-            if (otherId == id) continue;
             states.push_back(otherPtr->getState());
         }
+
+        std::sort(states.begin(), states.end(), [](const ClientState &a, const ClientState &b){
+            return a.id < b.id;
+        });
 
         GameState gs;
         gs.clientStates = states;
@@ -137,9 +141,11 @@ void GameNetworkServer::broadcastStates() {
 
         gf::Packet packet;
         packet.is(gs);
-        player.socket.sendPacket(packet);
+
+        playerPtr->socket.sendPacket(packet);
     }
 }
+
 
 Game& GameNetworkServer::getGame() {
     return game;
