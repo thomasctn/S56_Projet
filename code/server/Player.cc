@@ -1,4 +1,5 @@
 #include "Player.h"
+#include <gf/Log.h>
 
 // ------------------
 // Constructeur
@@ -14,7 +15,7 @@ Player::Player(uint32_t id_, PlayerRole role_)
 }
 
 // ------------------
-// Rôle
+// Accesseurs rôle
 // ------------------
 PlayerRole Player::getRole() const {
     return role;
@@ -55,7 +56,7 @@ bool Player::eat(bool isPacGomme, Player* otherPlayer) {
 
         case PlayerRole::Ghost:
             if (otherPlayer && otherPlayer->getRole() == PlayerRole::PacMan) {
-                // Respawn PacMan
+                // Respawn de PacMan
                 otherPlayer->x = 50.0f;
                 otherPlayer->y = 50.0f;
                 otherPlayer->score = 0;
