@@ -1,6 +1,6 @@
-#include "Plateau.h"
+#include "Board.h"
 
-Plateau::Plateau(unsigned int w, unsigned int h) : width(w), height(h), grid({w, h})
+Board::Board(unsigned int w, unsigned int h) : width(w), height(h), grid({w, h})
 {
     for (unsigned int y = 0; y < height; ++y)
     {
@@ -22,22 +22,22 @@ Plateau::Plateau(unsigned int w, unsigned int h) : width(w), height(h), grid({w,
     }
 }
 
-Case &Plateau::getCase(unsigned int x, unsigned int y)
+Case &Board::getCase(unsigned int x, unsigned int y)
 {
     return grid({x, y});
 }
 
-const Case &Plateau::getCase(unsigned int x, unsigned int y) const
+const Case &Board::getCase(unsigned int x, unsigned int y) const
 {
     return grid({x, y});
 }
 
-bool Plateau::isInside(unsigned int x, unsigned int y) const
+bool Board::isInside(unsigned int x, unsigned int y) const
 {
     return x >= 0 && y >= 0 && x < width && y < height;
 }
 
-bool Plateau::isWalkable(unsigned int x, unsigned int y) const
+bool Board::isWalkable(unsigned int x, unsigned int y) const
 {
     if (x < 0 || y < 0 || x >= width || y >= height)
         return false;
@@ -46,7 +46,7 @@ bool Plateau::isWalkable(unsigned int x, unsigned int y) const
     return type == CellType::Floor;
 }
 
-bool Plateau::isOccupied(unsigned int x, unsigned int y, uint32_t excludeId, const std::vector<Player> &players) const
+bool Board::isOccupied(unsigned int x, unsigned int y, uint32_t excludeId, const std::vector<Player> &players) const
 {
     for (auto &p : players)
     {
@@ -58,7 +58,7 @@ bool Plateau::isOccupied(unsigned int x, unsigned int y, uint32_t excludeId, con
 
 
 
-void Plateau::placeRandomPacGommes(int count) {
+void Board::placeRandomPacGommes(int count) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> distX(0, getWidth() - 1);
@@ -79,7 +79,7 @@ void Plateau::placeRandomPacGommes(int count) {
 
 
 /******PRINT*****/
-void Plateau::print() const
+void Board::print() const
 {
     for (unsigned int y = 0; y < height; ++y)
     {
@@ -102,7 +102,7 @@ void Plateau::print() const
     }
 }
 
-void Plateau::printWithPlayers(const std::vector<Player> &players) const
+void Board::printWithPlayers(const std::vector<Player> &players) const
 {
     for (unsigned int y = 0; y < height; ++y)
     {
@@ -141,7 +141,7 @@ void Plateau::printWithPlayers(const std::vector<Player> &players) const
     }
 }
 
-BoardCommon Plateau::toCommonData()
+BoardCommon Board::toCommonData()
 {
     BoardCommon bc = BoardCommon(width,height);
     for (unsigned int y = 0; y < height; ++y)

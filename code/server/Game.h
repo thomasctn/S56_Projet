@@ -8,7 +8,7 @@
 #include <atomic> 
 
 #include "Player.h"
-#include "Plateau.h"
+#include "Board.h"
 #include "../common/Constants.h"
 
 enum class Direction {
@@ -25,14 +25,14 @@ public:
     void addPlayer(uint32_t id, float x, float y);
     bool canMove(uint32_t playerId, float newX, float newY) const;
     void spawnPlayer(Player& p);
-    
+
     std::unordered_map<uint32_t, std::unique_ptr<Player>>& getPlayers() { return players; }
     const std::unordered_map<uint32_t, std::unique_ptr<Player>>& getPlayers() const { return players; }
 
 
-    // --- Plateau ---
-    Plateau& getPlateau() { return plateau; }
-    const Plateau& getPlateau() const { return plateau; }
+    // --- Board ---
+    Board& getBoard() { return board; }
+    const Board& getBoard() const { return board; }
 
     // --- Chrono ---
     double getElapsedSeconds() const { return gameElapsed; }
@@ -50,7 +50,7 @@ public:
 
     
 private:
-    Plateau plateau;
+    Board board;
     std::unordered_map<uint32_t, std::unique_ptr<Player>> players;
 
     // --- Chrono ---

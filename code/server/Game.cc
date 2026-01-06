@@ -2,19 +2,19 @@
 
 
 
-Game::Game(int width, int height) : plateau(width, height) {
-    plateau.placeRandomPacGommes(10);
+Game::Game(int width, int height) : board(width, height) {
+    board.placeRandomPacGommes(10);
 }
 
 
 bool Game::canMove(uint32_t playerId, float newX, float newY) const {
-    const auto& plateauRef = getPlateau();
+    const auto& boardRef = getBoard();
 
     int gridX = static_cast<int>(newX) / 50;
     int gridY = static_cast<int>(newY) / 50;
 
-    if (!plateauRef.isInside(gridX, gridY)) return false;
-    if (!plateauRef.getCase(gridX, gridY).isWalkable()) return false;
+    if (!boardRef.isInside(gridX, gridY)) return false;
+    if (!boardRef.getCase(gridX, gridY).isWalkable()) return false;
 
     // Récupère le joueur courant
     auto itCurrent = players.find(playerId);
@@ -71,7 +71,7 @@ bool Game::requestMove(uint32_t playerId, Direction dir) {
 
     int gridX = static_cast<int>(p.x) / 50;
     int gridY = static_cast<int>(p.y) / 50;
-    Case& cell = plateau.getCase(gridX, gridY);
+    Case& cell = board.getCase(gridX, gridY);
 
     if (p.getRole() == PlayerRole::PacMan && cell.hasPacGomme()) {
         p.eat(true, nullptr);
@@ -165,14 +165,6 @@ void Game::startGameLoop(int tickMs_) {
     });
 }
 
-
-
-
-
-
-
-
-
 void Game::stopGameLoop() {
     running = false;
     if (gameThread.joinable())
@@ -182,8 +174,8 @@ void Game::stopGameLoop() {
 void Game::spawnPlayer(Player& p) {
     if (p.getRole() == PlayerRole::Ghost) {
         // spawn Fantome
-        p.x = (plateau.getWidth() / 2) * 50.0f;
-        p.y = (plateau.getHeight() / 2) * 50.0f;
+        p.x = (board.getWidth() / 2) * 50.0f;
+        p.y = (board.getHeight() / 2) * 50.0f;
     } else if (p.getRole() == PlayerRole::PacMan) {
         // spawn PacMan
         p.x = 50.0f;

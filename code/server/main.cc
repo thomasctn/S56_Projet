@@ -62,9 +62,9 @@ int main() {
             {
                 std::lock_guard<std::mutex> lock(server.getPlayersMutex());
 
-                auto& plateau = server.getGame().getPlateau();
-                int mapWidth  = plateau.getWidth();
-                int mapHeight = plateau.getHeight();
+                auto& board = server.getGame().getBoard();
+                int mapWidth  = board.getWidth();
+                int mapHeight = board.getHeight();
 
                 float tileSize = std::min(RENDER_SIZE / mapWidth, RENDER_SIZE / mapHeight);
                 float offsetX = (windowWidth  - tileSize * mapWidth) / 2.0f;
@@ -73,7 +73,7 @@ int main() {
                 // --- Cases ---
                 for (int y = 0; y < mapHeight; ++y) {
                     for (int x = 0; x < mapWidth; ++x) {
-                        const Case& cell = plateau.getCase(x, y);
+                        const Case& cell = board.getCase(x, y);
                         gf::RectangleShape tile({tileSize, tileSize});
                         tile.setPosition({x * tileSize + offsetX, y * tileSize + offsetY});
 

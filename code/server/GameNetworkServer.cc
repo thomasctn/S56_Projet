@@ -146,7 +146,7 @@ void GameNetworkServer::broadcastStates()
 
         GameState gs;
         gs.clientStates = states;
-        gs.board = game.getPlateau().toCommonData();
+        gs.board = game.getBoard().toCommonData();
 
         gf::Packet packet;
         packet.is(gs);

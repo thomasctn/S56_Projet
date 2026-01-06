@@ -13,8 +13,7 @@ add_executable(server
     server/main.cc
     server/GameNetworkServer.cc
     server/Game.cc
-    server/Player.cc
-    server/Plateau.cc
+    server/Board.cc
 )
 target_link_libraries(server PRIVATE gf::core gf::graphics gf::net)
 

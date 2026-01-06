@@ -12,9 +12,9 @@
 #include <random>
 
 
-class Plateau {
+class Board {
 public:
-    Plateau(unsigned int width, unsigned int height);
+    Board(unsigned int width, unsigned int height);
 
     Case& getCase(unsigned int x, unsigned int y);
     const Case& getCase(unsigned int x, unsigned int y) const;
