@@ -17,8 +17,8 @@
 class Renderer{
     public:
     Renderer();
-    void render(const std::vector<ClientState>& states, uint32_t myId, const BoardCommon map);
-    void renderMap(const std::vector<ClientState>& states, uint32_t myId, const BoardCommon map);
+    void render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map);
+    void renderMap(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map);
     void calculateMovement(float worldSize, const BoardCommon& map,float& tileSize, float& offsetX, float& offsetY);
 
     bool isOpen() {
@@ -41,10 +41,33 @@ class Renderer{
     gf::Sprite  m_inkySprite;
     gf::Texture m_clydeTexture;
     gf::Sprite  m_clydeSprite;
+    gf::Texture m_pinkyTexture;
+    gf::Sprite  m_pinkySprite;
+    gf::Texture m_blinkyTexture;
+    gf::Sprite  m_blinkySprite;
 
-    gf::Texture m_pacmanTexture;
-    gf::Animation m_pacmanAnimation;
+    //gf::Texture m_pacmanTexture;
+    //gf::Animation m_pacmanAnimation;
     gf::AnimatedSprite m_pacmanSprite;   
+
+    //pour les differentes directions animée
+    char m_pacmanDir = 'R'; //R L U D
+    float m_lastPacmanX = 0.f;
+    float m_lastPacmanY = 0.f;
+    bool m_hasLastPacmanPos = false;
+
+    gf::Texture m_pacmanRightTexture;
+    gf::Texture m_pacmanLeftTexture;
+    gf::Texture m_pacmanUpTexture;
+    gf::Texture m_pacmanDownTexture;
+
+    gf::Animation m_pacmanRightAnim;
+    gf::Animation m_pacmanLeftAnim;
+    gf::Animation m_pacmanUpAnim;
+    gf::Animation m_pacmanDownAnim;
+
+
+
 
 
 };
