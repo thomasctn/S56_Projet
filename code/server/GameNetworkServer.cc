@@ -2,16 +2,14 @@
 
 // --- ATTENTION game(xx,xx) avec xx impaire < 10 !
 GameNetworkServer::GameNetworkServer()
-    : listener("5000"), nextId(1), game(27, 27), running(true)
-{
+    : listener("5000"), nextId(1), game(27, 27), running(true) {
     if (!listener)
         gf::Log::error("Impossible de démarrer le serveur !");
     
     selector.addSocket(listener);
 }
 
-int GameNetworkServer::run()
-{
+int GameNetworkServer::run() {
     gf::Log::info("Serveur démarré !");
     game.startGameLoop(50, inputQueue);
     while (running) {
@@ -24,8 +22,7 @@ int GameNetworkServer::run()
     return 0;
 }
 
-void GameNetworkServer::handleNewClient()
-{
+void GameNetworkServer::handleNewClient() {
     if (!selector.isReady(listener))
         return;
 
@@ -124,8 +121,7 @@ void GameNetworkServer::removeDisconnectedPlayers(const std::vector<uint32_t>& d
 }
 
 
-void GameNetworkServer::broadcastStates()
-{
+void GameNetworkServer::broadcastStates() {
     auto& players = game.getPlayers();
 
     for (auto& [id, playerPtr] : players)

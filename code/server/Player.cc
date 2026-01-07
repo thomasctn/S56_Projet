@@ -10,9 +10,7 @@ Player::Player(uint32_t id_, PlayerRole role_)
 , x(0.0f)
 , y(0.0f)
 , color(0xFFFFFFFF)
-, score(0)
-{
-}
+, score(0) {}
 
 // ------------------
 // Accesseurs rôle

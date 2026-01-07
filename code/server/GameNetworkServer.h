@@ -23,8 +23,7 @@
 
 
 
-class GameNetworkServer
-{
+class GameNetworkServer {
 public:
     GameNetworkServer();
 
@@ -53,8 +52,7 @@ private:
     void handleClientData();
     void removeDisconnectedPlayers(const std::vector<uint32_t> &disconnectedIds);
     template <typename T>
-    void broadcast(const T &data)
-    {
+    void broadcast(const T &data) {
         gf::Packet packet;
         packet.is(data);
         auto &players = game.getPlayers();

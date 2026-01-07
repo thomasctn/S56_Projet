@@ -9,8 +9,11 @@
 class Player {
 public:
     Player(uint32_t id = 0, PlayerRole role = PlayerRole::Spectator);
+    PlayerRole getRole() const;
+    void setRole(PlayerRole r);
+    PlayerData getState() const;
+    void setState(const PlayerData& state);
 
-    // Interdiction de la copie (socket non copiable)
     Player(const Player&) = delete;
     Player& operator=(const Player&) = delete;
 
@@ -18,14 +21,7 @@ public:
     Player(Player&&) = default;
     Player& operator=(Player&&) = default;
 
-    // --- Accesseurs ---
-    PlayerRole getRole() const;
-    void setRole(PlayerRole r);
-
-    PlayerData getState() const;
-    void setState(const PlayerData& state);
-
-    // --- Gameplay ---
+    // --- Game ---
     // Retourne true si quelque chose a été mangé
     bool eat(bool isPacGomme, Player* otherPlayer = nullptr);
 
