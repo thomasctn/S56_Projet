@@ -11,7 +11,7 @@ GameNetworkServer::GameNetworkServer()
 
 int GameNetworkServer::run() {
     gf::Log::info("Serveur démarré !");
-    game.startGameLoop(50, inputQueue);
+    game.startGameLoop(50, inputQueue, *this);
     while (running) {
         if (selector.wait(gf::milliseconds(SPEED)) == gf::v1::SocketSelectorStatus::Event) {
             handleNewClient();
@@ -100,7 +100,6 @@ void GameNetworkServer::handleClientData() {
     }
 
     removeDisconnectedPlayers(toRemove);
-    broadcastStates();
 }
 
 

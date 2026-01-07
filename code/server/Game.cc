@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "GameNetworkServer.h"
 
 
 
@@ -123,7 +124,7 @@ void Game::resetChrono() {
     chronoStart = std::chrono::steady_clock::now();
 }
 
-void Game::startGameLoop(int tickMs_, InputQueue& inputQueue) {
+void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, GameNetworkServer& server) {
     tickMs = tickMs_;
     running.store(true);
     gameStarted.store(false);
@@ -132,9 +133,10 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue) {
 
     preGameStart = std::chrono::steady_clock::now();
 
-    gameThread = std::thread([this, &inputQueue]() {
+    gameThread = std::thread([this, &inputQueue, &server]() {
         while (running.load()) {
             processInputs(inputQueue);
+            server.broadcastStates();
             auto now = std::chrono::steady_clock::now();
             std::chrono::duration<double> elapsed = now - preGameStart;
 

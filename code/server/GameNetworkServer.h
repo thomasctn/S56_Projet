@@ -37,6 +37,8 @@ public:
 
     InputQueue inputQueue;
 
+    void broadcastStates();
+
 
 private:
     gf::TcpListener listener;
@@ -62,7 +64,6 @@ private:
             playerPtr->socket.sendPacket(packet);
         }
     }
-    void broadcastStates();
 };
 
 

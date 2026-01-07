@@ -13,6 +13,7 @@
 #include "Board.h"
 #include "InputQueue.h"
 
+class GameNetworkServer;
 
 class Game {
 public:
@@ -40,7 +41,7 @@ public:
     void resetChrono();
 
     // --- GameLoop ---
-    void startGameLoop(int tickMs_, InputQueue& inputQueue);
+    void startGameLoop(int tickMs_, InputQueue& inputQueue, GameNetworkServer& server);
     void stopGameLoop();
     bool isGameStarted() const { return gameStarted; }
     bool isPreGame() const { return !gameStarted && preGameElapsed < preGameDelay; }
