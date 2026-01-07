@@ -1,26 +1,16 @@
 #include "Board.h"
 
-Board::Board(unsigned int w, unsigned int h) : width(w), height(h), grid({w, h})
+Board::Board(unsigned int w, unsigned int h)
+: width(w), height(h), grid({w, h})
 {
-    for (unsigned int y = 0; y < height; ++y)
-    {
-        for (unsigned int x = 0; x < width; ++x)
-        {
-            if (y == 0 || y == height - 1 || x == 0 || x == width - 1)
-            {
-                grid({x, y}) = Case(CellType::Wall);
-            }
-            else if (y == height / 2 && x == width / 2)
-            {
-                grid({x, y}) = Case(CellType::Hut);
-            }
-            else
-            {
-                grid({x, y}) = Case(CellType::Floor);
-            }
-        }
-    }
+
+    // -- Generateur de labyrinthe ---
+    generateMaze();
+    //generateTestMaze();
+
+
 }
+
 
 Case &Board::getCase(unsigned int x, unsigned int y)
 {
@@ -76,6 +66,274 @@ void Board::placeRandomPacGommes(int count) {
         }
     }
 }
+
+void Board::generateMaze(){
+    for (unsigned int y = 0; y < height; ++y){
+        for (unsigned int x = 0; x < width; ++x)
+        {
+            grid({x, y}) = Case(CellType::Wall);
+        }
+    }
+    generatePrimMaze();
+    placeHut();
+    connectHut();
+    openCorners();
+    addLoops(0.05f);
+}
+
+
+void Board::generatePrimMaze() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    auto inBounds = [&](int x, int y) {
+        return x > 0 && y > 0 && x < (int)width - 1 && y < (int)height - 1;
+    };
+
+    std::vector<std::pair<int,int>> frontier;
+
+    // Point de départ : coin supérieur gauche impair
+    int sx = 1;
+    int sy = 1;
+    grid({sx, sy}) = Case(CellType::Floor);
+
+    // Ajoute les murs voisins dans la frontier, sauf autour de la cabane
+    auto addFrontier = [&](int x, int y)
+    {
+        if (inBounds(x, y) && grid({x, y}).getType() == CellType::Wall && !isHutWall(x, y))
+        {
+            frontier.emplace_back(x, y);
+        }
+    };
+
+    addFrontier(sx + 2, sy);
+    addFrontier(sx - 2, sy);
+    addFrontier(sx, sy + 2);
+    addFrontier(sx, sy - 2);
+
+    while (!frontier.empty())
+    {
+        std::uniform_int_distribution<> dist(0, frontier.size() - 1);
+        int idx = dist(gen);
+        auto [x, y] = frontier[idx];
+        frontier.erase(frontier.begin() + idx);
+
+        if (grid({x, y}).getType() == CellType::Floor)
+            continue;
+
+        // Cherche les voisins déjà ouverts
+        std::vector<std::pair<int,int>> neighbors;
+
+        if (inBounds(x + 2, y) && grid({x + 2, y}).getType() == CellType::Floor)
+            neighbors.emplace_back(x + 2, y);
+        if (inBounds(x - 2, y) && grid({x - 2, y}).getType() == CellType::Floor)
+            neighbors.emplace_back(x - 2, y);
+        if (inBounds(x, y + 2) && grid({x, y + 2}).getType() == CellType::Floor)
+            neighbors.emplace_back(x, y + 2);
+        if (inBounds(x, y - 2) && grid({x, y - 2}).getType() == CellType::Floor)
+            neighbors.emplace_back(x, y - 2);
+
+        if (!neighbors.empty())
+        {
+            std::uniform_int_distribution<> ndist(0, neighbors.size() - 1);
+            auto [nx, ny] = neighbors[ndist(gen)];
+
+            // Casse le mur entre les deux, sauf si c'est un mur de cabane
+            int wallX = (x + nx) / 2;
+            int wallY = (y + ny) / 2;
+
+            if (!isHutWall(wallX, wallY))
+                grid({wallX, wallY}) = Case(CellType::Floor);
+
+            if (!isHutWall(x, y))
+                grid({x, y}) = Case(CellType::Floor);
+
+            // Ajouter les nouveaux murs à frontier, sauf cabane
+            addFrontier(x + 2, y);
+            addFrontier(x - 2, y);
+            addFrontier(x, y + 2);
+            addFrontier(x, y - 2);
+        }
+    }
+}
+
+
+void Board::placeHut()
+{
+    int cx = width / 2;
+    int cy = height / 2;
+
+    // Cabane
+    for (int dy = -1; dy <= 1; ++dy)
+    {
+        for (int dx = -1; dx <= 1; ++dx)
+        {
+            grid({cx + dx, cy + dy}) = Case(CellType::Hut);
+        }
+    }
+
+    // Mur autour (optionnel pour renforcer la pièce)
+    for (int dx = -2; dx <= 2; ++dx)
+    {
+        if (cx + dx > 0 && cx + dx < (int)width)
+        {
+            if (cy-2 > 0) grid({cx+dx, cy-2}) = Case(CellType::Wall);
+            if (cy+2 < (int)height) grid({cx+dx, cy+2}) = Case(CellType::Wall);
+        }
+    }
+    for (int dy = -1; dy <= 1; ++dy)
+    {
+        if (cx-2 > 0) grid({cx-2, cy+dy}) = Case(CellType::Wall);
+        if (cx+2 < (int)width) grid({cx+2, cy+dy}) = Case(CellType::Wall);
+    }
+}
+
+
+void Board::connectHut()
+{
+    int cx = width / 2;
+    int cy = height / 2;
+
+    // Directions : haut, bas, gauche, droite
+    struct Dir { int dx, dy; };
+    std::vector<Dir> dirs = {
+        { 0, -1 }, // haut
+        { 0,  1 }, // bas
+        { -1, 0 }, // gauche
+        { 1,  0 }  // droite
+    };
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(dirs.begin(), dirs.end(), gen);
+
+    for (auto d : dirs)
+    {
+        // Mur juste à la sortie du 3x3
+        int wx = cx + d.dx * 2;
+        int wy = cy + d.dy * 2;
+
+        // Cellule du labyrinthe
+        int lx = cx + d.dx * 3;
+        int ly = cy + d.dy * 3;
+
+        if (wx <= 0 || wy <= 0 || wx >= (int)width - 1 || wy >= (int)height - 1)
+            continue;
+        if (lx <= 0 || ly <= 0 || lx >= (int)width - 1 || ly >= (int)height - 1)
+            continue;
+
+        // On ne modifie QUE des murs
+        if (grid({wx, wy}).getType() == CellType::Wall)
+            grid({wx, wy}) = Case(CellType::Floor);
+
+        if (grid({lx, ly}).getType() == CellType::Wall)
+            grid({lx, ly}) = Case(CellType::Floor);
+
+        return; // voir pour plusieur ouverture
+    }
+}
+
+
+void Board::openCorners()
+{
+    std::vector<std::pair<int,int>> corners = {
+        {1,1},
+        {(int)width - 2, 1},
+        {1, (int)height - 2},
+        {(int)width - 2, (int)height - 2}
+    };
+
+    for (auto [x, y] : corners)
+    {
+        grid({x, y}) = Case(CellType::Floor);
+
+        // Connecte vers l'intérieur
+        if (grid({x + (x == 1 ? 1 : -1), y}).getType() == CellType::Wall)
+            grid({x + (x == 1 ? 1 : -1), y}) = Case(CellType::Floor);
+
+        if (grid({x, y + (y == 1 ? 1 : -1)}).getType() == CellType::Wall)
+            grid({x, y + (y == 1 ? 1 : -1)}) = Case(CellType::Floor);
+    }
+}
+
+void Board::addLoops(float probability)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> chance(0.0f, 1.0f);
+
+    int cx = width / 2;
+    int cy = height / 2;
+
+    for (unsigned int y = 1; y < height - 1; ++y)
+    {
+        for (unsigned int x = 1; x < width - 1; ++x)
+        {
+            if (grid({x, y}).getType() != CellType::Wall)
+                continue;
+
+            // Ne touche pas à la cabane (zone 3x3 + marge)
+            if (x >= cx - 2 && x <= cx + 2 &&
+                y >= cy - 2 && y <= cy + 2)
+                continue;
+
+            // Cas horizontal : sol mur sol
+            bool h =
+                grid({x - 1, y}).getType() == CellType::Floor &&
+                grid({x + 1, y}).getType() == CellType::Floor;
+
+            // Cas vertical : sol mur sol
+            bool v =
+                grid({x, y - 1}).getType() == CellType::Floor &&
+                grid({x, y + 1}).getType() == CellType::Floor;
+
+            if ((h || v) && chance(gen) < probability)
+            {
+                grid({x, y}) = Case(CellType::Floor);
+            }
+        }
+    }
+}
+
+bool Board::isHutWall(int x, int y)
+{
+    int cx = width / 2;
+    int cy = height / 2;
+
+    // Seule la cabane 3x3 est protégée
+    return (x >= cx - 1 && x <= cx + 1 &&
+            y >= cy - 1 && y <= cy + 1);
+}
+
+
+void Board::generateTestMaze(){
+    for (unsigned int y = 0; y < height; ++y)
+    {
+        for (unsigned int x = 0; x < width; ++x)
+        {
+            // Les murs autour de la grille
+            if (y == 0 || y == height - 1 || x == 0 || x == width - 1)
+            {
+                grid({x, y}) = Case(CellType::Wall);
+            }
+            // La cabane centrale 3x3
+            else if ((x >= width/2 - 1 && x <= width/2 + 1) &&
+                     (y >= height/2 - 1 && y <= height/2 + 1))
+            {
+                grid({x, y}) = Case(CellType::Hut);
+            }
+            // Le reste = sol
+            else
+            {
+                grid({x, y}) = Case(CellType::Floor);
+            }
+        }
+    }
+}
+
+
+
+
 
 
 /******PRINT*****/

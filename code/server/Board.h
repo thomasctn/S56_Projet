@@ -38,4 +38,12 @@ private:
     unsigned int height;
     gf::Array2D<Case> grid;
 
+    void generateTestMaze();
+    void generateMaze();
+    void generatePrimMaze();
+    void placeHut();
+    void connectHut();
+    void openCorners();
+    void addLoops(float probability);
+    bool isHutWall(int x, int y);
 };

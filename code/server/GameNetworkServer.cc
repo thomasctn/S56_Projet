@@ -1,6 +1,6 @@
 #include "GameNetworkServer.h"
 
-
+// --- ATTENTION game(xx,xx) avec xx impaire < 10 !
 GameNetworkServer::GameNetworkServer()
     : listener("5000"), nextId(1), game(27, 27), running(true)
 {
