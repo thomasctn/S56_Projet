@@ -33,6 +33,8 @@ public:
     unsigned int getHeight() const { return height; }
     BoardCommon toCommonData();
 
+    
+
 private:
     unsigned int width;
     unsigned int height;
@@ -48,3 +50,4 @@ private:
     void fillDeadEnds();
     bool isHutWall(int x, int y);
 };
+
