@@ -10,7 +10,7 @@ public:
     CellType getType() const { return type; }
 
     bool isWalkable() const {
-        return type == CellType::Floor; // on peut marcher seulement sur le sol
+        return ((type == CellType::Floor) || (type == CellType::Hut)); // on peut marcher seulement sur le sol et la cabane
     }
 
     // --- Pac-gomme ---

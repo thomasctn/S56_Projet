@@ -45,5 +45,6 @@ private:
     void connectHut();
     void openCorners();
     void addLoops(float probability);
+    void fillDeadEnds();
     bool isHutWall(int x, int y);
 };

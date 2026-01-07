@@ -1,8 +1,7 @@
 #include "Board.h"
 
 Board::Board(unsigned int w, unsigned int h)
-: width(w), height(h), grid({w, h})
-{
+: width(w), height(h), grid({w, h}) {
 
     // -- Generateur de labyrinthe ---
     generateMaze();
@@ -12,23 +11,19 @@ Board::Board(unsigned int w, unsigned int h)
 }
 
 
-Case &Board::getCase(unsigned int x, unsigned int y)
-{
+Case &Board::getCase(unsigned int x, unsigned int y) {
     return grid({x, y});
 }
 
-const Case &Board::getCase(unsigned int x, unsigned int y) const
-{
+const Case &Board::getCase(unsigned int x, unsigned int y) const {
     return grid({x, y});
 }
 
-bool Board::isInside(unsigned int x, unsigned int y) const
-{
+bool Board::isInside(unsigned int x, unsigned int y) const {
     return x >= 0 && y >= 0 && x < width && y < height;
 }
 
-bool Board::isWalkable(unsigned int x, unsigned int y) const
-{
+bool Board::isWalkable(unsigned int x, unsigned int y) const {
     if (x < 0 || y < 0 || x >= width || y >= height)
         return false;
 
@@ -36,8 +31,7 @@ bool Board::isWalkable(unsigned int x, unsigned int y) const
     return type == CellType::Floor;
 }
 
-bool Board::isOccupied(unsigned int x, unsigned int y, uint32_t excludeId, const std::vector<Player> &players) const
-{
+bool Board::isOccupied(unsigned int x, unsigned int y, uint32_t excludeId, const std::vector<Player> &players) const {
     for (auto &p : players)
     {
         if (p.id != excludeId && p.x == x && p.y == y)
@@ -67,7 +61,7 @@ void Board::placeRandomPacGommes(int count) {
     }
 }
 
-void Board::generateMaze(){
+void Board::generateMaze() {
     for (unsigned int y = 0; y < height; ++y){
         for (unsigned int x = 0; x < width; ++x)
         {
@@ -78,7 +72,9 @@ void Board::generateMaze(){
     placeHut();
     connectHut();
     openCorners();
-    addLoops(0.05f);
+    //addLoops(0.15f);
+    fillDeadEnds();
+
 }
 
 
@@ -158,8 +154,7 @@ void Board::generatePrimMaze() {
 }
 
 
-void Board::placeHut()
-{
+void Board::placeHut() {
     int cx = width / 2;
     int cy = height / 2;
 
@@ -172,7 +167,7 @@ void Board::placeHut()
         }
     }
 
-    // Mur autour (optionnel pour renforcer la pièce)
+    // Mur autour
     for (int dx = -2; dx <= 2; ++dx)
     {
         if (cx + dx > 0 && cx + dx < (int)width)
@@ -189,12 +184,10 @@ void Board::placeHut()
 }
 
 
-void Board::connectHut()
-{
+void Board::connectHut() {
     int cx = width / 2;
     int cy = height / 2;
 
-    // Directions : haut, bas, gauche, droite
     struct Dir { int dx, dy; };
     std::vector<Dir> dirs = {
         { 0, -1 }, // haut
@@ -203,39 +196,52 @@ void Board::connectHut()
         { 1,  0 }  // droite
     };
 
+    for (auto d : dirs)
+    {
+        // Mur juste à l'extérieur de la cabane
+        int wx = cx + d.dx * 2;
+        int wy = cy + d.dy * 2;
+
+        if (wx <= 0 || wy <= 0 || wx >= (int)width - 1 || wy >= (int)height - 1)
+            continue;
+
+        // Vérifie si la cellule au-delà du mur est déjà Floor
+        int nx = cx + d.dx * 3;
+        int ny = cy + d.dy * 3;
+        if (!isInside(nx, ny))
+            continue;
+
+        if (grid({nx, ny}).getType() == CellType::Floor)
+        {
+            // Casse le mur entre la cabane et le labyrinthe
+            grid({wx, wy}) = Case(CellType::Floor);
+        }
+    }
+
+    // Si aucune direction n'était connectée, on force une sortie aléatoire
     std::random_device rd;
     std::mt19937 gen(rd());
     std::shuffle(dirs.begin(), dirs.end(), gen);
 
     for (auto d : dirs)
     {
-        // Mur juste à la sortie du 3x3
         int wx = cx + d.dx * 2;
         int wy = cy + d.dy * 2;
+        int nx = cx + d.dx * 3;
+        int ny = cy + d.dy * 3;
 
-        // Cellule du labyrinthe
-        int lx = cx + d.dx * 3;
-        int ly = cy + d.dy * 3;
-
-        if (wx <= 0 || wy <= 0 || wx >= (int)width - 1 || wy >= (int)height - 1)
-            continue;
-        if (lx <= 0 || ly <= 0 || lx >= (int)width - 1 || ly >= (int)height - 1)
+        if (!isInside(wx, wy) || !isInside(nx, ny))
             continue;
 
-        // On ne modifie QUE des murs
-        if (grid({wx, wy}).getType() == CellType::Wall)
-            grid({wx, wy}) = Case(CellType::Floor);
-
-        if (grid({lx, ly}).getType() == CellType::Wall)
-            grid({lx, ly}) = Case(CellType::Floor);
-
-        return; // voir pour plusieur ouverture
+        grid({wx, wy}) = Case(CellType::Floor);
+        grid({nx, ny}) = Case(CellType::Floor);
+        return;
     }
 }
 
 
-void Board::openCorners()
-{
+
+void Board::openCorners() {
     std::vector<std::pair<int,int>> corners = {
         {1,1},
         {(int)width - 2, 1},
@@ -256,8 +262,7 @@ void Board::openCorners()
     }
 }
 
-void Board::addLoops(float probability)
-{
+void Board::addLoops(float probability) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> chance(0.0f, 1.0f);
@@ -295,8 +300,62 @@ void Board::addLoops(float probability)
     }
 }
 
-bool Board::isHutWall(int x, int y)
-{
+void Board::fillDeadEnds() {
+    bool changed = true;
+
+    while (changed)
+    {
+        changed = false;
+
+        for (unsigned int y = 1; y < height - 1; ++y) // <- ne touche pas les bords
+        {
+            for (unsigned int x = 1; x < width - 1; ++x) // <- ne touche pas les bords
+            {
+                if (grid({x, y}).getType() != CellType::Floor)
+                    continue;
+
+                // Ne touche pas la cabane
+                int cx = width / 2;
+                int cy = height / 2;
+                if (x >= cx - 1 && x <= cx + 1 && y >= cy - 1 && y <= cy + 1)
+                    continue;
+
+                // Compter les cases Floor autour
+                int floorCount = 0;
+                if (grid({x + 1, y}).getType() == CellType::Floor) floorCount++;
+                if (grid({x - 1, y}).getType() == CellType::Floor) floorCount++;
+                if (grid({x, y + 1}).getType() == CellType::Floor) floorCount++;
+                if (grid({x, y - 1}).getType() == CellType::Floor) floorCount++;
+
+                // Si c'est un cul-de-sac
+                if (floorCount == 1)
+                {
+                    // Chercher un mur adjacent à casser (hors bordure)
+                    std::vector<std::pair<int,int>> candidates;
+                    if (x + 1 < width - 1 && grid({x + 1, y}).getType() == CellType::Wall) candidates.push_back({x+1, y});
+                    if (x - 1 > 0       && grid({x - 1, y}).getType() == CellType::Wall) candidates.push_back({x-1, y});
+                    if (y + 1 < height - 1 && grid({x, y + 1}).getType() == CellType::Wall) candidates.push_back({x, y+1});
+                    if (y - 1 > 0       && grid({x, y - 1}).getType() == CellType::Wall) candidates.push_back({x, y-1});
+
+                    if (!candidates.empty())
+                    {
+                        // Prend un mur au hasard et le transforme en Floor
+                        std::random_device rd;
+                        std::mt19937 gen(rd());
+                        std::uniform_int_distribution<> dist(0, candidates.size() - 1);
+                        auto [mx, my] = candidates[dist(gen)];
+
+                        grid({mx, my}) = Case(CellType::Floor);
+                        changed = true;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+bool Board::isHutWall(int x, int y) {
     int cx = width / 2;
     int cy = height / 2;
 
@@ -337,8 +396,7 @@ void Board::generateTestMaze(){
 
 
 /******PRINT*****/
-void Board::print() const
-{
+void Board::print() const {
     for (unsigned int y = 0; y < height; ++y)
     {
         for (unsigned int x = 0; x < width; ++x)
@@ -360,8 +418,7 @@ void Board::print() const
     }
 }
 
-void Board::printWithPlayers(const std::vector<Player> &players) const
-{
+void Board::printWithPlayers(const std::vector<Player> &players) const {
     for (unsigned int y = 0; y < height; ++y)
     {
         for (unsigned int x = 0; x < width; ++x)
@@ -399,8 +456,7 @@ void Board::printWithPlayers(const std::vector<Player> &players) const
     }
 }
 
-BoardCommon Board::toCommonData()
-{
+BoardCommon Board::toCommonData() {
     BoardCommon bc = BoardCommon(width,height);
     for (unsigned int y = 0; y < height; ++y)
     {
