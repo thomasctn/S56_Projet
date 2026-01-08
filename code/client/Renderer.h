@@ -21,6 +21,9 @@ class Renderer{
     void renderMap(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map);
     void calculateMovement(float worldSize, const BoardCommon& map,float& tileSize, float& offsetX, float& offsetY);
 
+    void renderWelcome();
+    void renderLobby();
+    
     bool isOpen() {
         return main_window.isOpen();
     }
