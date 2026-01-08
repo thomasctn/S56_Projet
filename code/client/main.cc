@@ -40,6 +40,20 @@ int main()
     bool running = true;
     socket.setNonBlocking();
 
+    //ajout pr un lobby
+    enum class ClientScreen { 
+        Welcome, 
+        Lobby, 
+        Playing
+    };
+    ClientScreen screen = ClientScreen::Welcome;
+
+    int connectedPlayers = 0; //normalement mis a jour par ce que le serveur me dit selon benoit plus tard
+    const int maxPlayers = 5;// nombre requis pour démarrer (ajuste si besoin)
+
+    bool askedToJoin = false;  // pour n'envoyer la requête join qu'une fois
+
+
     // ID local du client
     uint32_t myId = 0;
 
@@ -119,7 +133,7 @@ int main()
     auto lastSend = std::chrono::steady_clock::now();
 
     
-
+    auto startTime = std::chrono::steady_clock::now();//POUR DEMARRER PLAYING APRES 20 SEONDES, JUSTE TEST
 
     while (running && renderer.isOpen())
     {
@@ -129,6 +143,32 @@ int main()
         while (renderer.getWindow().pollEvent(event))
         {   
             actions.processEvent(event); //important actions
+            //mettre un bouton si on est dans le welcome!
+            if (screen == ClientScreen::Welcome && event.type == gf::EventType::MouseButtonPressed){
+                if (event.mouseButton.button == gf::MouseButton::Left){ //clic gauche
+
+                    int mx = event.mouseButton.coords.x;
+                    int my = event.mouseButton.coords.y;
+
+                    // zone bouton
+                    int bx= 20;
+                    int by= 80;
+                    int bw= 200;
+                    int bh= 80;
+
+                    if (mx >= bx && mx <= bx + bw && my >= by && my <= by + bh){ //si on a clqiue au bon endroit
+                        gf::Log::info("Bouton ENTRER cliqué\n");
+
+                        if (!askedToJoin){ //on a pas deja demandé
+                            askedToJoin = true;
+                            //ICI faudrait envyer genre "join LOBBY " ou qqch
+                            screen = ClientScreen::Lobby; //passe a la salle d'attente
+                        }
+                    }
+                }
+            }
+
+
             if (event.type == gf::EventType::Closed)
             {
                 gf::Log::info("Fermeture demandée par l'utilisateur\n");
@@ -144,30 +184,32 @@ int main()
 
         
         //envoi réseau de la touche
-        auto now = std::chrono::steady_clock::now();
-        if (now-lastSend > std::chrono::milliseconds(100)) {
+        if (screen == ClientScreen::Playing){ //envoie seulement si on est en jeu!!
+            auto now = std::chrono::steady_clock::now();
+            if (now-lastSend > std::chrono::milliseconds(100)) {
 
-            char dir=0;
+                char dir=0;
 
-            if (upAction.isActive()) {
-                dir = 'U';
-            } else if (downAction.isActive()) {
-                dir = 'D';
-            } else if (leftAction.isActive()) {
-                dir = 'L';
-            } else if (rightAction.isActive()) {
-                dir = 'R';
-            }
+                if (upAction.isActive()) {
+                    dir = 'U';
+                } else if (downAction.isActive()) {
+                    dir = 'D';
+                } else if (leftAction.isActive()) {
+                    dir = 'L';
+                } else if (rightAction.isActive()) {
+                    dir = 'R';
+                }
 
-            if(dir != 0){
-                gf::Log::info("Envoi : touche '%c'\n", dir);
-            
-                gf::Packet packet;
-                ClientMove cm;
-                cm.moveDir = dir;
-                packet.is(cm);
-                socket.sendPacket(packet);
-                lastSend=now;
+                if(dir != 0){
+                    gf::Log::info("Envoi : touche '%c'\n", dir);
+                
+                    gf::Packet packet;
+                    ClientMove cm;
+                    cm.moveDir = dir;
+                    packet.is(cm);
+                    socket.sendPacket(packet);
+                    lastSend=now;
+                }
             }
         }
         //dépiler les packets du réseau
@@ -177,7 +219,20 @@ int main()
                 gf::Packet packet = std::move(packetQueue.front());
                 packetQueue.pop();
                 switch (packet.getType()) {
-                    case GameState::type: {
+                    /*case LobbyInfo::type:{//jsp encore comment ça va s'appeler
+                        auto data = packet.as<LobbyInfo>();
+                        connectedPlayers = data.count; //nombre total de joueur connecté (benoit a dit qu'il me le donne)
+                        break;
+                    }
+
+                    case GameReady::type:{ //le jeu est pret, jsp encore le nom du truc
+                        auto data = packet.as<GameReady>();
+                        board = data.board;
+                        states = data.clientStates;
+                        screen = ClientScreen::Playing; //affichage du plateay et tt, le jeu commence les touches marchent
+                        break;
+                    }*/
+                    case GameState::type:{
                         auto data = packet.as<GameState>();
                         states = data.clientStates;
                         board=data.board;
@@ -187,8 +242,33 @@ int main()
             }
         }
 
-        // Rendu
-        renderer.render(states, myId, board);
+
+        // TRUC DE TEST :si on est dans lobby, au bout de 20s on passe en playing
+        //(vu que je recois pas encore de signal qu'on est pret a jouer)
+        if(screen == ClientScreen::Lobby){
+            auto now = std::chrono::steady_clock::now();
+            auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now-startTime).count();
+            
+            if (elapsed >= 20){  // 20 secondes écoulées
+                gf::Log::info("Temps écoulé on passe en PLAYING \n");
+                screen = ClientScreen::Playing;
+            }
+        }
+
+
+        // Rendu basique
+        //renderer.render(states, myId, board);
+
+        if(screen == ClientScreen::Welcome) {
+            renderer.renderWelcome(); 
+        }
+        else if(screen == ClientScreen::Lobby) {
+            //renderer.drawLobby(connectedPlayers, maxPlayers); 
+            renderer.renderLobby();//version sans les connected et max vu que je sais pas trop comment on va me les donner
+        }
+        else{ //Playing
+            renderer.render(states, myId, board);
+        }
         
 
         std::this_thread::sleep_for(std::chrono::milliseconds(8));

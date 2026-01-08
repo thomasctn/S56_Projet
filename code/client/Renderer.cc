@@ -277,3 +277,66 @@ void Renderer::calculateMovement(float worldSize, const BoardCommon &map, float 
     offsetX = (worldSize - tileSize *float(map.width)) / 2.f;
     offsetY = (worldSize - tileSize *float(map.height)) / 2.f;
 }
+
+void Renderer::renderWelcome() {
+    rendered_window.clear(gf::Color::Black);
+
+    static gf::Font font("../common/fonts/arial.ttf");
+
+    //Titre PACMAN 
+    gf::Text title;
+    title.setFont(font);
+    title.setCharacterSize(40);
+    title.setColor(gf::Color::White);
+    title.setString("PACMAN");
+    title.setPosition({20.f, 20.f});
+    rendered_window.draw(title);
+
+    //Bouton rectangle
+    int bx= 20;
+    int by= 80;
+    int bw= 200;
+    int bh= 80;
+
+    gf::RectangleShape button({float(bw), float(bh)});
+    button.setPosition({float(bx), float(by)});
+    button.setColor(gf::Color::fromRgb(0.2f, 0.2f, 0.8f));
+    rendered_window.draw(button);
+
+    //Texte du bouton centré a peu pres dans le rectangle
+    gf::Text buttonText;
+    buttonText.setFont(font);
+    buttonText.setCharacterSize(24);
+    buttonText.setColor(gf::Color::White);
+    buttonText.setString("ENTRER");
+    buttonText.setPosition({
+        float(bx)+ 20.f, //decal horizontal
+        float(by)+ 25.f  //decal vertical
+    });
+
+    rendered_window.draw(buttonText);
+
+    rendered_window.display();
+}
+
+
+
+
+void Renderer::renderLobby() {
+    rendered_window.clear(gf::Color::Black);
+
+    static gf::Font font("../common/fonts/arial.ttf");
+
+    gf::Text text;
+    text.setFont(font);
+    text.setCharacterSize(32);
+    text.setColor(gf::Color::White);
+    text.setString("En attente de joueurs...");
+
+    // position simple : en haut à gauche avec un petit offset
+    text.setPosition({20.f, 20.f});
+
+    rendered_window.draw(text);
+    rendered_window.display();
+}
+
