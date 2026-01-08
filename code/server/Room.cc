@@ -8,11 +8,18 @@ Room::Room(uint32_t id, ServerNetwork& network)
 }
 
 void Room::addPlayer(uint32_t playerId) {
+    if (players.size() >= MAX_PLAYERS) {
+        gf::Log::warning("[Room %u] Room pleine, joueur %u non ajouté\n", id, playerId);
+        return;
+    }
+
     players.insert(playerId);
     gf::Log::info("[Room %u] Joueur %u ajouté\n", id, playerId);
 
     if (!game) {
-        startGame();
+        if (players.size() == MAX_PLAYERS) {
+            startGame();
+        } 
     } else {
         if (game->getPlayers().find(playerId) == game->getPlayers().end()) {
             PlayerRole role = PlayerRole::Ghost;
