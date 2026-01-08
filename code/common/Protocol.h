@@ -119,11 +119,13 @@ struct ServerGameStart
 {
   static constexpr gf::Id type = "ServerGameStart"_id;
   BoardCommon board;
+  //Pas sûr que ce soit vraiment utile...
+  std::vector<PlayerData> players;
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, ServerGameStart &data)
 {
-  return ar | data.board;
+  return ar | data.board | data.players;
 }
 struct ServerGameEnd
 {
