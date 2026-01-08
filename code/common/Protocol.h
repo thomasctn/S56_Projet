@@ -118,11 +118,12 @@ Archive &operator|(Archive &ar, ServerReady &data)
 struct ServerGameStart
 {
   static constexpr gf::Id type = "ServerGameStart"_id;
+  BoardCommon board;
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, ServerGameStart &data)
 {
-  return ar;
+  return ar | data.board;
 }
 struct ServerGameEnd
 {
