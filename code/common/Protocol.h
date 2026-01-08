@@ -43,6 +43,39 @@ Serveur (envoyé)
 
 
 */
+struct CaseCommon
+{
+  static constexpr gf::Id type = "CaseCommon"_id;
+  CellType celltype;
+  bool pacGomme = false;
+  CaseCommon() : celltype(CellType::Floor) {}
+  CaseCommon(CellType t, bool pg)
+  {
+    celltype = t;
+    pacGomme = pg;
+  }
+};
+template <typename Archive>
+Archive &operator|(Archive &ar, CaseCommon &data)
+{
+  return ar | data.celltype | data.pacGomme;
+}
+
+struct BoardCommon
+{
+  BoardCommon() {};
+  BoardCommon(unsigned int w, unsigned int h) : grid({w, h}), width(w), height(h) {}
+  static constexpr gf::Id type = "BoardCommon"_id;
+  unsigned int width;
+  unsigned int height;
+  gf::Array2D<CaseCommon> grid;
+};
+template <typename Archive>
+Archive &operator|(Archive &ar, BoardCommon &data)
+{
+  return ar | data.width | data.height | data.grid;
+}
+
 struct PlayerData
 {
   static constexpr gf::Id type = "PlayerData"_id;
@@ -192,38 +225,6 @@ Archive &operator|(Archive &ar, ClientMove &data)
   return ar | data.moveDir;
 }
 
-struct CaseCommon
-{
-  static constexpr gf::Id type = "CaseCommon"_id;
-  CellType celltype;
-  bool pacGomme = false;
-  CaseCommon() : celltype(CellType::Floor) {}
-  CaseCommon(CellType t, bool pg)
-  {
-    celltype = t;
-    pacGomme = pg;
-  }
-};
-template <typename Archive>
-Archive &operator|(Archive &ar, CaseCommon &data)
-{
-  return ar | data.celltype | data.pacGomme;
-}
-
-struct BoardCommon
-{
-  BoardCommon() {};
-  BoardCommon(unsigned int w, unsigned int h) : grid({w, h}), width(w), height(h) {}
-  static constexpr gf::Id type = "BoardCommon"_id;
-  unsigned int width;
-  unsigned int height;
-  gf::Array2D<CaseCommon> grid;
-};
-template <typename Archive>
-Archive &operator|(Archive &ar, BoardCommon &data)
-{
-  return ar | data.width | data.height | data.grid;
-}
 
 struct GameState
 {
