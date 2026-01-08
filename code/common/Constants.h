@@ -6,6 +6,8 @@ constexpr bool DEV = true;
 
 
 constexpr int T_GAME = 60;      // durée de la partie en secondes
-constexpr int PRE_GAME_DELAY = 30; // délai avant début
+constexpr int PRE_GAME_DELAY = 10; // délai avant début
 
 constexpr int SPEED = 30; // vitesse du serv
+
+constexpr size_t MAX_PLAYERS = 2; //nombre de joueur par room

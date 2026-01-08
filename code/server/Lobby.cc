@@ -13,11 +13,20 @@ Lobby::Lobby(ServerNetwork& network)
 void Lobby::onPlayerConnected(uint32_t playerId) {
     gf::Log::info("[Lobby] Joueur %u connecté\n", playerId);
 
-    playerRoom[playerId] = defaultRoom;
-    rooms[defaultRoom]->addPlayer(playerId);
+    RoomId roomId = defaultRoom;
 
-    gf::Log::info("[Lobby] Joueur %u ajouté à la room %u\n", playerId, defaultRoom);
+    auto& room = rooms.at(roomId);
+    if (room->players.size() >= MAX_PLAYERS) {
+        gf::Log::info("[Lobby] Room %u pleine, création d'une nouvelle room\n", roomId);
+        roomId = createRoom();
+    }
+
+    playerRoom[playerId] = roomId;
+    rooms[roomId]->addPlayer(playerId);
+
+    gf::Log::info("[Lobby] Joueur %u ajouté à la room %u\n", playerId, roomId);
 }
+
 
 void Lobby::onPlayerDisconnected(uint32_t playerId) {
     gf::Log::info("[Lobby] Joueur %u déconnecté\n", playerId);

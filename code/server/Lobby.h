@@ -7,6 +7,7 @@
 #include "PacketContext.h"
 #include "ServerNetwork.h"
 #include "Room.h"
+#include "../common/Constants.h"
 
 
 

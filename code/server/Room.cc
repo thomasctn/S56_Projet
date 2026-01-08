@@ -3,7 +3,6 @@
 Room::Room(uint32_t id, ServerNetwork& network)
 : id(id)
 , network(network)
-, gameStarted(false)
 {
     gf::Log::info("[Room %u] Créée\n", id);
 }
@@ -12,10 +11,19 @@ void Room::addPlayer(uint32_t playerId) {
     players.insert(playerId);
     gf::Log::info("[Room %u] Joueur %u ajouté\n", id, playerId);
 
-    if (!gameStarted && players.size() >= 1) {
+    if (!game) {
         startGame();
+    } else {
+        // Partie déjà lancée → spawn le joueur dans le game
+        if (game->getPlayers().find(playerId) == game->getPlayers().end()) {
+            // Déterminer un rôle pour le nouveau joueur
+            PlayerRole role = PlayerRole::Ghost; // ou logique Ghost si déjà PacMan existant
+            game->addPlayer(playerId, 50.0f, 50.0f, role);
+            game->spawnPlayer(game->getPlayerInfo(playerId));
+        }
     }
 }
+
 
 void Room::removePlayer(uint32_t playerId) {
     players.erase(playerId);
@@ -23,30 +31,32 @@ void Room::removePlayer(uint32_t playerId) {
 }
 
 void Room::startGame() {
-    if (gameStarted)
+    if (game)
         return;
 
     if (!game) {
-        constexpr int boardWidth = 10;
-        constexpr int boardHeight = 10;
+        constexpr int boardWidth = 27;
+        constexpr int boardHeight = 27;
         game = std::make_unique<Game>(boardWidth, boardHeight);
     }
 
     game->setRoom(*this);
 
+    size_t i = 0;
     for (uint32_t playerId : players) {
         if (game->getPlayers().find(playerId) == game->getPlayers().end()) {
-            game->addPlayer(playerId, 50.0f, 50.0f); 
+            PlayerRole role = (i == 0) ? PlayerRole::PacMan : PlayerRole::Ghost;
+            game->addPlayer(playerId, 100.0f, 100.0f, role);
         }
+        ++i;
     }
+
 
     for (auto& [id, playerPtr] : game->getPlayers()) {
         game->spawnPlayer(*playerPtr);
     }
 
     game->startGameLoop(50, inputQueue, network);
-
-    gameStarted = true;
 
     gf::Log::info("[Room %u] Partie démarrée avec %zu joueurs\n", id, players.size());
 }
@@ -88,6 +98,7 @@ gf::Log::info(
 
 void Room::handleClientMove(PacketContext& ctx) {
     auto data = ctx.packet.as<ClientMove>();
+    gf::Log::info("[Room %u] Input ajouté joueur=%u dir=%c\n", id, ctx.senderId, data.moveDir);
 
     Direction dir;
     switch (data.moveDir) {
@@ -111,23 +122,31 @@ void Room::handleClientMove(PacketContext& ctx) {
 }
 
 void Room::broadcastState() {
-    if (!gameStarted)
+    if (!game)
         return;
 
-    gf::Log::info("[Room %u] Broadcast de l'état du jeu\n", id);
+    auto& playersMap = game->getPlayers();
 
-    GameState state;
-    state.board = game->getBoard().toCommonData();
+    GameState gs;
+    gs.board = game->getBoard().toCommonData();
 
-    for (auto& [id, player] : game->getPlayers()) {
-        state.clientStates.push_back(player->getState());
+    for (auto& [id, playerPtr] : playersMap) {
+        gs.clientStates.push_back(playerPtr->getState());
     }
 
+    std::sort(
+        gs.clientStates.begin(),
+        gs.clientStates.end(),
+        [](const PlayerData& a, const PlayerData& b) {
+            return a.id < b.id;
+        }
+    );
 
     gf::Packet packet;
-    packet.is(state);
+    packet.is(gs);
 
     for (uint32_t pid : players) {
         network.send(pid, packet);
     }
 }
+

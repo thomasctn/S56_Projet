@@ -12,6 +12,9 @@
 #include "../common/Protocol.h"
 #include "PacketContext.h"
 #include "InputQueue.h"
+#include "../common/Constants.h"
+
+
 
 class Room {
 public:
@@ -22,7 +25,7 @@ public:
 
     void handlePacket(PacketContext& ctx);
 
-    Game& getGameRef() { return *game; }
+    Game& getGame() { return *game; }
 
     std::unique_ptr<Game> game;
     uint32_t id;
@@ -30,7 +33,6 @@ public:
     std::unordered_set<uint32_t> players;
     InputQueue inputQueue;
 
-    bool gameStarted = false;
     Room* room = nullptr;
     void broadcastState();
 

@@ -64,7 +64,11 @@ int main() {
             // --- Récupération de la Room et du Game ---
             try {
                 Room& room = server.getLobby().getRoom(displayRoomId);
-                Game& game = room.getGameRef();
+                Game* gamePtr = &room.getGame();
+                if (gamePtr) {
+                    Game& game = *gamePtr;
+                
+
                 auto& board = game.getBoard();
                 auto& players = game.getPlayers();
 
@@ -152,7 +156,7 @@ int main() {
                 chronoText.setString(chronoMessage);
                 chronoText.setPosition({12.0f, 20.0f});
                 window.draw(chronoText);
-
+            }
             } catch (const std::out_of_range& e) {
                 gf::Log::error("Room %d introuvable !\n", displayRoomId);
             }

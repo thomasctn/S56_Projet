@@ -5,7 +5,7 @@
 
 
 Game::Game(int width, int height) : board(width, height) {
-    board.placeRandomPacGommes(10);
+    board.placeRandomPacGommes(20);
 }
 
 
@@ -107,8 +107,8 @@ Player& Game::getPlayerInfo(uint32_t playerId) {
 
 
 
-void Game::addPlayer(uint32_t id, float x, float y) {
-    auto player = std::make_unique<Player>(id, PlayerRole::Spectator);
+void Game::addPlayer(uint32_t id, float x, float y, PlayerRole role = PlayerRole::Spectator) {
+    auto player = std::make_unique<Player>(id, role);
     player->x = x;
     player->y = y;
 
@@ -116,14 +116,17 @@ void Game::addPlayer(uint32_t id, float x, float y) {
 }
 
 
+
 void Game::startChrono() {
+    std::lock_guard<std::mutex> lock(chronoMutex);
     chronoStart = std::chrono::steady_clock::now();
 }
-
 
 void Game::resetChrono() {
+    std::lock_guard<std::mutex> lock(chronoMutex);
     chronoStart = std::chrono::steady_clock::now();
 }
+
 
 void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& server) {
     tickMs = tickMs_;
@@ -145,7 +148,6 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& ser
 
             preGameElapsed = elapsed.count();
 
-            // --- debug du pré-jeu ---
             if (!gameStarted.load()) {
                 if (preGameElapsed >= preGameDelay) {
                     gameStarted.store(true);
@@ -196,9 +198,32 @@ void Game::spawnPlayer(Player& p) {
 void Game::processInputs(InputQueue& queue) {
     while (auto inputOpt = queue.pop()) {
         auto& input = *inputOpt;
-        requestMove(input.playerId, input.dir);
+        bool moved = requestMove(input.playerId, input.dir);
+        if (moved) {
+            auto& p = getPlayerInfo(input.playerId);
+            gf::Log::info("Player %u moved to (%.1f, %.1f)", p.id, p.x, p.y);
+        }
     }
 }
 
+double Game::getPreGameElapsed() const {
+    std::lock_guard<std::mutex> lock(chronoMutex);
+    return preGameElapsed;
+}
+
+double Game::getElapsedSeconds() const {
+    std::lock_guard<std::mutex> lock(chronoMutex);
+    return gameElapsed;
+}
+
+bool Game::isPreGame() const {
+    std::lock_guard<std::mutex> lock(chronoMutex);
+    return !gameStarted.load() && preGameElapsed < preGameDelay;
+}
+
+bool Game::isGameOver() const {
+    std::lock_guard<std::mutex> lock(chronoMutex);
+    return gameStarted.load() && gameElapsed >= T_GAME;
+}
 
 

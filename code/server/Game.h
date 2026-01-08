@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <memory>
 #include <atomic> 
+#include <mutex>
 
 #include "../common/Constants.h"
 #include "Player.h"
@@ -23,7 +24,7 @@ public:
     // --- Joueur ---
     bool requestMove(uint32_t playerId, Direction dir);
     Player& getPlayerInfo(uint32_t playerId);
-    void addPlayer(uint32_t id, float x, float y);
+    void addPlayer(uint32_t id, float x, float y, PlayerRole role);
     bool canMove(uint32_t playerId, float newX, float newY) const;
     void spawnPlayer(Player& p);
 
@@ -36,8 +37,8 @@ public:
     const Board& getBoard() const { return board; }
 
     // --- Chrono ---
-    double getElapsedSeconds() const { return gameElapsed; }
-    double getPreGameElapsed() const { return preGameElapsed; }
+    double getElapsedSeconds() const;
+    double getPreGameElapsed() const;
     void startChrono();
     void resetChrono();
 
@@ -45,8 +46,8 @@ public:
     void startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& server);
     void stopGameLoop();
     bool isGameStarted() const { return gameStarted; }
-    bool isPreGame() const { return !gameStarted && preGameElapsed < preGameDelay; }
-    bool isGameOver() const { return gameStarted && gameElapsed >= T_GAME; }
+    bool isPreGame() const;
+    bool isGameOver() const;
 
     Room* room = nullptr;
     void setRoom(Room& r) { room = &r; }
@@ -61,7 +62,7 @@ private:
     std::chrono::steady_clock::time_point chronoStart;
     std::chrono::steady_clock::time_point preGameStart;
 
-    
+    mutable std::mutex chronoMutex; // <<== cette ligne
     double preGameElapsed = 0.0;
     double gameElapsed = 0.0;
     const int preGameDelay = PRE_GAME_DELAY;
