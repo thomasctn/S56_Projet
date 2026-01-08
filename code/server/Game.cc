@@ -115,6 +115,9 @@ void Game::addPlayer(uint32_t id, float x, float y, PlayerRole role = PlayerRole
     players.emplace(id, std::move(player));
 }
 
+void Game::removePlayer(uint32_t playerId) {
+    players.erase(playerId);
+}
 
 
 void Game::startChrono() {

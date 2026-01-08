@@ -24,7 +24,7 @@ public:
     // --- Game ---
     // Retourne true si quelque chose a été mangé
     bool eat(bool isPacGomme, Player* otherPlayer = nullptr);
-
+    bool ready;
 public:
     uint32_t id;
     PlayerRole role;

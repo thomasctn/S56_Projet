@@ -16,16 +16,24 @@ void Room::addPlayer(uint32_t playerId) {
     players.insert(playerId);
     gf::Log::info("[Room %u] Joueur %u ajouté\n", id, playerId);
 
-    if (!game) {
-        if (players.size() == MAX_PLAYERS) {
-            startGame();
-        } 
-    } else {
-        if (game->getPlayers().find(playerId) == game->getPlayers().end()) {
-            PlayerRole role = PlayerRole::Ghost;
-            game->addPlayer(playerId, 50.0f, 50.0f, role);
-            game->spawnPlayer(game->getPlayerInfo(playerId));
-        }
+    // Envoyer la confirmation au joueur qui a rejoint
+    gf::Packet joinPacket;
+    joinPacket.is(ServerJoinRoom{});
+    network.send(playerId, joinPacket);
+
+    // Broadcast de la liste des joueurs à tous
+    ServerListRoomPlayers list;
+    for (uint32_t pid : players)
+        list.players.push_back(getPlayerData(pid));
+
+    gf::Packet listPacket;
+    listPacket.is(list);
+    for (uint32_t pid : players)
+        network.send(pid, listPacket);
+
+    // Démarrage automatique si la room est pleine et que la partie n'existe pas encore
+    if (!game && players.size() == MAX_PLAYERS) {
+        startGame();
     }
 }
 
@@ -33,20 +41,41 @@ void Room::addPlayer(uint32_t playerId) {
 void Room::removePlayer(uint32_t playerId) {
     players.erase(playerId);
     gf::Log::info("[Room %u] Joueur %u retiré\n", id, playerId);
+
+    // Envoyer confirmation au joueur qui quitte
+    gf::Packet leavePacket;
+    leavePacket.is(ServerLeaveRoom{});
+    network.send(playerId, leavePacket);
+
+    // Broadcast de la liste mise à jour aux autres joueurs
+    ServerListRoomPlayers list;
+    for (uint32_t pid : players)
+        list.players.push_back(getPlayerData(pid));
+
+    gf::Packet listPacket;
+    listPacket.is(list);
+    for (uint32_t pid : players)
+        network.send(pid, listPacket);
+
+    // Si le joueur était dans la partie en cours, le retirer également
+    if (game) {
+        game->removePlayer(playerId);
+    }
+
 }
+
 
 void Room::startGame() {
     if (game)
         return;
 
-    if (!game) {
-        constexpr int boardWidth = 27;
-        constexpr int boardHeight = 27;
-        game = std::make_unique<Game>(boardWidth, boardHeight);
-    }
+    constexpr int boardWidth = 27;
+    constexpr int boardHeight = 27;
 
+    game = std::make_unique<Game>(boardWidth, boardHeight);
     game->setRoom(*this);
 
+    // Ajouter les joueurs dans le jeu
     size_t i = 0;
     for (uint32_t playerId : players) {
         if (game->getPlayers().find(playerId) == game->getPlayers().end()) {
@@ -56,11 +85,25 @@ void Room::startGame() {
         ++i;
     }
 
-
+    // Spawner tous les joueurs
     for (auto& [id, playerPtr] : game->getPlayers()) {
         game->spawnPlayer(*playerPtr);
     }
 
+    // Broadcast de ServerGameStart à tous les joueurs avec la carte et l'état initial
+    ServerGameStart startMsg;
+    startMsg.board = game->getBoard().toCommonData();
+    for (auto& [id, playerPtr] : game->getPlayers()) {
+        startMsg.players.push_back(playerPtr->getState());
+    }
+
+    gf::Packet startPacket;
+    startPacket.is(startMsg);
+    for (uint32_t pid : players)
+        network.send(pid, startPacket);
+
+
+    // Démarrer la boucle de jeu
     game->startGameLoop(50, inputQueue, network);
 
     gf::Log::info("[Room %u] Partie démarrée avec %zu joueurs\n", id, players.size());
@@ -72,34 +115,34 @@ void Room::startGame() {
 
 
 
-void Room::handlePacket(PacketContext& ctx) {
-gf::Log::info("[Room %u] Paquet reçu joueur=%u type=%llu\n", 
-              id, 
-              ctx.senderId, 
-              static_cast<unsigned long long>(ctx.packet.getType()));
 
+void Room::handlePacket(PacketContext& ctx) {
+    gf::Log::info("[Room %u] Paquet reçu joueur=%u type=%llu\n", 
+                  id, ctx.senderId, static_cast<unsigned long long>(ctx.packet.getType()));
 
     if (players.find(ctx.senderId) == players.end()) {
-        gf::Log::warning(
-            "[Room %u] Joueur %u non autorisé\n",
-            id,
-            ctx.senderId
-        );
+        gf::Log::warning("[Room %u] Joueur %u non autorisé\n", id, ctx.senderId);
         return;
     }
 
-    if (ctx.packet.getType() == ClientMove::type) {
-        handleClientMove(ctx);
-        return;
+    switch (ctx.packet.getType()) {
+        case ClientMove::type:
+            handleClientMove(ctx);
+            break;
+        case ClientReady::type:
+            handleClientReady(ctx);
+            break;
+        case ClientChangeRole::type:
+            handleClientChangeRole(ctx);
+            break;
+        default:
+            gf::Log::info("[Room %u] Paquet non traité (type=%llu)\n", 
+                          id, static_cast<unsigned long long>(ctx.packet.getType()));
+            break;
     }
-
-gf::Log::info(
-    "[Room %u] Paquet non traité (type=%llu)\n",
-    id,
-    static_cast<unsigned long long>(ctx.packet.getType())
-);
-
 }
+
+
 
 void Room::handleClientMove(PacketContext& ctx) {
     auto data = ctx.packet.as<ClientMove>();
@@ -117,13 +160,58 @@ void Room::handleClientMove(PacketContext& ctx) {
     }
 
     inputQueue.push({ctx.senderId, dir});
+}
 
-    gf::Log::info(
-        "[Room %u] Input ajouté joueur=%u dir=%c\n",
-        id,
-        ctx.senderId,
-        data.moveDir
-    );
+void Room::handleClientReady(PacketContext& ctx) {
+    if (!game)
+        return;
+
+    auto& player = game->getPlayerInfo(ctx.senderId);
+    player.ready = true;
+    gf::Log::info("[Room %u] Joueur %u ready\n", id, ctx.senderId);
+
+    // Broadcast ServerReady à tous les joueurs
+    ServerReady readyMsg;
+    gf::Packet readyPacket;
+    readyPacket.is(readyMsg);
+
+    for (uint32_t pid : players)
+        network.send(pid, readyPacket);
+
+
+    // Si tous prêts, démarrer la partie
+    if (allPlayersReady()) {
+        startGame();
+    }
+}
+
+void Room::handleClientChangeRole(PacketContext& ctx) {
+    auto& player = game->getPlayerInfo(ctx.senderId);
+    player.role = (player.role == PlayerRole::PacMan) ? PlayerRole::Ghost : PlayerRole::PacMan;
+
+    // Broadcast le changement
+    ServerChangeRole msg;
+    gf::Packet rolePacket;
+    rolePacket.is(msg);
+
+    for (uint32_t pid : players)
+        network.send(pid, rolePacket);
+
+}
+
+PlayerData Room::getPlayerData(uint32_t playerId) const {
+    if (!game) return {};
+    const auto& player = game->getPlayerInfo(playerId);
+    return player.getState();
+}
+
+bool Room::allPlayersReady() const {
+    if (!game) return false;
+    for (const auto& [id, playerPtr] : game->getPlayers()) {
+        if (!playerPtr->getState().ready)
+            return false;
+    }
+    return true;
 }
 
 void Room::broadcastState() {

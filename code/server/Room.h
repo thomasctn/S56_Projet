@@ -36,10 +36,16 @@ public:
     Room* room = nullptr;
     void broadcastState();
 
+    bool allPlayersReady() const;
+    PlayerData getPlayerData(uint32_t playerId) const;
+    void handleClientChangeRole(PacketContext& ctx);
+    void handleClientReady(PacketContext& ctx);
+    void handleClientMove(PacketContext& ctx);
+
+
 
 private:
     void startGame();
-    void handleClientMove(PacketContext& ctx);
     void setRoom(Room& r) { room = &r; }
 
 };
