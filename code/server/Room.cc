@@ -14,10 +14,8 @@ void Room::addPlayer(uint32_t playerId) {
     if (!game) {
         startGame();
     } else {
-        // Partie déjà lancée → spawn le joueur dans le game
         if (game->getPlayers().find(playerId) == game->getPlayers().end()) {
-            // Déterminer un rôle pour le nouveau joueur
-            PlayerRole role = PlayerRole::Ghost; // ou logique Ghost si déjà PacMan existant
+            PlayerRole role = PlayerRole::Ghost;
             game->addPlayer(playerId, 50.0f, 50.0f, role);
             game->spawnPlayer(game->getPlayerInfo(playerId));
         }

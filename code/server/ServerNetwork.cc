@@ -4,7 +4,7 @@ ServerNetwork::ServerNetwork()
 : listener("5000")
 , nextId(1)
 , running(true)
-, lobby(std::make_unique<Lobby>(*this)) // construction correcte
+, lobby(std::make_unique<Lobby>(*this))
 {
     if (!listener) {
         gf::Log::error("Impossible de démarrer le serveur réseau\n");
