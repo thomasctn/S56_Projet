@@ -11,10 +11,12 @@ include_directories(common)
 # --- Serveur ---
 add_executable(server
     server/main.cc
-    server/GameNetworkServer.cc
     server/Game.cc
     server/Board.cc
     server/Player.cc
+    server/ServerNetwork.cc
+    server/Lobby.cc
+    server/Room.cc
 )
 target_link_libraries(server PRIVATE gf::core gf::graphics gf::net)
 

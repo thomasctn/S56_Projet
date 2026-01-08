@@ -13,7 +13,8 @@
 #include "Board.h"
 #include "InputQueue.h"
 
-class GameNetworkServer;
+class Room;
+class ServerNetwork;
 
 class Game {
 public:
@@ -41,12 +42,14 @@ public:
     void resetChrono();
 
     // --- GameLoop ---
-    void startGameLoop(int tickMs_, InputQueue& inputQueue, GameNetworkServer& server);
+    void startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& server);
     void stopGameLoop();
     bool isGameStarted() const { return gameStarted; }
     bool isPreGame() const { return !gameStarted && preGameElapsed < preGameDelay; }
     bool isGameOver() const { return gameStarted && gameElapsed >= T_GAME; }
 
+    Room* room = nullptr;
+    void setRoom(Room& r) { room = &r; }
 
 
     

@@ -1,5 +1,6 @@
 #include "Game.h"
-#include "GameNetworkServer.h"
+#include "ServerNetwork.h"
+#include "Room.h" // ici on inclut la vraie définition
 
 
 
@@ -124,7 +125,7 @@ void Game::resetChrono() {
     chronoStart = std::chrono::steady_clock::now();
 }
 
-void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, GameNetworkServer& server) {
+void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& server) {
     tickMs = tickMs_;
     running.store(true);
     gameStarted.store(false);
@@ -136,7 +137,9 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, GameNetworkServer&
     gameThread = std::thread([this, &inputQueue, &server]() {
         while (running.load()) {
             processInputs(inputQueue);
-            server.broadcastStates();
+            if(room){
+                room->broadcastState();
+            }
             auto now = std::chrono::steady_clock::now();
             std::chrono::duration<double> elapsed = now - preGameStart;
 
