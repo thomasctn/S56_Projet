@@ -142,17 +142,12 @@ void Room::handlePacket(PacketContext& ctx) {
     gf::Log::info("[Room %u] Paquet reçu joueur=%u type=%llu\n", 
                   id, ctx.senderId, static_cast<unsigned long long>(ctx.packet.getType()));
 
-    // Pour ClientJoinRoom, on ne vérifie pas encore si le joueur est dans la room
-    if (ctx.packet.getType() != ClientJoinRoom::type &&
-        players.find(ctx.senderId) == players.end()) {
+    if (players.find(ctx.senderId) == players.end()) {
         gf::Log::warning("[Room %u] Joueur %u non autorisé\n", id, ctx.senderId);
         return;
     }
 
     switch (ctx.packet.getType()) {
-        case ClientJoinRoom::type:
-            handleClientJoinRoom(ctx);
-            break;
         case ClientMove::type:
             handleClientMove(ctx);
             break;
@@ -225,20 +220,6 @@ void Room::handleClientChangeRole(PacketContext& ctx) {
         network.send(pid, rolePacket);
 
 }
-
-void Room::handleClientJoinRoom(PacketContext& ctx) {
-    auto data = ctx.packet.as<ClientJoinRoom>();
-    // Ici, tu peux vérifier que ctx.senderId veut bien rejoindre cette room
-    if (data.room != id) {
-        gf::Log::warning("[Room %u] Joueur %u tente de rejoindre une autre room %llu\n",
-                         id, ctx.senderId, static_cast<unsigned long long>(data.room));
-        return;
-    }
-
-    gf::Log::info("[Room %u] Joueur %u rejoint la room via ClientJoinRoom\n", id, ctx.senderId);
-    addPlayer(ctx.senderId);
-}
-
 
 PlayerData Room::getPlayerData(uint32_t playerId) const {
     if (!game) return {};

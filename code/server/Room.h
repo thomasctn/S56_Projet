@@ -42,7 +42,7 @@ public:
     void handleClientChangeRole(PacketContext& ctx);
     void handleClientReady(PacketContext& ctx);
     void handleClientMove(PacketContext& ctx);
-    void handleClientJoinRoom(PacketContext& ctx);
+
 
 
 private:

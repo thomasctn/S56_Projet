@@ -12,20 +12,9 @@ Lobby::Lobby(ServerNetwork& network)
 
 void Lobby::onPlayerConnected(uint32_t playerId) {
     gf::Log::info("[Lobby] Joueur %u connecté\n", playerId);
-
-    RoomId roomId = defaultRoom;
-
-    auto& room = rooms.at(roomId);
-    if (room->players.size() >= MAX_PLAYERS) {
-        gf::Log::info("[Lobby] Room %u pleine, création d'une nouvelle room\n", roomId);
-        roomId = createRoom();
-    }
-
-    playerRoom[playerId] = roomId;
-    rooms[roomId]->addPlayer(playerId);
-
-    gf::Log::info("[Lobby] Joueur %u ajouté à la room %u\n", playerId, roomId);
+    playerRoom[playerId] = 0; // pas encore de room
 }
+
 
 
 void Lobby::onPlayerDisconnected(uint32_t playerId) {
@@ -47,20 +36,23 @@ void Lobby::onPlayerDisconnected(uint32_t playerId) {
 }
 
 void Lobby::handlePacket(PacketContext& ctx) {
-gf::Log::info("[Lobby] Paquet reçu du joueur %u (type=%llu)\n", 
-              ctx.senderId, 
-              static_cast<unsigned long long>(ctx.packet.getType()));
+    gf::Log::info("[Lobby] Paquet reçu du joueur %u (type=%llu)\n", 
+                  ctx.senderId, 
+                  static_cast<unsigned long long>(ctx.packet.getType()));
 
+    if (ctx.packet.getType() == ClientJoinRoom::type) {
+        handleClientJoinRoom(ctx);
+        return;
+    }
 
     auto it = playerRoom.find(ctx.senderId);
-    if (it == playerRoom.end()) {
+    if (it == playerRoom.end() || it->second == 0) {
         gf::Log::warning("[Lobby] Joueur %u sans room, paquet ignoré\n", ctx.senderId);
         return;
     }
 
     RoomId roomId = it->second;
     auto roomIt = rooms.find(roomId);
-
     if (roomIt == rooms.end()) {
         gf::Log::error("[Lobby] Room %u introuvable\n", roomId);
         return;
@@ -74,6 +66,7 @@ gf::Log::info("[Lobby] Paquet reçu du joueur %u (type=%llu)\n",
 
     roomIt->second->handlePacket(ctx);
 }
+
 
 RoomId Lobby::createRoom() {
     RoomId id = nextRoomId++;
@@ -95,4 +88,31 @@ void Lobby::destroyRoom(RoomId id) {
 
 Room& Lobby::getRoom(uint32_t id) {
     return *rooms.at(id);
+}
+
+void Lobby::handleClientJoinRoom(PacketContext& ctx) {
+    auto data = ctx.packet.as<ClientJoinRoom>();
+
+    RoomId roomId = data.room;
+
+    if (roomId == 0) {
+        roomId = defaultRoom;
+    }
+
+    if (rooms.find(roomId) == rooms.end()) {
+        gf::Log::info("[Lobby] Room %u inexistante, création\n", roomId);
+        roomId = createRoom();
+    }
+
+    auto& room = rooms.at(roomId);
+    if (room->players.size() >= MAX_PLAYERS) {
+        gf::Log::info("[Lobby] Room %u pleine, création d'une nouvelle room\n", roomId);
+        roomId = createRoom();
+    }
+
+    playerRoom[ctx.senderId] = roomId;
+    rooms[roomId]->addPlayer(ctx.senderId);
+
+    gf::Log::info("[Lobby] Joueur %u ajouté à la room %u via ClientJoinRoom\n",
+                  ctx.senderId, roomId);
 }
