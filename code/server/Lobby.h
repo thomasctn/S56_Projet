@@ -24,6 +24,7 @@ public:
     void onPlayerDisconnected(uint32_t playerId);
     void handlePacket(PacketContext& ctx);
     Room& getRoom(uint32_t id);
+    void handleClientJoinRoom(PacketContext& ctx);
 
 private:
     RoomId createRoom();

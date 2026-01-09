@@ -322,7 +322,7 @@ void Renderer::renderWelcome() {
 
 
 
-void Renderer::renderLobby() {
+void Renderer::renderLobby(int connectedPlayers, int maxPlayers) {
     rendered_window.clear(gf::Color::Black);
 
     static gf::Font font("../common/fonts/arial.ttf");
@@ -331,9 +331,13 @@ void Renderer::renderLobby() {
     text.setFont(font);
     text.setCharacterSize(32);
     text.setColor(gf::Color::White);
-    text.setString("En attente de joueurs...");
 
-    // position simple : en haut à gauche avec un petit offset
+    text.setString(
+        "En attente de joueurs...\n" +
+        std::to_string(connectedPlayers) + "/" +
+        std::to_string(maxPlayers) + " joueurs connectes"
+    );
+
     text.setPosition({20.f, 20.f});
 
     rendered_window.draw(text);
