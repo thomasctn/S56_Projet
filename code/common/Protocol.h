@@ -115,7 +115,7 @@ Archive &operator|(Archive &ar, ServerLeaveRoom &data)
 {
   return ar;
 }
-//Utilisé pour mettre à jour le nombre de joueur, le changement de rôle de joueur, le changement de couleur, etc...
+// Utilisé pour mettre à jour le nombre de joueur, le changement de rôle de joueur, le changement de couleur, etc...
 struct ServerListRoomPlayers
 {
   static constexpr gf::Id type = "ServerListRoomPlayers"_id;
@@ -152,7 +152,7 @@ struct ServerGameStart
 {
   static constexpr gf::Id type = "ServerGameStart"_id;
   BoardCommon board;
-  //Pas sûr que ce soit vraiment utile...
+  // Pas sûr que ce soit vraiment utile...
   std::vector<PlayerData> players;
 };
 template <typename Archive>
@@ -170,16 +170,28 @@ Archive &operator|(Archive &ar, ServerGameEnd &data)
   return ar;
 }
 
+struct ServerDisconnect
+{
+  static constexpr gf::Id type = "ServerDisconnect"_id;
+};
+
+template <typename Archive>
+Archive &operator|(Archive &ar, ServerDisconnect &)
+{
+  return ar;
+}
+
 // Client -> serveur
 
 struct ClientJoinRoom
 {
   static constexpr gf::Id type = "ClientJoinRoom"_id;
+  gf::Id room;
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, ClientJoinRoom &data)
 {
-  return ar;
+  return ar | data.room;
 }
 
 struct ClientLeaveRoom
@@ -212,6 +224,16 @@ Archive &operator|(Archive &ar, ClientReady &data)
   return ar;
 }
 
+struct ClientDisconnect
+{
+  static constexpr gf::Id type = "ClientDisconnect"_id;
+};
+template <typename Archive>
+Archive &operator|(Archive &ar, ClientDisconnect &data)
+{
+  return ar;
+}
+
 //
 
 struct ClientMove
@@ -224,7 +246,6 @@ Archive &operator|(Archive &ar, ClientMove &data)
 {
   return ar | data.moveDir;
 }
-
 
 struct GameState
 {
