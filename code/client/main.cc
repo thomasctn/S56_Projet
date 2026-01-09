@@ -161,7 +161,11 @@ int main()
 
                         if (!askedToJoin){ //on a pas deja demandé
                             askedToJoin = true;
-                            //ICI faudrait envyer genre "join LOBBY " ou qqch
+                            gf::Packet p;
+                            p.is(ClientJoinRoom{});   
+                            socket.sendPacket(p);
+
+                            gf::Log::info("ClientJoinRoom envoye\n");
                             screen = ClientScreen::Lobby; //passe a la salle d'attente
                         }
                     }
