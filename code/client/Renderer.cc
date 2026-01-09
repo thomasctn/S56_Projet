@@ -321,26 +321,78 @@ void Renderer::renderWelcome() {
 
 
 
-
-void Renderer::renderLobby(int connectedPlayers, int maxPlayers) {
+void Renderer::renderLobby(int connectedPlayers, int maxPlayers, bool amReady) {
     rendered_window.clear(gf::Color::Black);
 
     static gf::Font font("../common/fonts/arial.ttf");
+    auto winSize = rendered_window.getSize();
+    float winW = float(winSize.x);
+    float winH = float(winSize.y);
 
-    gf::Text text;
-    text.setFont(font);
-    text.setCharacterSize(32);
-    text.setColor(gf::Color::White);
+    //infos
+    gf::Text title;
+    title.setFont(font);
+    title.setCharacterSize(28);
+    title.setColor(gf::Color::White);
+    title.setString("En attente de joueurs...");
+    title.setPosition({20.f, 20.f});
+    rendered_window.draw(title);
 
-    text.setString(
-        "En attente de joueurs...\n" +
-        std::to_string(connectedPlayers) + "/" +
-        std::to_string(maxPlayers) + " joueurs connectes"
-    );
+    // compteur de nombre de personnes
+    gf::Text countText;
+    countText.setFont(font);
+    countText.setCharacterSize(20);
+    countText.setColor(gf::Color::White);
+    countText.setString(std::to_string(connectedPlayers) + " / " + std::to_string(maxPlayers));
+    countText.setPosition({20.f, 60.f});
+    rendered_window.draw(countText);
 
-    text.setPosition({20.f, 20.f});
+    //etat pret ou pas pret
+    gf::Text readyState;
+    readyState.setFont(font);
+    readyState.setCharacterSize(20);
+    readyState.setColor(gf::Color::White);
+    if (amReady) {
+        readyState.setString("Vous êtes : PRÊT");
+    } else {
+        readyState.setString("Vous êtes : PAS PRÊT");
+    }
+    readyState.setPosition({20.f, 100.f});
+    rendered_window.draw(readyState);
 
-    rendered_window.draw(text);
+    //btouon
+    float bw = winW*0.18f;
+    float bh = winH*0.08f;
+    float bx = 20.f; 
+    float by = 140.f;
+
+    gf::RectangleShape button({bw, bh});
+    //couleur différente selon l'état
+    if (amReady){
+        button.setColor(gf::Color::fromRgb(0.7f, 0.2f, 0.2f)); //environ rouge
+    } else {
+        button.setColor(gf::Color::fromRgb(0.2f, 0.7f, 0.2f)); //environ vert
+    }
+    button.setPosition({bx, by});
+    rendered_window.draw(button);
+
+    // texte du bouton
+    gf::Text buttonText;
+    buttonText.setFont(font);
+    buttonText.setCharacterSize(int(bh * 0.4f));
+    buttonText.setColor(gf::Color::White);
+    if (amReady){
+        buttonText.setString("PLUS PRÊT?");
+    }
+    else{
+        buttonText.setString("PRÊT");
+    }
+
+    //position approximativement centrée dans le bouton
+    buttonText.setPosition({bx + bw * 0.12f, by + bh * 0.25f});
+    rendered_window.draw(buttonText);
+
     rendered_window.display();
 }
+
 

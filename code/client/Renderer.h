@@ -22,7 +22,8 @@ class Renderer{
     void calculateMovement(float worldSize, const BoardCommon& map,float& tileSize, float& offsetX, float& offsetY);
 
     void renderWelcome();
-    void renderLobby(int connectedPlayers, int maxPlayers);
+    void renderLobby(int connectedPlayers, int maxPlayers, bool amReady);
+
 
     
     bool isOpen() {

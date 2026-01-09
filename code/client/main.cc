@@ -52,6 +52,7 @@ int main()
     const int maxPlayers = 2;// nombre requis pour démarrer (ajuste si besoin)
 
     bool askedToJoin = false;  // pour n'envoyer la requête join qu'une fois
+    bool amReady = false; //notre état local prêt/pas prêt
 
 
     // ID local du client
@@ -160,6 +161,38 @@ int main()
                     }
                 }
             }
+            //bouton pret/pas pret du lobby
+            if (screen == ClientScreen::Lobby && event.type == gf::EventType::MouseButtonPressed) {
+                if (event.mouseButton.button == gf::MouseButton::Left) {
+
+                    //calcule la zone du bouton  comme dans renderLobby
+                    auto winSize = renderer.getWindow().getSize();
+                    float winW = float(winSize.x);
+                    float winH = float(winSize.y);
+
+                    float bw = winW*0.18f;
+                    float bh = winH*0.08f;
+                    float bx = 20.f;
+                    float by = 140.f;
+
+                    int mx = event.mouseButton.coords.x;
+                    int my = event.mouseButton.coords.y;
+
+                    if(mx >= bx && mx <= bx + bw && my >= by && my <= by + bh) {
+                        amReady = !amReady;//change etat de pret
+
+                        if (askedToJoin) {
+                            gf::Packet p;
+                            p.is(ClientReady{amReady});
+                            socket.sendPacket(p);
+                            gf::Log::info("ClientReady envoye : %s\n", amReady ? "true" : "false");
+                        } else {
+                            gf::Log::info("Bouton prêt cliqué mais pas encore demande de rejoindre???\n");
+                        }
+                    }
+                }
+            }
+
 
 
             if (event.type == gf::EventType::Closed)
@@ -262,7 +295,7 @@ int main()
         }
         else if(screen == ClientScreen::Lobby) {
             //renderer.drawLobby(connectedPlayers, maxPlayers); 
-            renderer.renderLobby(connectedPlayers, maxPlayers);//version sans les connected et max vu que je sais pas trop comment on va me les donner
+            renderer.renderLobby(connectedPlayers, maxPlayers, amReady);
         }
         else{ //Playing
             renderer.render(states, myId, board);
