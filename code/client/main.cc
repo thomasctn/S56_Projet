@@ -100,17 +100,7 @@ int main()
         switch (socket.recvPacket(packet))
         {
         case gf::SocketStatus::Data:{
-            /*switch (packet.getType())
-            {
-            case GameState::type:
-                auto data = packet.as<GameState>();
-                states = data.PlayerDatas;
-                gf::Log::info("Donnée reçu\n");
-
-                //ici, je suis censée récupérer le plateau(?)
-                //mapS= data.plateau;
-                break;
-            }*/
+            
             std::lock_guard<std::mutex> lock(packetMutex);
             packetQueue.push(std::move(packet));
             break;
@@ -133,7 +123,6 @@ int main()
     auto lastSend = std::chrono::steady_clock::now();
 
     
-    auto startTime = std::chrono::steady_clock::now();//POUR DEMARRER PLAYING APRES 20 SEONDES, JUSTE TEST
 
     while (running && renderer.isOpen())
     {
@@ -224,7 +213,8 @@ int main()
                 packetQueue.pop();
                 switch (packet.getType()) {
                     //ce serait bien que je recoive qqch quand quelque était en jeu et se deconnecte
-                    //comme ça je peux nous retourner les autre a l'écran d'acceuil!
+                    //comme ça je peux nous retourner les autre a l'écran d'acceuil! 
+                    //en fait pas sur ptet thomas il ajoute des bots?
 
                     
                     case ServerJoinRoom::type: {
@@ -261,17 +251,7 @@ int main()
         }
 
 
-        // TRUC DE TEST :si on est dans lobby, au bout de 20s on passe en playing
-        //(vu que je recois pas encore de signal qu'on est pret a jouer)
-        /*if(screen == ClientScreen::Lobby){
-            auto now = std::chrono::steady_clock::now();
-            auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now-startTime).count();
-            
-            if (elapsed >= 20){  // 20 secondes écoulées
-                gf::Log::info("Temps écoulé on passe en PLAYING \n");
-                screen = ClientScreen::Playing;
-            }
-        }*/
+        
 
 
         // Rendu basique
