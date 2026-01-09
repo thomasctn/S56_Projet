@@ -97,9 +97,13 @@ void Room::startGame() {
         uint32_t botId = generateBotId();
         game->addPlayer(botId, 0.f, 0.f, PlayerRole::Ghost);
         Player& bot = game->getPlayerInfo(botId);
-        bot.controller = new BotController();
+
+        // Fournir l'ID au constructeur
+        bot.controller = new BotController(botId);
+
         botManager->registerBot(botId);
     }
+
 
 
 

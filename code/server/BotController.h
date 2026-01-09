@@ -1,11 +1,16 @@
 #pragma once
 #include "Controller.h"
-#include "Game.h"
-#include <optional>
 
 class BotController : public Controller {
 public:
-    std::optional<Direction> update(Game& game) override {
-        return Direction::Up; // exemple simple
-    }
+    BotController(uint32_t id) : playerId(id) {}
+
+    std::optional<Direction> update(Game& game) override;
+
+private:
+    uint32_t playerId;
+
+    std::pair<float,float> getPacManPosition(const Game& game);
+    bool isVisible(float fromX, float fromY, float toX, float toY);
+    Direction getDirectionTowards(float fromX, float fromY, float toX, float toY);
 };
