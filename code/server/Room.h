@@ -51,5 +51,6 @@ private:
     uint32_t generateBotId();
 
     std::unique_ptr<BotManager> botManager;
+    std::unordered_map<uint32_t, bool> preGameReady;
 
 };

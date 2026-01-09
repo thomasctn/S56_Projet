@@ -34,9 +34,11 @@ void Room::addPlayer(uint32_t playerId) {
         network.send(pid, listPacket);
 
     // Démarrage automatique si la room est pleine et que la partie n'existe pas encore
+    /*
     if (!game && players.size() == MAX_PLAYERS) {
         startGame();
     }
+    */
 }
 
 
@@ -185,27 +187,33 @@ void Room::handleClientMove(PacketContext& ctx) {
 }
 
 void Room::handleClientReady(PacketContext& ctx) {
-    if (!game)
-        return;
+    // Convertir le packet en ClientReady
+    auto data = ctx.packet.as<ClientReady>();
 
-    auto& player = game->getPlayerInfo(ctx.senderId);
-    player.ready = true;
-    gf::Log::info("[Room %u] Joueur %u ready\n", id, ctx.senderId);
+    gf::Log::info("[Room %u] Joueur %u ready=%s\n", id, ctx.senderId, data.ready ? "true" : "false");
+
+    // --- Si le Game existe, mettre à jour le Player ---
+    if (game) {
+        auto& player = game->getPlayerInfo(ctx.senderId);
+        player.ready = data.ready;
+    } else {
+        preGameReady[ctx.senderId] = data.ready;
+    }
 
     // Broadcast ServerReady à tous les joueurs
     ServerReady readyMsg;
     gf::Packet readyPacket;
     readyPacket.is(readyMsg);
-
     for (uint32_t pid : players)
         network.send(pid, readyPacket);
 
-
-    // Si tous prêts, démarrer la partie
+    // Vérifier si tous les joueurs sont prêts
     if (allPlayersReady()) {
         startGame();
     }
 }
+
+
 
 void Room::handleClientChangeRole(PacketContext& ctx) {
     auto& player = game->getPlayerInfo(ctx.senderId);
@@ -228,13 +236,24 @@ PlayerData Room::getPlayerData(uint32_t playerId) const {
 }
 
 bool Room::allPlayersReady() const {
-    if (!game) return false;
-    for (const auto& [id, playerPtr] : game->getPlayers()) {
-        if (!playerPtr->getState().ready)
+    for (uint32_t pid : players) {
+        bool isReady = false;
+        if (game) {
+            const Player& p = game->getPlayerInfo(pid);
+            isReady = p.ready;
+        } else {
+            auto it = preGameReady.find(pid);
+            if (it != preGameReady.end())
+                isReady = it->second;
+        }
+
+        if (!isReady)
             return false;
     }
     return true;
 }
+
+
 
 void Room::broadcastState() {
     if (!game)
