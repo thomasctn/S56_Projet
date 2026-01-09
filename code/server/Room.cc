@@ -1,4 +1,6 @@
 #include "Room.h"
+#include "BotController.h"
+
 
 Room::Room(uint32_t id, ServerNetwork& network)
 : id(id)
@@ -74,8 +76,10 @@ void Room::startGame() {
 
     game = std::make_unique<Game>(boardWidth, boardHeight);
     game->setRoom(*this);
+    botManager = std::make_unique<BotManager>(*game, inputQueue);
+    game->setBotManager(botManager.get());
 
-    // Ajouter les joueurs dans le jeu
+    // --- Ajouter les joueurs ---
     size_t i = 0;
     for (uint32_t playerId : players) {
         if (game->getPlayers().find(playerId) == game->getPlayers().end()) {
@@ -85,7 +89,25 @@ void Room::startGame() {
         ++i;
     }
 
-    // Spawner tous les joueurs
+    // --- Ajouter les bots ---
+    int humans = players.size();
+    int botsToAdd = NB_BOTS;    //MAX_PLAYERS - humans;
+
+    for (int b = 0; b < botsToAdd; ++b) {
+        uint32_t botId = generateBotId();
+        game->addPlayer(botId, 0.f, 0.f, PlayerRole::Ghost);
+        Player& bot = game->getPlayerInfo(botId);
+
+        // Fournir l'ID au constructeur
+        bot.controller = new BotController(botId);
+
+        botManager->registerBot(botId);
+    }
+
+
+
+
+    // --- Spawner tous les joueurs ---
     for (auto& [id, playerPtr] : game->getPlayers()) {
         game->spawnPlayer(*playerPtr);
     }
@@ -243,3 +265,7 @@ void Room::broadcastState() {
     }
 }
 
+uint32_t Room::generateBotId() {
+    static uint32_t nextBotId = 10000; // commence après les IDs joueurs
+    return nextBotId++;
+}

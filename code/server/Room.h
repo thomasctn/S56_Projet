@@ -13,7 +13,8 @@
 #include "PacketContext.h"
 #include "InputQueue.h"
 #include "../common/Constants.h"
-
+#include "BotController.h"
+#include "BotManager.h" 
 
 
 class Room {
@@ -47,5 +48,8 @@ public:
 private:
     void startGame();
     void setRoom(Room& r) { room = &r; }
+    uint32_t generateBotId();
+
+    std::unique_ptr<BotManager> botManager;
 
 };

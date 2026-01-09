@@ -1,7 +1,8 @@
 #include "Game.h"
 #include "ServerNetwork.h"
 #include "Room.h"
-
+#include "../common/Constants.h"
+#include "BotManager.h"
 
 
 Game::Game(int width, int height) : board(width, height) {
@@ -141,12 +142,24 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& ser
     preGameStart = std::chrono::steady_clock::now();
 
     gameThread = std::thread([this, &inputQueue, &server]() {
+        auto lastBotUpdate = std::chrono::steady_clock::now();
+
         while (running.load()) {
+                auto now = std::chrono::steady_clock::now();
+
+            // --- mise à jour des bots toutes les 0.5 secondes ---
+            if (botManager) {
+                std::chrono::duration<double> elapsed = now - lastBotUpdate;
+                if (elapsed.count() >= 0.5) {  // 0.5s = 500ms
+                    botManager->update();
+                    lastBotUpdate = now;
+                }
+            }
+
             processInputs(inputQueue);
             if(room){
                 room->broadcastState();
             }
-            auto now = std::chrono::steady_clock::now();
             std::chrono::duration<double> elapsed = now - preGameStart;
 
             preGameElapsed = elapsed.count();
@@ -204,7 +217,7 @@ void Game::processInputs(InputQueue& queue) {
         bool moved = requestMove(input.playerId, input.dir);
         if (moved) {
             auto& p = getPlayerInfo(input.playerId);
-            gf::Log::info("Player %u moved to (%.1f, %.1f)", p.id, p.x, p.y);
+            //gf::Log::info("Player %u moved to (%.1f, %.1f)", p.id, p.x, p.y);
         }
     }
 }
