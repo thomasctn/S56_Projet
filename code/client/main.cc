@@ -49,7 +49,7 @@ int main()
     ClientScreen screen = ClientScreen::Welcome;
 
     int connectedPlayers = 0; //normalement mis a jour par ce que le serveur me dit selon benoit plus tard
-    const int maxPlayers = 5;// nombre requis pour démarrer (ajuste si besoin)
+    const int maxPlayers = 2;// nombre requis pour démarrer (ajuste si besoin)
 
     bool askedToJoin = false;  // pour n'envoyer la requête join qu'une fois
 
@@ -219,19 +219,33 @@ int main()
                 gf::Packet packet = std::move(packetQueue.front());
                 packetQueue.pop();
                 switch (packet.getType()) {
-                    /*case LobbyInfo::type:{//jsp encore comment ça va s'appeler
-                        auto data = packet.as<LobbyInfo>();
-                        connectedPlayers = data.count; //nombre total de joueur connecté (benoit a dit qu'il me le donne)
+                    //ce serait bien que je recoive qqch quand quelque était en jeu et se deconnecte
+                    //comme ça je peux nous retourner les autre a l'écran d'acceuil!
+
+                    
+                    case ServerJoinRoom::type: {
+                        gf::Log::info("Serveur: rejoint la room\n"); //pour l'instant aussi inutile (le serv nous met direct dans une room)
                         break;
                     }
 
-                    case GameReady::type:{ //le jeu est pret, jsp encore le nom du truc
-                        auto data = packet.as<GameReady>();
-                        board = data.board;
-                        states = data.clientStates;
-                        screen = ClientScreen::Playing; //affichage du plateay et tt, le jeu commence les touches marchent
+                    case ServerListRoomPlayers::type: {
+                        auto data = packet.as<ServerListRoomPlayers>();
+                        connectedPlayers = data.players.size();
+                        gf::Log::info("Lobby: %d / %d joueurs\n", connectedPlayers, maxPlayers);
                         break;
-                    }*/
+                    }
+
+                    case ServerGameStart::type:{
+                        auto data = packet.as<ServerGameStart>();
+
+                        states = data.players;  
+                        board=data.board;
+
+                        screen = ClientScreen::Playing; //passage en mode jeu, on montre la carte
+                        gf::Log::info("Game start reçu -> passage en Playing\n");
+                        break;
+                    }
+
                     case GameState::type:{
                         auto data = packet.as<GameState>();
                         states = data.clientStates;
@@ -245,7 +259,7 @@ int main()
 
         // TRUC DE TEST :si on est dans lobby, au bout de 20s on passe en playing
         //(vu que je recois pas encore de signal qu'on est pret a jouer)
-        if(screen == ClientScreen::Lobby){
+        /*if(screen == ClientScreen::Lobby){
             auto now = std::chrono::steady_clock::now();
             auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now-startTime).count();
             
@@ -253,7 +267,7 @@ int main()
                 gf::Log::info("Temps écoulé on passe en PLAYING \n");
                 screen = ClientScreen::Playing;
             }
-        }
+        }*/
 
 
         // Rendu basique
@@ -264,7 +278,7 @@ int main()
         }
         else if(screen == ClientScreen::Lobby) {
             //renderer.drawLobby(connectedPlayers, maxPlayers); 
-            renderer.renderLobby();//version sans les connected et max vu que je sais pas trop comment on va me les donner
+            renderer.renderLobby(connectedPlayers, maxPlayers);//version sans les connected et max vu que je sais pas trop comment on va me les donner
         }
         else{ //Playing
             renderer.render(states, myId, board);
