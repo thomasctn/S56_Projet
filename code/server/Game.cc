@@ -1,7 +1,8 @@
 #include "Game.h"
 #include "ServerNetwork.h"
 #include "Room.h"
-
+#include "../common/Constants.h"
+#include "BotManager.h"
 
 
 Game::Game(int width, int height) : board(width, height) {
@@ -142,6 +143,10 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& ser
 
     gameThread = std::thread([this, &inputQueue, &server]() {
         while (running.load()) {
+            if (botManager) {
+                botManager->update();
+            }
+
             processInputs(inputQueue);
             if(room){
                 room->broadcastState();

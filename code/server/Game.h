@@ -16,6 +16,8 @@
 
 class Room;
 class ServerNetwork;
+class BotManager; 
+
 
 class Game {
 public:
@@ -54,6 +56,11 @@ public:
     void setRoom(Room& r) { room = &r; }
 
 
+    void setBotManager(BotManager* manager) {
+        botManager = manager;
+    }
+
+
     
 private:
     Board board;
@@ -75,4 +82,6 @@ private:
     std::atomic<bool> gameStarted{false};
 
     void processInputs(InputQueue& queue);
+
+    BotManager* botManager = nullptr;
 };

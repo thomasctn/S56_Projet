@@ -6,6 +6,9 @@
 #include "../common/Protocol.h"
 #include "../common/Types.h"
 
+
+class Controller;
+
 class Player {
 public:
     Player(uint32_t id = 0, PlayerRole role = PlayerRole::Spectator);
@@ -33,4 +36,6 @@ public:
     uint32_t color;
     gf::TcpSocket socket;
     int score;
+    Controller* controller = nullptr;
+
 };

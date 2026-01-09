@@ -17,6 +17,7 @@ add_executable(server
     server/ServerNetwork.cc
     server/Lobby.cc
     server/Room.cc
+    server/BotManager.cc
 )
 target_link_libraries(server PRIVATE gf::core gf::graphics gf::net)
 
