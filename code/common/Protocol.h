@@ -217,11 +217,12 @@ Archive &operator|(Archive &ar, ClientChangeRole &data)
 struct ClientReady
 {
   static constexpr gf::Id type = "ClientReady"_id;
+  bool ready;
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, ClientReady &data)
 {
-  return ar;
+  return ar | data.ready;
 }
 
 struct ClientDisconnect
