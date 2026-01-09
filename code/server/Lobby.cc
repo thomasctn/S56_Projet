@@ -36,9 +36,7 @@ void Lobby::onPlayerDisconnected(uint32_t playerId) {
 }
 
 void Lobby::handlePacket(PacketContext& ctx) {
-    gf::Log::info("[Lobby] Paquet reçu du joueur %u (type=%llu)\n", 
-                  ctx.senderId, 
-                  static_cast<unsigned long long>(ctx.packet.getType()));
+    //gf::Log::info("[Lobby] Paquet reçu du joueur %u (type=%llu)\n",ctx.senderId, static_cast<unsigned long long>(ctx.packet.getType()));
 
     if (ctx.packet.getType() == ClientJoinRoom::type) {
         handleClientJoinRoom(ctx);
@@ -58,11 +56,7 @@ void Lobby::handlePacket(PacketContext& ctx) {
         return;
     }
 
-    gf::Log::info(
-        "[Lobby] Transmission du paquet du joueur %u vers room %u\n",
-        ctx.senderId,
-        roomId
-    );
+    //gf::Log::info("[Lobby] Transmission du paquet du joueur %u vers room %u\n",ctx.senderId,roomId);
 
     roomIt->second->handlePacket(ctx);
 }

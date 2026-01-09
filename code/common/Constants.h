@@ -11,4 +11,8 @@ constexpr int PRE_GAME_DELAY = 10; // délai avant début
 constexpr int SPEED = 30; // vitesse du serv
 
 constexpr size_t MAX_PLAYERS = 2; //nombre de joueur par room
-constexpr size_t NB_BOTS = 1; //nombre de Bot par partie
+constexpr size_t NB_BOTS = 4; //nombre de Bot par partie
+
+static constexpr int VISION_RANGE = 4;
+static constexpr float MOVE_INTERVAL = 0.5f;
+static constexpr float CASE_SIZE = 50;

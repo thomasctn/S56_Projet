@@ -37,5 +37,6 @@ public:
     gf::TcpSocket socket;
     int score;
     Controller* controller = nullptr;
+    bool isBot = false;
 
 };
