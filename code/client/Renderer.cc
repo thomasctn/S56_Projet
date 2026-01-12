@@ -345,7 +345,7 @@ void Renderer::renderWelcome() {
 
 
 
-void Renderer::renderLobby(int connectedPlayers, int maxPlayers, bool amReady) {
+void Renderer::renderLobby(int connectedPlayers,int roomSize,bool amReady){
     rendered_window.clear(gf::Color::Black);
 
     static gf::Font font("../common/fonts/arial.ttf");
@@ -367,9 +367,70 @@ void Renderer::renderLobby(int connectedPlayers, int maxPlayers, bool amReady) {
     countText.setFont(font);
     countText.setCharacterSize(20);
     countText.setColor(gf::Color::White);
-    countText.setString(std::to_string(connectedPlayers) + " / " + std::to_string(maxPlayers));
+    countText.setString(std::to_string(connectedPlayers) + " / " + std::to_string(roomSize));
     countText.setPosition({20.f, 60.f});
     rendered_window.draw(countText);
+
+    //ajouts pr modif nbr max de joueurs
+    gf::Text roomLabel;
+    roomLabel.setFont(font);
+    roomLabel.setCharacterSize(20);
+    roomLabel.setColor(gf::Color::White);
+    roomLabel.setString("Joueurs max :");
+    roomLabel.setPosition({20.f,100.f});
+    rendered_window.draw(roomLabel);
+
+    // positions pour - / valeur / +
+    float btnW = 40.f;
+    float btnH = 40.f;
+    float btnX = 20.f + 140.f; // décal par rapport au label
+    float btnY = 100.f;
+
+    // bouton -
+    gf::RectangleShape minusBtn({btnW,btnH});
+    minusBtn.setPosition({btnX,btnY});
+    minusBtn.setColor(gf::Color::fromRgb(0.5f,0.5f,0.5f));
+    rendered_window.draw(minusBtn);
+    gf::Text minusText;
+    minusText.setFont(font);
+    minusText.setCharacterSize(24);
+    minusText.setColor(gf::Color::White);
+    minusText.setString("-");
+    minusText.setPosition({btnX + btnW*0.28f, btnY + btnH*0.06f});
+    rendered_window.draw(minusText);
+
+    // valeur courante
+    gf::Text valueText;
+    valueText.setFont(font);
+    valueText.setCharacterSize(20);
+    valueText.setColor(gf::Color::White);
+    valueText.setString(std::to_string(roomSize));
+    valueText.setPosition({btnX + btnW + 10.f, btnY + 8.f});
+    rendered_window.draw(valueText);
+
+    // bouton +
+    gf::RectangleShape plusBtn({btnW,btnH});
+    plusBtn.setPosition({btnX + btnW + 60.f, btnY});
+    plusBtn.setColor(gf::Color::fromRgb(0.5f,0.5f,0.5f));
+    rendered_window.draw(plusBtn);
+    gf::Text plusText;
+    plusText.setFont(font);
+    plusText.setCharacterSize(20);
+    plusText.setColor(gf::Color::White);
+    plusText.setString("+");
+    plusText.setPosition({btnX + btnW + 60.f + btnW*0.28f, btnY + btnH*0.06f});
+    rendered_window.draw(plusText);
+
+
+
+
+
+
+
+
+
+
+
 
     //etat pret ou pas pret
     gf::Text readyState;
@@ -381,14 +442,14 @@ void Renderer::renderLobby(int connectedPlayers, int maxPlayers, bool amReady) {
     } else {
         readyState.setString("Vous êtes : PAS PRÊT");
     }
-    readyState.setPosition({20.f, 100.f});
+    readyState.setPosition({20.f, 160.f});
     rendered_window.draw(readyState);
 
     //btouon
     float bw = winW*0.18f;
     float bh = winH*0.08f;
     float bx = 20.f; 
-    float by = 140.f;
+    float by = 200.f;
 
     gf::RectangleShape button({bw, bh});
     //couleur différente selon l'état

@@ -18,6 +18,20 @@
 #include "Renderer.h"
 
 
+void sendRoomSettings(gf::TcpSocket& socket,unsigned int newRoomSize){
+    RoomSettings settings;
+    settings.roomSize = newRoomSize;
+    settings.nbBot = 0;
+    settings.gameDuration = 0;
+
+    gf::Packet p;
+    p.is(ClientChangeRoomSettings{settings});
+    socket.sendPacket(p);
+
+    gf::Log::info("ClientChangeRoomSettings envoye : roomSize=%u\n", newRoomSize);
+}
+
+
 Renderer renderer;
 
 int main()
@@ -37,6 +51,8 @@ int main()
     BoardCommon board;
     std::set<Position> pacgommes;
 
+    int roomSize = 2; // capacité actuelle de la room (modifiable)
+
 
     //std::mutex statesMutex;
     bool running = true;
@@ -51,7 +67,6 @@ int main()
     ClientScreen screen = ClientScreen::Welcome;
 
     int connectedPlayers = 0; //normalement mis a jour par ce que le serveur me dit selon benoit plus tard
-    const int maxPlayers = 2;// nombre requis pour démarrer (ajuste si besoin)
 
     bool askedToJoin = false;  // pour n'envoyer la requête join qu'une fois
     bool amReady = false; //notre état local prêt/pas prêt
@@ -163,26 +178,52 @@ int main()
                     }
                 }
             }
-            //bouton pret/pas pret du lobby
-            if (screen == ClientScreen::Lobby && event.type == gf::EventType::MouseButtonPressed) {
-                if (event.mouseButton.button == gf::MouseButton::Left) {
+            
 
-                    //calcule la zone du bouton  comme dans renderLobby
-                    auto winSize = renderer.getWindow().getSize();
-                    float winW = float(winSize.x);
-                    float winH = float(winSize.y);
-
-                    float bw = winW*0.18f;
-                    float bh = winH*0.08f;
-                    float bx = 20.f;
-                    float by = 140.f;
-
+            //boutons - et + du lobby
+            if(screen == ClientScreen::Lobby && event.type == gf::EventType::MouseButtonPressed){
+                if(event.mouseButton.button == gf::MouseButton::Left){
                     int mx = event.mouseButton.coords.x;
                     int my = event.mouseButton.coords.y;
 
-                    if(mx >= bx && mx <= bx + bw && my >= by && my <= by + bh) {
-                        amReady = !amReady;//change etat de pret
+                    // zones identiques à renderLobby
+                    float btnW = 40.f;
+                    float btnH = 40.f;
+                    float btnX = 20.f + 140.f;
+                    float btnY = 100.f;
 
+                    // zone -
+                    if(mx >= int(btnX) && mx <= int(btnX + btnW) && my >= int(btnY) && my <= int(btnY + btnH)){
+                        if(roomSize > 1){
+                            roomSize--;
+                            gf::Log::info("Changementr de taille de room (-): %d\n", roomSize);
+
+                            sendRoomSettings(socket,roomSize);
+
+                        }
+                    }
+
+                    // zone +
+                    float plusX = btnX + btnW + 60.f;
+                    if(mx >= int(plusX) && mx <= int(plusX + btnW) && my >= int(btnY) && my <= int(btnY + btnH)){
+                        if(roomSize < 5){
+                            roomSize++;
+                            gf::Log::info("Changementr de taille de room (-): %d\n", roomSize);
+                            sendRoomSettings(socket,roomSize);
+
+                        }
+                    }
+
+                    //zone bouton PRET (identique à ton ancienne zone)
+                    auto winSize = renderer.getWindow().getSize();
+                    float winW = float(winSize.x);
+                    float winH = float(winSize.y);
+                    float bw = winW*0.18f;
+                    float bh = winH*0.08f;
+                    float bx = 20.f;
+                    float by = 200.f;
+                    if(mx >= int(bx) && mx <= int(bx + bw) && my >= int(by) && my <= int(by + bh)) {
+                        amReady = !amReady;
                         if (askedToJoin) {
                             gf::Packet p;
                             p.is(ClientReady{amReady});
@@ -194,6 +235,7 @@ int main()
                     }
                 }
             }
+
 
 
 
@@ -251,7 +293,13 @@ int main()
                     //comme ça je peux nous retourner les autre a l'écran d'acceuil! 
                     //en fait pas sur ptet thomas il ajoute des bots?
 
-                    
+                    case ServerRoomSettings::type:{
+                        auto data = packet.as<ServerRoomSettings>();
+                        roomSize = int(data.settings.roomSize);
+                        gf::Log::info("ServerRoomSettings reçu : roomSize=%u\n", data.settings.roomSize);
+                        break;
+                    }
+
                     case ServerJoinRoom::type: {
                         gf::Log::info("Serveur: rejoint la room\n"); //pour l'instant aussi inutile (le serv nous met direct dans une room)
                         break;
@@ -260,7 +308,7 @@ int main()
                     case ServerListRoomPlayers::type: {
                         auto data = packet.as<ServerListRoomPlayers>();
                         connectedPlayers = data.players.size();
-                        gf::Log::info("Lobby: %d / %d joueurs\n", connectedPlayers, maxPlayers);
+                        gf::Log::info("Lobby: %d / %d joueurs\n", connectedPlayers, roomSize);
                         break;
                     }
 
@@ -283,6 +331,8 @@ int main()
                         pacgommes = data.pacgommes;
                         break;
                     }
+
+                    
                 }
             }
         }
@@ -299,7 +349,7 @@ int main()
         }
         else if(screen == ClientScreen::Lobby) {
             //renderer.drawLobby(connectedPlayers, maxPlayers); 
-            renderer.renderLobby(connectedPlayers, maxPlayers, amReady);
+            renderer.renderLobby(connectedPlayers, roomSize, amReady);
         }
         else{ //Playing
             renderer.render(states, myId, board, pacgommes);

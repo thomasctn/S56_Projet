@@ -23,7 +23,7 @@ class Renderer{
     void renderPacGommes(const std::set<Position>& pacgommes,float tileSize,float offsetX,float offsetY);
 
     void renderWelcome();
-    void renderLobby(int connectedPlayers, int maxPlayers, bool amReady);
+    void renderLobby(int connectedPlayers,int roomSize,bool amReady);
 
 
     
