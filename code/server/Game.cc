@@ -74,11 +74,10 @@ bool Game::requestMove(uint32_t playerId, Direction dir) {
 
     int gridX = static_cast<int>(p.x) / 50;
     int gridY = static_cast<int>(p.y) / 50;
-    Case& cell = board.getCase(gridX, gridY);
 
-    if (p.getRole() == PlayerRole::PacMan && cell.hasPacGomme()) {
+    if (p.getRole() == PlayerRole::PacMan && board.hasPacgomme(gridX,gridY)) {
         p.eat(true, nullptr);
-        cell.removePacGomme();
+        board.removePacgomme(gridX,gridY);
     } else if (p.getRole() == PlayerRole::Ghost) {
         for (auto& [otherId, otherPtr] : players) {
             Player& other = *otherPtr;

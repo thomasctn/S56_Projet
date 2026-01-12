@@ -94,7 +94,7 @@ int main() {
                         }
                         window.draw(tile);
 
-                        if (cell.hasPacGomme()) {
+                        if (board.hasPacgomme(x,y)) {
                             gf::CircleShape pacGommeShape(tileSize / 6.0f); 
                             pacGommeShape.setOrigin({tileSize/12.0f, tileSize/12.0f});
                             pacGommeShape.setPosition({x * tileSize + offsetX + tileSize/2,

@@ -4,8 +4,8 @@
 
 class Case {
 public:
-    Case() : type(CellType::Floor), pacGomme(false) {}
-    Case(CellType t) : type(t), pacGomme(false) {}
+    Case() : type(CellType::Floor) {}
+    Case(CellType t) : type(t) {}
 
     CellType getType() const { return type; }
 
@@ -13,17 +13,11 @@ public:
         return ((type == CellType::Floor) || (type == CellType::Hut)); // on peut marcher seulement sur le sol et la cabane
     }
 
-    // --- Pac-gomme ---
-    bool hasPacGomme() const { return pacGomme; }
-    void placePacGomme() { if(type == CellType::Floor) pacGomme = true; }
-    void removePacGomme() { pacGomme = false; }
-
     CaseCommon toCommonData() const {
-        CaseCommon cc(type, pacGomme);
+        CaseCommon cc(type);
         return cc;
     }
 
 private:
     CellType type;
-    bool pacGomme;
 };
