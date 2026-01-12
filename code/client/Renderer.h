@@ -25,6 +25,7 @@ class Renderer{
     void renderWelcome();
     void renderLobby(int connectedPlayers,int roomSize,bool amReady);
 
+    
 
     
     bool isOpen() {
@@ -33,6 +34,15 @@ class Renderer{
     gf::Window& getWindow(){
         return main_window;
     }
+
+    float getWorldSize() const { return m_worldSize; }
+
+    gf::v1::Vector2f getMinusBtnPos() const { return m_minusBtnPos; }
+    gf::v1::Vector2f getPlusBtnPos() const { return m_plusBtnPos; }
+    gf::v1::Vector2f getReadyBtnPos() const { return m_readyBtnPos; }
+
+    gf::v1::Vector2f getBtnSize() const { return m_btnSize; }           // - et +
+    gf::v1::Vector2f getReadyBtnSize() const { return m_readyBtnSize; } // PRET
 
     void handleResize(unsigned int winW, unsigned int winH);
 
@@ -72,6 +82,14 @@ class Renderer{
     gf::Animation m_pacmanUpAnim;
     gf::Animation m_pacmanDownAnim;
 
+    //problems de clics
+    // coordonnées et tailles dans le monde
+gf::v1::Vector2f m_minusBtnPos;
+gf::v1::Vector2f m_plusBtnPos;
+gf::v1::Vector2f m_readyBtnPos;
+
+gf::v1::Vector2f m_btnSize;       // pour - et +
+gf::v1::Vector2f m_readyBtnSize;  // pour le bouton PRET
 
 
 

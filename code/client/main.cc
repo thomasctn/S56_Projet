@@ -181,58 +181,34 @@ int main()
             
 
             //boutons - et + du lobby
-            if(screen == ClientScreen::Lobby && event.type == gf::EventType::MouseButtonPressed){
-                if(event.mouseButton.button == gf::MouseButton::Left){
-                    int mx = event.mouseButton.coords.x;
-                    int my = event.mouseButton.coords.y;
+            if(event.type == gf::EventType::MouseButtonPressed && event.mouseButton.button == gf::MouseButton::Left){
+                auto winSize = renderer.getWindow().getSize(); 
+                float mx = event.mouseButton.coords.x * (renderer.getWorldSize() / float(winSize.x));
+                float my = event.mouseButton.coords.y * (renderer.getWorldSize() / float(winSize.y));
 
-                    // zones identiques à renderLobby
-                    float btnW = 40.f;
-                    float btnH = 40.f;
-                    float btnX = 20.f + 140.f;
-                    float btnY = 100.f;
+                //bouton -
+                auto minusPos = renderer.getMinusBtnPos();
+                auto btnSize = renderer.getBtnSize();
+                if(mx >= minusPos.x && mx <= minusPos.x + btnSize.x &&my >= minusPos.y && my <= minusPos.y + btnSize.y){
+                    if(roomSize > 1) roomSize--;
+                    sendRoomSettings(socket, roomSize);
+                }
 
-                    // zone -
-                    if(mx >= int(btnX) && mx <= int(btnX + btnW) && my >= int(btnY) && my <= int(btnY + btnH)){
-                        if(roomSize > 1){
-                            roomSize--;
-                            gf::Log::info("Changementr de taille de room (-): %d\n", roomSize);
+                //bouton +
+                auto plusPos = renderer.getPlusBtnPos();
+                if(mx >= plusPos.x && mx <= plusPos.x + btnSize.x &&my >= plusPos.y && my <= plusPos.y + btnSize.y){
+                    if(roomSize < 5) roomSize++;
+                    sendRoomSettings(socket, roomSize);
+                }
 
-                            sendRoomSettings(socket,roomSize);
-
-                        }
-                    }
-
-                    // zone +
-                    float plusX = btnX + btnW + 60.f;
-                    if(mx >= int(plusX) && mx <= int(plusX + btnW) && my >= int(btnY) && my <= int(btnY + btnH)){
-                        if(roomSize < 5){
-                            roomSize++;
-                            gf::Log::info("Changementr de taille de room (-): %d\n", roomSize);
-                            sendRoomSettings(socket,roomSize);
-
-                        }
-                    }
-
-                    //zone bouton PRET (identique à ton ancienne zone)
-                    auto winSize = renderer.getWindow().getSize();
-                    float winW = float(winSize.x);
-                    float winH = float(winSize.y);
-                    float bw = winW*0.18f;
-                    float bh = winH*0.08f;
-                    float bx = 20.f;
-                    float by = 200.f;
-                    if(mx >= int(bx) && mx <= int(bx + bw) && my >= int(by) && my <= int(by + bh)) {
-                        amReady = !amReady;
-                        if (askedToJoin) {
-                            gf::Packet p;
-                            p.is(ClientReady{amReady});
-                            socket.sendPacket(p);
-                            gf::Log::info("ClientReady envoye : %s\n", amReady ? "true" : "false");
-                        } else {
-                            gf::Log::info("Bouton prêt cliqué mais pas encore demande de rejoindre???\n");
-                        }
-                    }
+                //bouton PRET
+                auto readyPos = renderer.getReadyBtnPos();
+                auto readySize = renderer.getReadyBtnSize();
+                if(mx >= readyPos.x && mx <= readyPos.x + readySize.x &&my >= readyPos.y && my <= readyPos.y + readySize.y){
+                    amReady = !amReady;
+                    gf::Packet p;
+                    p.is(ClientReady{amReady});
+                    socket.sendPacket(p);
                 }
             }
 
