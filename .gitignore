@@ -25,3 +25,5 @@ code/.vscode
 
 Rapport/.bin/*
 Rapport/.bin
+!Rapport/.bin/main.pdf
+
