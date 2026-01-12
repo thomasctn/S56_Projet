@@ -43,19 +43,32 @@ Serveur (envoyé)
 
 
 */
-struct PacgommeCommon
+struct Position
 {
-  static constexpr gf::Id type = "PacgommeCommon"_id;
+  static constexpr gf::Id type = "Position"_id;
   unsigned int x;
   unsigned int y;
-  PacgommeCommon() {x = 0; y= 0;}
-  PacgommeCommon(unsigned int xp, unsigned int yp) {
+  Position()
+  {
+    x = 0;
+    y = 0;
+  }
+  Position(unsigned int xp, unsigned int yp)
+  {
     x = xp;
     y = yp;
   }
+  bool operator==(const Position &a) const
+  {
+    return (x == a.x && y == a.y);
+  }
+  bool operator<(const Position &a) const
+  {
+    return (x < a.x || (x == a.x && y < a.y));
+  }
 };
 template <typename Archive>
-Archive &operator|(Archive &ar, PacgommeCommon &data)
+Archive &operator|(Archive &ar, Position &data)
 {
   return ar | data.x | data.y;
 }
@@ -66,16 +79,15 @@ struct CaseCommon
   CellType celltype;
   bool pacGomme = false;
   CaseCommon() : celltype(CellType::Floor) {}
-  CaseCommon(CellType t, bool pg)
+  CaseCommon(CellType t)
   {
     celltype = t;
-    pacGomme = pg;
   }
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, CaseCommon &data)
 {
-  return ar | data.celltype | data.pacGomme;
+  return ar | data.celltype;
 }
 
 struct BoardCommon
@@ -170,7 +182,7 @@ struct ServerGameStart
   static constexpr gf::Id type = "ServerGameStart"_id;
   BoardCommon board;
   std::vector<PlayerData> players;
-  std::vector<PacgommeCommon> pacgommes;
+  std::set<Position> pacgommes;
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, ServerGameStart &data)
@@ -196,7 +208,7 @@ template <typename Archive>
 Archive &operator|(Archive &ar, ServerDisconnect &)
 {
   return ar;
-}
+};
 
 // Client -> serveur
 
@@ -270,7 +282,7 @@ struct GameState
   static constexpr gf::Id type = "GameState"_id;
   std::vector<PlayerData> clientStates;
   BoardCommon board;
-  std::vector<PacgommeCommon> pacgommes;
+  std::set<Position> pacgommes;
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, GameState &data)

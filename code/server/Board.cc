@@ -47,16 +47,14 @@ void Board::placeRandomPacGommes(unsigned int count) {
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> distX(0, getWidth() - 1);
     std::uniform_int_distribution<> distY(0, getHeight() - 1);
-    std::set<std::pair<unsigned int, unsigned int>> occupieds;
     unsigned int placed = 0;
     while (placed < count) {
         unsigned int x = distX(gen);
         unsigned int y = distY(gen);
         Case& c = getCase(x, y);
 
-        if (c.getType() == CellType::Floor && occupieds.find({x,y}) == occupieds.end()) {
-            pacgommes.push_back(PacgommeCommon(x,y));
-            occupieds.insert({x,y});
+        if (c.getType() == CellType::Floor && pacgommes.find(Position(x,y)) == pacgommes.end()) {
+            pacgommes.insert(Position(x,y));
             ++placed;
         }
     }
@@ -457,7 +455,21 @@ void Board::printWithPlayers(const std::vector<Player> &players) const {
     }
 }
 
-BoardCommon Board::toCommonData() {
+bool Board::hasPacgomme(unsigned int x, unsigned int y)
+{
+    return pacgommes.find(Position(x,y)) != pacgommes.end();
+}
+
+bool Board::removePacgomme(unsigned int x, unsigned int y)
+{
+    if(!hasPacgomme(x,y))
+        return false;
+    pacgommes.erase(Position(x,y));
+    return true;
+}
+
+BoardCommon Board::toCommonData()
+{
     BoardCommon bc = BoardCommon(width,height);
     for (unsigned int y = 0; y < height; ++y)
     {

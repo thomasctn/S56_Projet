@@ -76,9 +76,10 @@ gf::Color4f Renderer::colorFromId(uint32_t id) {
 
 
 
-void Renderer::render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map){
+void Renderer::render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map,const std::vector<PacgommeCommon>& pacgommes){
     rendered_window.clear(gf::Color::Black);
-    renderMap(states,myId,map);
+    renderMap(states,map);
+    
     //AVANT : LES PXIELS JOUEURS
     /*for (auto& s : states) {
         gf::RectangleShape box({50.0f, 50.0f});
@@ -91,6 +92,7 @@ void Renderer::render(const std::vector<PlayerData>& states, uint32_t myId, cons
     //apres, test sprit:
     float tileSize, offsetX, offsetY;
     calculateMovement(m_worldSize, map, tileSize, offsetX, offsetY);
+    renderPacGommes(pacgommes,tileSize,offsetX,offsetY);
 
     //TEMPORAIRE calculer correctement la taille du sprite!
     auto texSize=m_inkyTexture.getSize();
@@ -214,7 +216,7 @@ void Renderer::render(const std::vector<PlayerData>& states, uint32_t myId, cons
 
 
 
-void Renderer::renderMap(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map){
+void Renderer::renderMap(const std::vector<PlayerData>& states, const BoardCommon map){
     BoardCommon mapPerso = map;
     //sans le responsive:
     float tileSize = std::min(m_worldSize / mapPerso.width, m_worldSize / mapPerso.height); //a remplacer par ma fonction utilistaire
@@ -254,6 +256,28 @@ void Renderer::renderMap(const std::vector<PlayerData>& states, uint32_t myId, c
                 }
             }
 }
+
+void Renderer::renderPacGommes(const std::vector<PacgommeCommon>& pacgommes,float tileSize,float offsetX,float offsetY){
+
+    for (const auto& pg : pacgommes) {
+        gf::CircleShape pacGomme(tileSize / 6.0f);
+
+        pacGomme.setOrigin({
+            tileSize / 12.0f,
+            tileSize / 12.0f
+        });
+
+        pacGomme.setPosition({
+            pg.x * tileSize + offsetX + tileSize / 2.0f,
+            pg.y * tileSize + offsetY + tileSize / 2.0f
+        });
+
+        pacGomme.setColor(gf::Color::Yellow);
+
+        rendered_window.draw(pacGomme);
+    }
+}
+
 
 void Renderer::handleResize(unsigned int winW, unsigned int winH)
 {

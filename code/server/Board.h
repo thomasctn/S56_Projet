@@ -32,7 +32,9 @@ public:
     unsigned int getWidth() const { return width; }
     unsigned int getHeight() const { return height; }
 
-    std::vector<PacgommeCommon> getPacgommes() const {return pacgommes;}
+    std::set<Position> getPacgommes() const {return pacgommes;}
+    bool hasPacgomme(unsigned int x, unsigned int y);
+    bool removePacgomme(unsigned int x, unsigned int y);
     BoardCommon toCommonData();
 
     
@@ -41,7 +43,7 @@ private:
     unsigned int width;
     unsigned int height;
     gf::Array2D<Case> grid;
-    std::vector<PacgommeCommon> pacgommes;
+    std::set<Position> pacgommes;
 
     void generateTestMaze();
     void generateMaze();

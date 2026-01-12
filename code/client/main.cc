@@ -35,6 +35,8 @@ int main()
     //STRCUTURES DE DONNÉES RECUES
     std::vector<PlayerData> states;
     BoardCommon board;
+    std::vector<PacgommeCommon> pacgommes;
+
 
     //std::mutex statesMutex;
     bool running = true;
@@ -269,6 +271,7 @@ int main()
                         board=data.board;
 
                         screen = ClientScreen::Playing; //passage en mode jeu, on montre la carte
+                        
                         gf::Log::info("Game start reçu -> passage en Playing\n");
                         break;
                     }
@@ -276,7 +279,8 @@ int main()
                     case GameState::type:{
                         auto data = packet.as<GameState>();
                         states = data.clientStates;
-                        board=data.board;
+                        //board=data.board;
+                        pacgommes = data.pacgommes;
                         break;
                     }
                 }
@@ -298,7 +302,7 @@ int main()
             renderer.renderLobby(connectedPlayers, maxPlayers, amReady);
         }
         else{ //Playing
-            renderer.render(states, myId, board);
+            renderer.render(states, myId, board, pacgommes);
         }
         
 

@@ -17,9 +17,10 @@
 class Renderer{
     public:
     Renderer();
-    void render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map);
-    void renderMap(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map);
+    void render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map,const std::vector<PacgommeCommon>& pacgommes);
+    void renderMap(const std::vector<PlayerData>& states,  const BoardCommon map);
     void calculateMovement(float worldSize, const BoardCommon& map,float& tileSize, float& offsetX, float& offsetY);
+    void renderPacGommes(const std::vector<PacgommeCommon>& pacgommes,float tileSize,float offsetX,float offsetY);
 
     void renderWelcome();
     void renderLobby(int connectedPlayers, int maxPlayers, bool amReady);
