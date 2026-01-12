@@ -19,7 +19,7 @@ A faire :
         + securiter en focntion de l'etat du client dans le SERVER
         (pas retourner alors que cest pas possible)
 
-    - Ne pas faire crash le client si il trouve pas le serv.
+    - Ne pas faire crash le client si il trouve pas le serv mais le faire chercher jusqua trouver.
 
 Bonus :
     - améliorer visuel
