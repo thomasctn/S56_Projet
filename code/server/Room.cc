@@ -24,14 +24,7 @@ void Room::addPlayer(uint32_t playerId) {
     network.send(playerId, joinPacket);
 
     // Broadcast de la liste des joueurs à tous
-    ServerListRoomPlayers list;
-    for (uint32_t pid : players)
-        list.players.push_back(getPlayerData(pid));
-
-    gf::Packet listPacket;
-    listPacket.is(list);
-    for (uint32_t pid : players)
-        network.send(pid, listPacket);
+    broadcastRoomPlayers();
 
     // Démarrage automatique si la room est pleine et que la partie n'existe pas encore
     /*
@@ -52,14 +45,7 @@ void Room::removePlayer(uint32_t playerId) {
     network.send(playerId, leavePacket);
 
     // Broadcast de la liste mise à jour aux autres joueurs
-    ServerListRoomPlayers list;
-    for (uint32_t pid : players)
-        list.players.push_back(getPlayerData(pid));
-
-    gf::Packet listPacket;
-    listPacket.is(list);
-    for (uint32_t pid : players)
-        network.send(pid, listPacket);
+    broadcastRoomPlayers();
 
     // Si le joueur était dans la partie en cours, le retirer également
     if (game) {
@@ -168,8 +154,8 @@ void Room::handlePacket(PacketContext& ctx) {
         case ClientReady::type:
             handleClientReady(ctx);
             break;
-        case ClientChangeRole::type:
-            handleClientChangeRole(ctx);
+        case ClientRoomPlayerChange::type:
+            handleClientRoomPlayerChange(ctx);
             break;
         default:
             gf::Log::info("[Room %u] Paquet non traité (type=%llu)\n", 
@@ -227,17 +213,15 @@ void Room::handleClientReady(PacketContext& ctx) {
 
 
 
-void Room::handleClientChangeRole(PacketContext& ctx) {
+void Room::handleClientRoomPlayerChange(PacketContext& ctx) {
     auto& player = game->getPlayerInfo(ctx.senderId);
     player.role = (player.role == PlayerRole::PacMan) ? PlayerRole::Ghost : PlayerRole::PacMan;
-
-    // Broadcast le changement
-    ServerChangeRole msg;
-    gf::Packet rolePacket;
-    rolePacket.is(msg);
-
-    for (uint32_t pid : players)
-        network.send(pid, rolePacket);
+    ServerRoomPlayerChange msg;
+    gf::Packet answer;
+    answer.is(msg);
+    player.socket.sendPacket(answer);
+    //broadcast
+    broadcastRoomPlayers();
 
 }
 
@@ -265,7 +249,16 @@ bool Room::allPlayersReady() const {
     return true;
 }
 
-
+void Room::broadcastRoomPlayers()
+{
+    ServerListRoomPlayers list;
+    for (uint32_t pid : players)
+        list.players.push_back(getPlayerData(pid));
+    gf::Packet packet;
+    packet.is(list);
+    for (uint32_t pid : players)
+        network.send(pid, packet);
+}
 
 void Room::broadcastState() {
     if (!game)
@@ -273,7 +266,7 @@ void Room::broadcastState() {
 
     auto& playersMap = game->getPlayers();
 
-    GameState gs;
+    ServerGameState gs;
     gs.board = game->getBoard().toCommonData();
     gs.pacgommes = game->getBoard().getPacgommes();
     for (auto& [id, playerPtr] : playersMap) {

@@ -43,6 +43,8 @@ Serveur (envoyé)
 
 
 */
+
+//Faudra probablement les déplacer ces structures
 struct Position
 {
   static constexpr gf::Id type = "Position"_id;
@@ -122,10 +124,27 @@ Archive &operator|(Archive &ar, PlayerData &data)
   return ar | data.id | data.x | data.y | data.color | data.name | data.role | data.score | data.ready;
 }
 
+struct RoomSettings
+{
+  static constexpr gf::Id type = "RoomSettings"_id;
+  unsigned int roomSize;
+  unsigned int nbBot;
+  unsigned int gameDuration;
+};
+template <typename Archive>
+Archive &operator|(Archive &ar, RoomSettings &data)
+{
+  return ar | data.roomSize | data.nbBot | data.gameDuration;
+}
+
+
+//------------------------------------------
+
 // Un peu inspiré de https://github.com/Hatunruna/ggj2020/blob/master/code/bits/common/Protocol.h
 
 // Serveur -> client
 
+//Réponse au client qui rejoind la room
 struct ServerJoinRoom
 {
   static constexpr gf::Id type = "ServerJoinRoom"_id;
@@ -135,6 +154,7 @@ Archive &operator|(Archive &ar, ServerJoinRoom &data)
 {
   return ar;
 }
+//Réponse au client qui quitte la room
 struct ServerLeaveRoom
 {
   static constexpr gf::Id type = "ServerLeaveRoom"_id;
@@ -144,7 +164,19 @@ Archive &operator|(Archive &ar, ServerLeaveRoom &data)
 {
   return ar;
 }
-// Utilisé pour mettre à jour le nombre de joueur, le changement de rôle de joueur, le changement de couleur, etc...
+
+//Réponse au client qui change de rôle/nom/couleur
+struct ServerRoomPlayerChange
+{
+  static constexpr gf::Id type = "ServerRoomPlayerChange"_id;
+};
+template <typename Archive>
+Archive &operator|(Archive &ar, ServerRoomPlayerChange &data)
+{
+  return ar;
+}
+
+// Réponse à tous les clients sur les données des joueurs (nom, rôles, couleurs, etc..)
 struct ServerListRoomPlayers
 {
   static constexpr gf::Id type = "ServerListRoomPlayers"_id;
@@ -155,18 +187,30 @@ Archive &operator|(Archive &ar, ServerListRoomPlayers &data)
 {
   return ar | data.players;
 }
-struct ServerChangeRole
+
+//Réponse au client qui change les paramètres de la room
+struct ServerRoomSettingsChange
 {
-  static constexpr gf::Id type = "ServerChangeRole"_id;
+  static constexpr gf::Id type = "ServerRoomSettingsChange"_id;
 };
 template <typename Archive>
-Archive &operator|(Archive &ar, ServerChangeRole &data)
+Archive &operator|(Archive &ar, ServerRoomSettingsChange &data)
 {
   return ar;
 }
 
-// Les autres changement
-
+//Réponse à tous les clients sur les changement de paramètre de la room
+struct ServerRoomSettings
+{
+  static constexpr gf::Id type = "ServerRoomSettings"_id;
+  RoomSettings settings;
+};
+template <typename Archive>
+Archive &operator|(Archive &ar, ServerRoomSettings &data)
+{
+  return ar | data.settings;
+}
+//Réponse au client qui est prêt
 struct ServerReady
 {
   static constexpr gf::Id type = "ServerReady"_id;
@@ -176,7 +220,7 @@ Archive &operator|(Archive &ar, ServerReady &data)
 {
   return ar;
 }
-
+//Réponse à tous les clients sur le démarrage de la partie
 struct ServerGameStart
 {
   static constexpr gf::Id type = "ServerGameStart"_id;
@@ -189,6 +233,21 @@ Archive &operator|(Archive &ar, ServerGameStart &data)
 {
   return ar | data.board | data.players | data.pacgommes;
 }
+//Réponse à tous les clients sur la mise à jour de la partie
+struct ServerGameState
+{
+  static constexpr gf::Id type = "ServerGameState"_id;
+  std::vector<PlayerData> clientStates;
+  BoardCommon board;
+  std::set<Position> pacgommes;
+};
+template <typename Archive>
+Archive &operator|(Archive &ar, ServerGameState &data)
+{
+  return ar | data.clientStates | data.board | data.pacgommes;
+}
+
+//Réponse à tous les clients sur la fin de la partie
 struct ServerGameEnd
 {
   static constexpr gf::Id type = "ServerGameOver"_id;
@@ -198,7 +257,6 @@ Archive &operator|(Archive &ar, ServerGameEnd &data)
 {
   return ar;
 }
-
 struct ServerDisconnect
 {
   static constexpr gf::Id type = "ServerDisconnect"_id;
@@ -232,15 +290,27 @@ Archive &operator|(Archive &ar, ClientLeaveRoom &data)
 {
   return ar;
 };
-
-struct ClientChangeRole
+//Requête au serveur pour le changement de données du joueur
+struct ClientRoomPlayerChange
 {
-  static constexpr gf::Id type = "ClientChangeRole"_id;
+  static constexpr gf::Id type = "ClientRoomPlayerChange"_id;
+  PlayerData newPlayerRoomData;
 };
 template <typename Archive>
-Archive &operator|(Archive &ar, ClientChangeRole &data)
+Archive &operator|(Archive &ar, ClientRoomPlayerChange &data)
 {
-  return ar;
+  return ar | data.newPlayerRoomData;
+}
+//Requête au serveur pour le changement des paramètres du jeu
+struct ClientRoomSettingsChange
+{
+  static constexpr gf::Id type = "ClientRoomSettingsChange"_id;
+  RoomSettings newSettings;
+};
+template <typename Archive>
+Archive &operator|(Archive &ar, ClientRoomSettingsChange &data)
+{
+  return ar | data.newSettings;
 }
 
 struct ClientReady
@@ -275,17 +345,4 @@ template <typename Archive>
 Archive &operator|(Archive &ar, ClientMove &data)
 {
   return ar | data.moveDir;
-}
-
-struct GameState
-{
-  static constexpr gf::Id type = "GameState"_id;
-  std::vector<PlayerData> clientStates;
-  BoardCommon board;
-  std::set<Position> pacgommes;
-};
-template <typename Archive>
-Archive &operator|(Archive &ar, GameState &data)
-{
-  return ar | data.clientStates | data.board | data.pacgommes;
 }
