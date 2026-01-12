@@ -76,7 +76,7 @@ gf::Color4f Renderer::colorFromId(uint32_t id) {
 
 
 
-void Renderer::render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map,const std::vector<PacgommeCommon>& pacgommes){
+void Renderer::render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map,const std::set<Position>& pacgommes){
     rendered_window.clear(gf::Color::Black);
     renderMap(states,map);
     
@@ -257,7 +257,7 @@ void Renderer::renderMap(const std::vector<PlayerData>& states, const BoardCommo
             }
 }
 
-void Renderer::renderPacGommes(const std::vector<PacgommeCommon>& pacgommes,float tileSize,float offsetX,float offsetY){
+void Renderer::renderPacGommes(const std::set<Position>& pacgommes,float tileSize,float offsetX,float offsetY){
 
     for (const auto& pg : pacgommes) {
         gf::CircleShape pacGomme(tileSize / 6.0f);

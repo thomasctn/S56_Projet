@@ -35,7 +35,7 @@ int main()
     //STRCUTURES DE DONNÉES RECUES
     std::vector<PlayerData> states;
     BoardCommon board;
-    std::vector<PacgommeCommon> pacgommes;
+    std::set<Position> pacgommes;
 
 
     //std::mutex statesMutex;
@@ -276,10 +276,10 @@ int main()
                         break;
                     }
 
-                    case GameState::type:{
-                        auto data = packet.as<GameState>();
+                    case ServerGameState::type:{
+                        auto data = packet.as<ServerGameState>();
                         states = data.clientStates;
-                        //board=data.board;
+                        //board=data.board; (on me l'envoie mais je suis pas censé le prendre a chaque fois)
                         pacgommes = data.pacgommes;
                         break;
                     }
