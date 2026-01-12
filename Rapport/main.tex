@@ -25,18 +25,20 @@
 \usepackage{fancyhdr}
 \usepackage[none]{hyphenat}
 \emergencystretch=3em
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{float}
 
-\usepackage[backend=biber,style=numeric]{biblatex}
-\addbibresource{sitographie.bib}
+
 \usepackage{csquotes}
 
 
 % Configuration de fancyhdr
 \pagestyle{fancy}
 \fancyhf{} % Efface tous les en-tètes et pieds de page précédents
-\fancyhead[C]{Rapport de Stage} % Texte centré en haut de la page
+\fancyhead[C]{Rapport de Projet} % Texte centré en haut de la page
 \fancyfoot[L]{2025} % Texte en bas à  gauche du pied de page
-\fancyfoot[C]{Thomas COUTANT} % Texte au centre du pied de page
+\fancyfoot[C]{COUTANT, LITAMPHA, PETER} % Texte au centre du pied de page
 \fancyfoot[R]{\thepage} % Numéro de page en bas à  droite du pied de page
 
 \renewcommand{\headrulewidth}{0.4pt} % à‰paisseur de la ligne de séparation de l'en-tète
@@ -46,9 +48,9 @@
 
 \fancypagestyle{plain}{
   \fancyhf{} % Effacer tous
-  \fancyhead[C]{Rapport de Stage} % Texte centré en haut de la page
-  \fancyfoot[L]{L2 Informatique} % Texte en bas à  gauche du pied de page
-  \fancyfoot[C]{Thomas COUTANT} % Texte au centre du pied de page
+  \fancyhead[C]{Rapport de Projet} % Texte centré en haut de la page
+  \fancyfoot[L]{L3 Informatique} % Texte en bas à  gauche du pied de page
+  \fancyfoot[C]{COUTANT, LITAMPHA, PETER} % Texte au centre du pied de page
   \fancyfoot[R]{\thepage} % Numéro de page en bas à  droite du pied de page
   \renewcommand{\headrulewidth}{0.4pt} % à‰paisseur de la ligne de séparation de l'en-tète
   \renewcommand{\footrulewidth}{0.4pt} % à‰paisseur de la ligne de séparation du pied de page
@@ -98,105 +100,141 @@
 \tableofcontents
 \listoffigures
 
-\chapter*{Introduction} % * pour ne pas avoir de numéro de chapitre
+\chapter*{Introduction}
 \addcontentsline{toc}{chapter}{Introduction}
 
+Ce projet s’inscrit dans le cadre de la licence 3 Informatique.
+L’objectif est la conception et la réalisation d’un jeu de type Pac-Man
+multijoueur en réseau, mettant en œuvre des notions de programmation,
+d’architecture logicielle et de communication client-serveur.
 
 \vfill
 
-\chapter{La structure d’accueil de mon stage : EBOP}
+
+\chapter{Présentation du projet}
+
+\section{Contexte académique}
+
+Présentation du cadre universitaire du projet (UE, semestre, travail en groupe ou individuel,
+objectifs pédagogiques).
+
+\section{Présentation générale du jeu Pac-Man}
+
+Rappel du principe du jeu Pac-Man original et justification de son choix
+pour une adaptation en réseau.
+
+\section{Objectifs généraux du projet}
+
+Objectifs fonctionnels (jeu jouable, multijoueur, synchronisation)
+et objectifs techniques (réseau, performance, architecture).
 
 
-\section{Présentation de l'organisation}
+\chapter{Définition du sujet et problématique}
 
+\section{Problématique du jeu en réseau}
 
+Contraintes liées au multijoueur en temps réel :
+latence, synchronisation des états, cohérence entre clients.
 
+\section{Choix techniques}
 
-\section{L’environnement de travail}
+Choix du langage, des bibliothèques, du modèle réseau
+(client-serveur, protocole, gestion des messages).
 
+\section{Répartition des rôles}
 
-\vspace{0.5cm}
-
-
-\chapter{Définition du sujet de stage}
-\section{Contexte et problématique}
-
-
-\section{Objectifs du stage}
-
-
-
-
-\section{Collaboration et intégration}
+Description de la collaboration, répartition des tâches et organisation du travail.
 
 
 %\chapter{L'Organisation du stage}
 
 
-\section{Équipement et outils}
+\chapter{Architecture et conception}
+
+\section{Architecture générale}
+
+Description de l’architecture client-serveur, diagrammes éventuels.
+
+\section{Structure du serveur}
+
+Gestion des joueurs, des parties, des salles (lobby),
+synchronisation de l’état du jeu.
+
+\section{Structure du client}
+
+Affichage, gestion des entrées utilisateur,
+réception et traitement des messages réseau.
+
+\section{Protocoles et échanges réseau}
+
+Description des trames, types de messages,
+gestion des événements (connexion, mouvement, fin de partie).
 
 
 %\section{L'application}
 
 %\section{La gestion des tickets}
 
-\chapter{Contenu et déroulement du stage}
+\chapter{Réalisation et déroulement du projet}
 
-\section{Exploration des outils et premières implémentations}
+\section{Mise en place de l’environnement de développement}
 
+Outils utilisés, configuration, compilation.
 
-\subsection*{12–13 juin : premiers essais d’interaction}
+\section{Implémentation des fonctionnalités principales}
 
+\subsection*{Gestion du déplacement et des collisions}
 
-\subsection*{16 juin : conception d’un déclencheur de transformation}
+\subsection*{Synchronisation des joueurs}
 
+\subsection*{Gestion des fantômes et de l’IA}
 
+\subsection*{Système de score et conditions de victoire}
 
-\subsection*{17 juin : implémentation du système de bloc par clic long}
+\section{Gestion du multijoueur}
 
+Connexion des clients, création des parties,
+gestion des déconnexions.
 
-\subsection*{Ajouts fonctionnels : zoom, lecture vocale, duplication}
+\section{Difficultés rencontrées}
 
-
-
-
-
-
-
-\subsection*{Conception du tableau de contrôle}
-
-
-
-\section{Intégration, adaptation et validation croisée}
-
-\subsection*{Collaboration avec un autre stagiaire}
-
-
-\section{Consolidation, optimisation et finalisation du prototype}
+Problèmes techniques, bugs réseau,
+choix remis en question.
 
 
 
-\chapter{Bilan}
+\chapter{Bilan et perspectives}
 
-\section{Acquis techniques}
+\section{Compétences acquises}
 
-
-
+Programmation réseau, architecture logicielle,
+travail de conception.
 
 \section{Résultat final}
+
+Fonctionnalités implémentées,
+objectifs atteints ou partiellement atteints.
+
+\section{Améliorations possibles}
+
+idee.txt
+
 
 
 % Page de conclusion 
 \chapter*{Conclusion}
 \addcontentsline{toc}{chapter}{Conclusion}
 
+Ce projet a permis de mettre en pratique les connaissances acquises
+durant la formation en informatique, en particulier dans le domaine
+du développement réseau et de la conception logicielle.
+
+
 
 
 % Page de conclusion 
 \chapter*{Sitographie}
 \addcontentsline{toc}{chapter}{Sitographie} % Ajout de la sitographie sur la table des matières sans ètre numéroté
-
-\printbibliography[heading=none]
 
 
 % Page de résumé
