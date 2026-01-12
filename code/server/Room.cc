@@ -276,7 +276,7 @@ void Room::broadcastRoomSettings()
 {
     ServerRoomSettings msg;
     msg.settings = settings;
-
+    gf::Log::info("[Room %u] Test %u\n",id, settings.roomSize);
     gf::Packet packet;
     packet.is(msg);
 
@@ -348,12 +348,10 @@ void Room::handleClientChangeRoomSettings(PacketContext& ctx)
 
     // (optionnel) limiter au host
     // if (ctx.senderId != *players.begin()) return;
-
-    setSettings(data.newSettings);
-
-    // Ack uniquement au client demandeur
+        // Ack uniquement au client demandeur
     ServerChangeRoomSettings ack;
     gf::Packet packet;
     packet.is(ack);
     network.send(ctx.senderId, packet);
+    setSettings(data.newSettings);
 }
