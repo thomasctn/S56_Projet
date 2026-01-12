@@ -23,7 +23,7 @@ public:
     bool isOccupied(unsigned int x, unsigned int y, uint32_t excludeId,
                     const std::vector<Player>& players) const;
     bool isInside(unsigned int x, unsigned int y) const;
-    void placeRandomPacGommes(int count);
+    void placeRandomPacGommes(unsigned int count);
 
 
     void print() const;
@@ -31,6 +31,8 @@ public:
 
     unsigned int getWidth() const { return width; }
     unsigned int getHeight() const { return height; }
+
+    std::vector<PacgommeCommon> getPacgommes() const {return pacgommes;}
     BoardCommon toCommonData();
 
     
@@ -39,6 +41,7 @@ private:
     unsigned int width;
     unsigned int height;
     gf::Array2D<Case> grid;
+    std::vector<PacgommeCommon> pacgommes;
 
     void generateTestMaze();
     void generateMaze();
@@ -48,6 +51,6 @@ private:
     void openCorners();
     void addLoops(float probability);
     void fillDeadEnds();
-    bool isHutWall(int x, int y);
+    bool isHutWall(unsigned int x, unsigned int y);
 };
 

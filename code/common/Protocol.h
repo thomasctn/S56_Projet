@@ -43,6 +43,23 @@ Serveur (envoyé)
 
 
 */
+struct PacgommeCommon
+{
+  static constexpr gf::Id type = "PacgommeCommon"_id;
+  unsigned int x;
+  unsigned int y;
+  PacgommeCommon() {x = 0; y= 0;}
+  PacgommeCommon(unsigned int xp, unsigned int yp) {
+    x = xp;
+    y = yp;
+  }
+};
+template <typename Archive>
+Archive &operator|(Archive &ar, PacgommeCommon &data)
+{
+  return ar | data.x | data.y;
+}
+
 struct CaseCommon
 {
   static constexpr gf::Id type = "CaseCommon"_id;
@@ -152,13 +169,13 @@ struct ServerGameStart
 {
   static constexpr gf::Id type = "ServerGameStart"_id;
   BoardCommon board;
-  // Pas sûr que ce soit vraiment utile...
   std::vector<PlayerData> players;
+  std::vector<PacgommeCommon> pacgommes;
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, ServerGameStart &data)
 {
-  return ar | data.board | data.players;
+  return ar | data.board | data.players | data.pacgommes;
 }
 struct ServerGameEnd
 {
@@ -253,9 +270,10 @@ struct GameState
   static constexpr gf::Id type = "GameState"_id;
   std::vector<PlayerData> clientStates;
   BoardCommon board;
+  std::vector<PacgommeCommon> pacgommes;
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, GameState &data)
 {
-  return ar | data.clientStates | data.board;
+  return ar | data.clientStates | data.board | data.pacgommes;
 }

@@ -42,20 +42,21 @@ bool Board::isOccupied(unsigned int x, unsigned int y, uint32_t excludeId, const
 
 
 
-void Board::placeRandomPacGommes(int count) {
+void Board::placeRandomPacGommes(unsigned int count) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> distX(0, getWidth() - 1);
     std::uniform_int_distribution<> distY(0, getHeight() - 1);
-
-    int placed = 0;
+    std::set<std::pair<unsigned int, unsigned int>> occupieds;
+    unsigned int placed = 0;
     while (placed < count) {
-        int x = distX(gen);
-        int y = distY(gen);
+        unsigned int x = distX(gen);
+        unsigned int y = distY(gen);
         Case& c = getCase(x, y);
 
-        if (c.getType() == CellType::Floor && !c.hasPacGomme()) {
-            c.placePacGomme();
+        if (c.getType() == CellType::Floor && occupieds.find({x,y}) == occupieds.end()) {
+            pacgommes.push_back(PacgommeCommon(x,y));
+            occupieds.insert({x,y});
             ++placed;
         }
     }
@@ -65,8 +66,7 @@ void Board::generateMaze() {
     for (unsigned int y = 0; y < height; ++y){
         for (unsigned int x = 0; x < width; ++x)
         {
-            grid({static_cast<unsigned int>(x),
-                 static_cast<unsigned int>(y)}) = Case(CellType::Wall);
+            grid({x,y}) = Case(CellType::Wall);
         }
     }
     generatePrimMaze();
@@ -83,23 +83,21 @@ void Board::generatePrimMaze() {
     std::random_device rd;
     std::mt19937 gen(rd());
 
-    auto inBounds = [&](int x, int y) {
-        return x > 0 && y > 0 && x < (int)width - 1 && y < (int)height - 1;
+    auto inBounds = [&](unsigned int x, unsigned int y) {
+        return x > 0 && y > 0 && x < width - 1 && y < height - 1;
     };
 
-    std::vector<std::pair<int,int>> frontier;
+    std::vector<std::pair<unsigned int,unsigned int>> frontier;
 
     // Point de départ : coin supérieur gauche impair
-    int sx = 1;
-    int sy = 1;
-    grid({static_cast<unsigned int>(sx),
-                 static_cast<unsigned int>(sy)}) = Case(CellType::Floor);
+    unsigned int sx = 1;
+    unsigned int sy = 1;
+    grid({sx,sy}) = Case(CellType::Floor);
 
     // Ajoute les murs voisins dans la frontier, sauf autour de la cabane
-    auto addFrontier = [&](int x, int y)
+    auto addFrontier = [&](unsigned int x, unsigned int y)
     {
-        if (inBounds(x, y) && grid({static_cast<unsigned int>(x),
-                 static_cast<unsigned int>(y)}).getType() == CellType::Wall && !isHutWall(x, y))
+        if (inBounds(x, y) && grid({x,y}).getType() == CellType::Wall && !isHutWall(x, y))
         {
             frontier.emplace_back(x, y);
         }
@@ -113,24 +111,23 @@ void Board::generatePrimMaze() {
     while (!frontier.empty())
     {
         std::uniform_int_distribution<> dist(0, frontier.size() - 1);
-        int idx = dist(gen);
+        unsigned int idx = dist(gen);
         auto [x, y] = frontier[idx];
         frontier.erase(frontier.begin() + idx);
 
-        if (grid({static_cast<unsigned int>(x),
-                 static_cast<unsigned int>(y)}).getType() == CellType::Floor)
+        if (grid({x,y}).getType() == CellType::Floor)
             continue;
 
         // Cherche les voisins déjà ouverts
         std::vector<std::pair<int,int>> neighbors;
 
-        if (inBounds(x + 2, y) && grid({static_cast<unsigned int>(x) + 2, static_cast<unsigned int>(y)}).getType() == CellType::Floor)
+        if (inBounds(x + 2, y) && grid({x + 2, y}).getType() == CellType::Floor)
             neighbors.emplace_back(x + 2, y);
-        if (inBounds(x - 2, y) && grid({static_cast<unsigned int>(x) - 2, static_cast<unsigned int>(y)}).getType() == CellType::Floor)
+        if (inBounds(x - 2, y) && grid({x - 2, y}).getType() == CellType::Floor)
             neighbors.emplace_back(x - 2, y);
-        if (inBounds(x, y + 2) && grid({static_cast<unsigned int>(x), static_cast<unsigned int>(y) + 2}).getType() == CellType::Floor)
+        if (inBounds(x, y + 2) && grid({x, y + 2}).getType() == CellType::Floor)
             neighbors.emplace_back(x, y + 2);
-        if (inBounds(x, y - 2) && grid({static_cast<unsigned int>(x), static_cast<unsigned int>(y) - 2}).getType() == CellType::Floor)
+        if (inBounds(x, y - 2) && grid({x, y - 2}).getType() == CellType::Floor)
             neighbors.emplace_back(x, y - 2);
 
         if (!neighbors.empty())
@@ -139,15 +136,14 @@ void Board::generatePrimMaze() {
             auto [nx, ny] = neighbors[ndist(gen)];
 
             // Casse le mur entre les deux, sauf si c'est un mur de cabane
-            int wallX = (x + nx) / 2;
-            int wallY = (y + ny) / 2;
+            unsigned int wallX = (x + nx) / 2;
+            unsigned int wallY = (y + ny) / 2;
 
             if (!isHutWall(wallX, wallY))
-                grid({static_cast<unsigned int>(wallX), static_cast<unsigned int>(wallY)}) = Case(CellType::Floor);
+                grid({wallX, wallY}) = Case(CellType::Floor);
 
             if (!isHutWall(x, y))
-                grid({static_cast<unsigned int>(x),
-                 static_cast<unsigned int>(y)}) = Case(CellType::Floor);
+                grid({x,y}) = Case(CellType::Floor);
 
             // Ajouter les nouveaux murs à frontier, sauf cabane
             addFrontier(x + 2, y);
@@ -160,8 +156,8 @@ void Board::generatePrimMaze() {
 
 
 void Board::placeHut() {
-    int cx = width / 2;
-    int cy = height / 2;
+    unsigned int cx = width / 2;
+    unsigned int cy = height / 2;
 
     // Cabane
     for (int dy = -1; dy <= 1; ++dy)
@@ -190,8 +186,8 @@ void Board::placeHut() {
 
 
 void Board::connectHut() {
-    int cx = width / 2;
-    int cy = height / 2;
+    unsigned int cx = width / 2;
+    unsigned int cy = height / 2;
 
     struct Dir { int dx, dy; };
     std::vector<Dir> dirs = {
@@ -247,24 +243,23 @@ void Board::connectHut() {
 
 
 void Board::openCorners() {
-    std::vector<std::pair<int,int>> corners = {
+    std::vector<std::pair<unsigned int,unsigned int>> corners = {
         {1,1},
-        {(int)width - 2, 1},
-        {1, (int)height - 2},
-        {(int)width - 2, (int)height - 2}
+        {width - 2, 1},
+        {1, height - 2},
+        {width - 2, height - 2}
     };
 
     for (auto [x, y] : corners)
     {
-        grid({static_cast<unsigned int>(x),
-                 static_cast<unsigned int>(y)}) = Case(CellType::Floor);
+        grid({x,y}) = Case(CellType::Floor);
 
         // Connecte vers l'intérieur
-        if (grid({static_cast<unsigned int>(x + (x == 1 ? 1 : -1)), static_cast<unsigned int>(y)}).getType() == CellType::Wall)
-            grid({static_cast<unsigned int>(x + (x == 1 ? 1 : -1)), static_cast<unsigned int>(y)}) = Case(CellType::Floor);
+        if (grid({static_cast<unsigned int>(x + (x == 1 ? 1 : -1)), y}).getType() == CellType::Wall)
+            grid({static_cast<unsigned int>(x + (x == 1 ? 1 : -1)), y}) = Case(CellType::Floor);
 
-        if (grid({static_cast<unsigned int>(x), static_cast<unsigned int>(y + (y == 1 ? 1 : -1))}).getType() == CellType::Wall)
-            grid({static_cast<unsigned int>(x), static_cast<unsigned int>(y + (y == 1 ? 1 : -1))}) = Case(CellType::Floor);
+        if (grid({x, static_cast<unsigned int>(y + (y == 1 ? 1 : -1))}).getType() == CellType::Wall)
+            grid({x, static_cast<unsigned int>(y + (y == 1 ? 1 : -1))}) = Case(CellType::Floor);
     }
 }
 
@@ -273,15 +268,14 @@ void Board::addLoops(float probability) {
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> chance(0.0f, 1.0f);
 
-    int cx = width / 2;
-    int cy = height / 2;
+    unsigned int cx = width / 2;
+    unsigned int cy = height / 2;
 
     for (unsigned int y = 1; y < height - 1; ++y)
     {
         for (unsigned int x = 1; x < width - 1; ++x)
         {
-            if (grid({static_cast<unsigned int>(x),
-                 static_cast<unsigned int>(y)}).getType() != CellType::Wall)
+            if (grid({x,y}).getType() != CellType::Wall)
                 continue;
 
             // Ne touche pas à la cabane (zone 3x3 + marge)
@@ -301,8 +295,7 @@ void Board::addLoops(float probability) {
 
             if ((h || v) && chance(gen) < probability)
             {
-                grid({static_cast<unsigned int>(x),
-                 static_cast<unsigned int>(y)}) = Case(CellType::Floor);
+                grid({x,y}) = Case(CellType::Floor);
             }
         }
     }
@@ -319,18 +312,17 @@ void Board::fillDeadEnds() {
         {
             for (unsigned int x = 1; x < width - 1; ++x) // <- ne touche pas les bords
             {
-                if (grid({static_cast<unsigned int>(x),
-                 static_cast<unsigned int>(y)}).getType() != CellType::Floor)
+                if (grid({x,y}).getType() != CellType::Floor)
                     continue;
 
                 // Ne touche pas la cabane
-                int cx = width / 2;
-                int cy = height / 2;
+                unsigned int cx = width / 2;
+                unsigned int cy = height / 2;
                 if (x >= cx - 1 && x <= cx + 1 && y >= cy - 1 && y <= cy + 1)
                     continue;
 
                 // Compter les cases Floor autour
-                int floorCount = 0;
+                unsigned int floorCount = 0;
                 if (grid({x + 1, y}).getType() == CellType::Floor) floorCount++;
                 if (grid({x - 1, y}).getType() == CellType::Floor) floorCount++;
                 if (grid({x, y + 1}).getType() == CellType::Floor) floorCount++;
@@ -340,7 +332,7 @@ void Board::fillDeadEnds() {
                 if (floorCount == 1)
                 {
                     // Chercher un mur adjacent à casser (hors bordure)
-                    std::vector<std::pair<int,int>> candidates;
+                    std::vector<std::pair<unsigned int,unsigned int>> candidates;
                     if (x + 1 < width - 1 && grid({x + 1, y}).getType() == CellType::Wall) candidates.push_back({x+1, y});
                     if (x - 1 > 0       && grid({x - 1, y}).getType() == CellType::Wall) candidates.push_back({x-1, y});
                     if (y + 1 < height - 1 && grid({x, y + 1}).getType() == CellType::Wall) candidates.push_back({x, y+1});
@@ -354,7 +346,7 @@ void Board::fillDeadEnds() {
                         std::uniform_int_distribution<> dist(0, candidates.size() - 1);
                         auto [mx, my] = candidates[dist(gen)];
 
-                        grid({static_cast<unsigned int>(mx), static_cast<unsigned int>(my)}) = Case(CellType::Floor);
+                        grid({mx, my}) = Case(CellType::Floor);
                         changed = true;
                     }
                 }
@@ -364,7 +356,7 @@ void Board::fillDeadEnds() {
 }
 
 
-bool Board::isHutWall(int x, int y) {
+bool Board::isHutWall(unsigned int x, unsigned int y) {
     int cx = width / 2;
     int cy = height / 2;
 
@@ -382,21 +374,18 @@ void Board::generateTestMaze(){
             // Les murs autour de la grille
             if (y == 0 || y == height - 1 || x == 0 || x == width - 1)
             {
-                grid({static_cast<unsigned int>(x),
-                 static_cast<unsigned int>(y)}) = Case(CellType::Wall);
+                grid({x,y}) = Case(CellType::Wall);
             }
             // La cabane centrale 3x3
             else if ((x >= width/2 - 1 && x <= width/2 + 1) &&
                      (y >= height/2 - 1 && y <= height/2 + 1))
             {
-                grid({static_cast<unsigned int>(x),
-                 static_cast<unsigned int>(y)}) = Case(CellType::Hut);
+                grid({x,y}) = Case(CellType::Hut);
             }
             // Le reste = sol
             else
             {
-                grid({static_cast<unsigned int>(x),
-                 static_cast<unsigned int>(y)}) = Case(CellType::Floor);
+                grid({x,y}) = Case(CellType::Floor);
             }
         }
     }

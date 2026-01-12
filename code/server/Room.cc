@@ -132,7 +132,7 @@ void Room::startGame() {
     for (auto& [id, playerPtr] : game->getPlayers()) {
         startMsg.players.push_back(playerPtr->getState());
     }
-
+    startMsg.pacgommes = game->getBoard().getPacgommes();
     gf::Packet startPacket;
     startPacket.is(startMsg);
     for (uint32_t pid : players)
@@ -275,7 +275,7 @@ void Room::broadcastState() {
 
     GameState gs;
     gs.board = game->getBoard().toCommonData();
-
+    gs.pacgommes = game->getBoard().getPacgommes();
     for (auto& [id, playerPtr] : playersMap) {
         gs.clientStates.push_back(playerPtr->getState());
     }
