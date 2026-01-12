@@ -146,8 +146,7 @@ void Room::startGame() {
 
 
 void Room::handlePacket(PacketContext& ctx) {
-    gf::Log::info("[Room %u] Paquet reçu joueur=%u type=%llu\n", 
-                  id, ctx.senderId, static_cast<unsigned long long>(ctx.packet.getType()));
+    //gf::Log::info("[Room %u] Paquet reçu joueur=%u type=%llu\n",id, ctx.senderId, static_cast<unsigned long long>(ctx.packet.getType()));
 
     if (players.find(ctx.senderId) == players.end()) {
         gf::Log::warning("[Room %u] Joueur %u non autorisé\n", id, ctx.senderId);
@@ -179,7 +178,7 @@ void Room::handlePacket(PacketContext& ctx) {
 
 void Room::handleClientMove(PacketContext& ctx) {
     auto data = ctx.packet.as<ClientMove>();
-    gf::Log::info("[Room %u] Input ajouté joueur=%u dir=%c\n", id, ctx.senderId, data.moveDir);
+    //gf::Log::info("[Room %u] Input ajouté joueur=%u dir=%c\n", id, ctx.senderId, data.moveDir);
 
     Direction dir;
     switch (data.moveDir) {
@@ -314,7 +313,7 @@ void Room::setSettings(const RoomSettings& newSettings){
         return;
     }
 
-    settings = newSettings;
+    settings.roomSize = newSettings.roomSize;
 
     gf::Log::info(
         "[Room %u] Règles mises à jour : roomSize=%u nbBot=%u duration=%u\n",
