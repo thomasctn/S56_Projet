@@ -22,3 +22,6 @@ code/build/*
 *.exe
 code/.vscode/*
 code/.vscode
+
+Rapport/.bin/*
+Rapport/.bin
