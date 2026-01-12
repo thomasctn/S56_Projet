@@ -279,7 +279,7 @@ int main()
                     case GameState::type:{
                         auto data = packet.as<GameState>();
                         states = data.clientStates;
-                        board=data.board;
+                        //board=data.board;
                         pacgommes = data.pacgommes;
                         break;
                     }
