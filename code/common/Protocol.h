@@ -166,12 +166,12 @@ Archive &operator|(Archive &ar, ServerLeaveRoom &data)
 }
 
 //Réponse au client qui change de rôle/nom/couleur
-struct ServerRoomPlayerChange
+struct ServerChangeRoomCharacterData
 {
-  static constexpr gf::Id type = "ServerRoomPlayerChange"_id;
+  static constexpr gf::Id type = "ServerChangeRoomCharacterData"_id;
 };
 template <typename Archive>
-Archive &operator|(Archive &ar, ServerRoomPlayerChange &data)
+Archive &operator|(Archive &ar, ServerChangeRoomCharacterData &data)
 {
   return ar;
 }
@@ -189,12 +189,12 @@ Archive &operator|(Archive &ar, ServerListRoomPlayers &data)
 }
 
 //Réponse au client qui change les paramètres de la room
-struct ServerRoomSettingsChange
+struct ServerChangeRoomSettings
 {
-  static constexpr gf::Id type = "ServerRoomSettingsChange"_id;
+  static constexpr gf::Id type = "ServerChangeRoomSettings"_id;
 };
 template <typename Archive>
-Archive &operator|(Archive &ar, ServerRoomSettingsChange &data)
+Archive &operator|(Archive &ar, ServerChangeRoomSettings &data)
 {
   return ar;
 }
@@ -227,11 +227,12 @@ struct ServerGameStart
   BoardCommon board;
   std::vector<PlayerData> players;
   std::set<Position> pacgommes;
+  RoomSettings settings;
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, ServerGameStart &data)
 {
-  return ar | data.board | data.players | data.pacgommes;
+  return ar | data.board | data.players | data.pacgommes | data.settings;
 }
 //Réponse à tous les clients sur la mise à jour de la partie
 struct ServerGameState
@@ -290,25 +291,25 @@ Archive &operator|(Archive &ar, ClientLeaveRoom &data)
 {
   return ar;
 };
-//Requête au serveur pour le changement de données du joueur
-struct ClientRoomPlayerChange
+//Requête au serveur pour le changement de données du personnage du joueur
+struct ClientChangeRoomCharacterData
 {
-  static constexpr gf::Id type = "ClientRoomPlayerChange"_id;
+  static constexpr gf::Id type = "ClientChangeRoomCharacterData"_id;
   PlayerData newPlayerRoomData;
 };
 template <typename Archive>
-Archive &operator|(Archive &ar, ClientRoomPlayerChange &data)
+Archive &operator|(Archive &ar, ClientChangeRoomCharacterData &data)
 {
   return ar | data.newPlayerRoomData;
 }
 //Requête au serveur pour le changement des paramètres du jeu
-struct ClientRoomSettingsChange
+struct ClientChangeRoomSettings
 {
-  static constexpr gf::Id type = "ClientRoomSettingsChange"_id;
+  static constexpr gf::Id type = "ClientChangeRoomSettings"_id;
   RoomSettings newSettings;
 };
 template <typename Archive>
-Archive &operator|(Archive &ar, ClientRoomSettingsChange &data)
+Archive &operator|(Archive &ar, ClientChangeRoomSettings &data)
 {
   return ar | data.newSettings;
 }

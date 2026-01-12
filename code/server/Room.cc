@@ -154,8 +154,8 @@ void Room::handlePacket(PacketContext& ctx) {
         case ClientReady::type:
             handleClientReady(ctx);
             break;
-        case ClientRoomPlayerChange::type:
-            handleClientRoomPlayerChange(ctx);
+        case ClientChangeRoomCharacterData::type:
+            handleClientChange(ctx);
             break;
         default:
             gf::Log::info("[Room %u] Paquet non traité (type=%llu)\n", 
@@ -213,10 +213,10 @@ void Room::handleClientReady(PacketContext& ctx) {
 
 
 
-void Room::handleClientRoomPlayerChange(PacketContext& ctx) {
+void Room::handleClientChange(PacketContext& ctx) {
     auto& player = game->getPlayerInfo(ctx.senderId);
     player.role = (player.role == PlayerRole::PacMan) ? PlayerRole::Ghost : PlayerRole::PacMan;
-    ServerRoomPlayerChange msg;
+    ServerChangeRoomCharacterData msg;
     gf::Packet answer;
     answer.is(msg);
     player.socket.sendPacket(answer);

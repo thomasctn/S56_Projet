@@ -40,7 +40,7 @@ public:
 
     bool allPlayersReady() const;
     PlayerData getPlayerData(uint32_t playerId) const;
-    void handleClientRoomPlayerChange(PacketContext& ctx);
+    void handleClientChange(PacketContext& ctx);
     void handleClientReady(PacketContext& ctx);
     void handleClientMove(PacketContext& ctx);
 
