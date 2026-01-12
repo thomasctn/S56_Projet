@@ -37,6 +37,8 @@ public:
     Room* room = nullptr;
     void broadcastState();
     void broadcastRoomPlayers();
+    void broadcastRoomSettings();
+
 
     bool allPlayersReady() const;
     PlayerData getPlayerData(uint32_t playerId) const;

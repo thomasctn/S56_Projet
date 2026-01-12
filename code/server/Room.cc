@@ -32,6 +32,7 @@ void Room::addPlayer(uint32_t playerId) {
 
     // Broadcast de la liste des joueurs à tous
     broadcastRoomPlayers();
+    broadcastRoomSettings();
 
     // Démarrage automatique si la room est pleine et que la partie n'existe pas encore
     /*
@@ -53,6 +54,7 @@ void Room::removePlayer(uint32_t playerId) {
 
     // Broadcast de la liste mise à jour aux autres joueurs
     broadcastRoomPlayers();
+    broadcastRoomSettings();
 
     // Si le joueur était dans la partie en cours, le retirer également
     if (game) {
@@ -270,6 +272,19 @@ void Room::broadcastRoomPlayers()
         network.send(pid, packet);
 }
 
+void Room::broadcastRoomSettings()
+{
+    ServerRoomSettings msg;
+    msg.settings = settings;
+
+    gf::Packet packet;
+    packet.is(msg);
+
+    for (uint32_t pid : players) {
+        network.send(pid, packet);
+    }
+}
+
 void Room::broadcastState() {
     if (!game)
         return;
@@ -324,15 +339,7 @@ void Room::setSettings(const RoomSettings& newSettings){
     );
 
     // Broadcast à tous les clients
-    ServerRoomSettings msg;
-    msg.settings = settings;
-
-    gf::Packet packet;
-    packet.is(msg);
-
-    for (uint32_t pid : players) {
-        network.send(pid, packet);
-    }
+    broadcastRoomSettings();
 }
 
 void Room::handleClientChangeRoomSettings(PacketContext& ctx)
