@@ -1,0 +1,241 @@
+\documentclass[a4paper, 11pt]{report}
+\usepackage[utf8]{inputenc}   % Pour lire les fichiers UTF-8
+\usepackage[T1]{fontenc}      % Pour une meilleure gestion des caractères accentués
+\usepackage{textcomp}         % Pour quelques symboles supplémentaires
+\usepackage{lmodern}          % Police compatible avec T1
+\usepackage[english,french]{babel} 
+\usepackage{graphicx} % Pour les images
+\def\@captype{figure}
+\usepackage{float}
+\usepackage{multicol} % Pour faire des multi colonnes
+\usepackage[export]{adjustbox} % Pour la clé 'valign'  (aligner verticalement)
+\usepackage[colorlinks=true,linkcolor=black]{hyperref} % Pour qu'il y est des liens sur la table des matières
+\usepackage{caption} % Utiliser plus de fonction sur caption (caption* pour ne pas afficher FIGURE-1)
+\usepackage{lipsum} % Pour générer du texte pour voir comment ca rend
+\usepackage{ragged2e} % Pour justifier le texte
+\usepackage{ulem}
+\usepackage[margin=3.2cm]{geometry}
+\usepackage{forest}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[section]{placeins}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{fancybox}
+\usepackage{fancyhdr}
+\usepackage[none]{hyphenat}
+\emergencystretch=3em
+
+\usepackage[backend=biber,style=numeric]{biblatex}
+\addbibresource{sitographie.bib}
+\usepackage{csquotes}
+
+
+% Configuration de fancyhdr
+\pagestyle{fancy}
+\fancyhf{} % Efface tous les en-tètes et pieds de page précédents
+\fancyhead[C]{Rapport de Stage} % Texte centré en haut de la page
+\fancyfoot[L]{2025} % Texte en bas à  gauche du pied de page
+\fancyfoot[C]{Thomas COUTANT} % Texte au centre du pied de page
+\fancyfoot[R]{\thepage} % Numéro de page en bas à  droite du pied de page
+
+\renewcommand{\headrulewidth}{0.4pt} % à‰paisseur de la ligne de séparation de l'en-tète
+\renewcommand{\footrulewidth}{0.4pt} % à‰paisseur de la ligne de séparation du pied depage
+\setlength{\headheight}{13.59999pt}
+% Appliquer le style d'en-tète fancy aux pages de début de chapitre
+
+\fancypagestyle{plain}{
+  \fancyhf{} % Effacer tous
+  \fancyhead[C]{Rapport de Stage} % Texte centré en haut de la page
+  \fancyfoot[L]{L2 Informatique} % Texte en bas à  gauche du pied de page
+  \fancyfoot[C]{Thomas COUTANT} % Texte au centre du pied de page
+  \fancyfoot[R]{\thepage} % Numéro de page en bas à  droite du pied de page
+  \renewcommand{\headrulewidth}{0.4pt} % à‰paisseur de la ligne de séparation de l'en-tète
+  \renewcommand{\footrulewidth}{0.4pt} % à‰paisseur de la ligne de séparation du pied de page
+}
+
+
+
+
+\begin{document}
+
+% Page de titre
+
+% Page de titre
+\begin{titlepage}
+    \centering
+    \vspace{3cm}
+    \includegraphics[width=0.4\textwidth]{images/logo_univ.jpg}\hfill
+    \includegraphics[width=0.5\textwidth]{images/logo_ufrst.png}\\
+    \vspace{1.5cm}
+    {\huge \textbf{Université Marie \& Louis Pasteur\\ UFR Sciences et Techniques}\par}
+    \vspace{0.5cm}
+
+
+    \shadowbox{\parbox{0.9\linewidth}{\centering \huge \textbf{Projet L3 : Pacman en réseau}}}\\
+    \vspace{1cm}
+    {\Large \textbf{Rapport de Projet} \\ Licence CMI Informatique - 3ème année \\ 2025-2026\par}
+    \vspace{0.5cm}
+
+    \includegraphics[width=1\textwidth]{images/entete.png}\\
+    \vspace{0.5cm}
+
+    {\LARGE \textbf{Thomas COUTANT}\\ \textbf{Benoît LITAMPHA}\\ \textbf{Auriane PETER}\par}
+    \vspace{1cm}
+    {\large \textbf{Encadrant : Julien BERNARD} }\\
+
+    
+\end{titlepage}
+
+
+    
+
+
+\chapter*{Remerciements}
+\addcontentsline{toc}{chapter}{Remerciements}
+
+
+\tableofcontents
+\listoffigures
+
+\chapter*{Introduction} % * pour ne pas avoir de numéro de chapitre
+\addcontentsline{toc}{chapter}{Introduction}
+
+
+\vfill
+
+\chapter{La structure d’accueil de mon stage : EBOP}
+
+
+\section{Présentation de l'organisation}
+
+
+
+
+\section{L’environnement de travail}
+
+
+\vspace{0.5cm}
+
+
+\chapter{Définition du sujet de stage}
+\section{Contexte et problématique}
+
+
+\section{Objectifs du stage}
+
+
+
+
+\section{Collaboration et intégration}
+
+
+%\chapter{L'Organisation du stage}
+
+
+\section{Équipement et outils}
+
+
+%\section{L'application}
+
+%\section{La gestion des tickets}
+
+\chapter{Contenu et déroulement du stage}
+
+\section{Exploration des outils et premières implémentations}
+
+
+\subsection*{12–13 juin : premiers essais d’interaction}
+
+
+\subsection*{16 juin : conception d’un déclencheur de transformation}
+
+
+
+\subsection*{17 juin : implémentation du système de bloc par clic long}
+
+
+\subsection*{Ajouts fonctionnels : zoom, lecture vocale, duplication}
+
+
+
+
+
+
+
+\subsection*{Conception du tableau de contrôle}
+
+
+
+\section{Intégration, adaptation et validation croisée}
+
+\subsection*{Collaboration avec un autre stagiaire}
+
+
+\section{Consolidation, optimisation et finalisation du prototype}
+
+
+
+\chapter{Bilan}
+
+\section{Acquis techniques}
+
+
+
+
+\section{Résultat final}
+
+
+% Page de conclusion 
+\chapter*{Conclusion}
+\addcontentsline{toc}{chapter}{Conclusion}
+
+
+
+% Page de conclusion 
+\chapter*{Sitographie}
+\addcontentsline{toc}{chapter}{Sitographie} % Ajout de la sitographie sur la table des matières sans ètre numéroté
+
+\printbibliography[heading=none]
+
+
+% Page de résumé
+\newpage
+\begin{center}
+    \vspace*{\fill} % Espace vertical
+    \section*{Résumé}
+    \addcontentsline
+    {toc}{chapter}{Résumé}
+    \begin{justify}
+
+    \end{justify}
+    \vspace*{\fill} % Espace vertical
+
+    \section*{Mots-clés}
+    \addcontentsline
+    {toc}{chapter}{Mots-Clés}
+    \begin{center}
+     MathLive - JavaScript - TypeScript - HTML - Drag \& Drop
+    \end{center}
+    \vspace*{\fill} % Espace vertical
+
+    \section*{Abstract}
+    \addcontentsline
+    {toc}{chapter}{Abstract}
+    \begin{justify}
+
+    \end{justify}
+    \vspace*{\fill} % Espace vertical
+
+    \section*{Key-Words}
+    \addcontentsline
+    {toc}{chapter}{Key-Words}
+    \begin{center}
+    MathLive - JavaScript - TypeScript - HTML - Drag \& Drop
+    \end{center}
+    \vspace*{\fill} % Espace vertical
+    
+    
+\end{center}
+
+\end{document}
