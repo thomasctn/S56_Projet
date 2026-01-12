@@ -99,10 +99,16 @@ void Lobby::handleClientJoinRoom(PacketContext& ctx) {
     }
 
     auto& room = rooms.at(roomId);
-    if (room->players.size() >= MAX_PLAYERS) {
-        gf::Log::info("[Lobby] Room %u pleine, création d'une nouvelle room\n", roomId);
+    if (room->isFull()) {
+        gf::Log::info(
+            "[Lobby] Room %u pleine (%zu / %u), création d'une nouvelle room\n",
+            roomId,
+            room->players.size(),
+            room->getMaxPlayers()
+        );
         roomId = createRoom();
     }
+
 
     playerRoom[ctx.senderId] = roomId;
     rooms[roomId]->addPlayer(ctx.senderId);

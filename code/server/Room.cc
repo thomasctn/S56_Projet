@@ -10,10 +10,17 @@ Room::Room(uint32_t id, ServerNetwork& network)
 }
 
 void Room::addPlayer(uint32_t playerId) {
-    if (players.size() >= MAX_PLAYERS) {
-        gf::Log::warning("[Room %u] Room pleine, joueur %u non ajouté\n", id, playerId);
+    if (players.size() >= settings.roomSize) {
+        gf::Log::warning(
+            "[Room %u] Room pleine (%zu / %u), joueur %u refusé\n",
+            id,
+            players.size(),
+            settings.roomSize,
+            playerId
+        );
         return;
     }
+
 
     players.insert(playerId);
     gf::Log::info("[Room %u] Joueur %u ajouté\n", id, playerId);
@@ -79,7 +86,7 @@ void Room::startGame() {
 
     // --- Ajouter les bots ---
     int humans = players.size();
-    int botsToAdd = NB_BOTS; // ou MAX_PLAYERS - humans;
+    int botsToAdd = settings.nbBot;
 
     for (int b = 0; b < botsToAdd; ++b) {
         uint32_t botId = generateBotId();
@@ -157,6 +164,10 @@ void Room::handlePacket(PacketContext& ctx) {
         case ClientChangeRoomCharacterData::type:
             handleClientChange(ctx);
             break;
+        case ClientChangeRoomSettings::type:
+            handleClientChangeRoomSettings(ctx);
+            break;
+
         default:
             gf::Log::info("[Room %u] Paquet non traité (type=%llu)\n", 
                           id, static_cast<unsigned long long>(ctx.packet.getType()));
@@ -292,4 +303,51 @@ void Room::broadcastState() {
 uint32_t Room::generateBotId() {
     static uint32_t nextBotId = 10000; // commence après les IDs joueurs
     return nextBotId++;
+}
+
+void Room::setSettings(const RoomSettings& newSettings){
+    if (game) {
+        gf::Log::warning(
+            "[Room %u] Changement de règles refusé : partie déjà lancée\n",
+            id
+        );
+        return;
+    }
+
+    settings = newSettings;
+
+    gf::Log::info(
+        "[Room %u] Règles mises à jour : roomSize=%u nbBot=%u duration=%u\n",
+        id,
+        settings.roomSize,
+        settings.nbBot,
+        settings.gameDuration
+    );
+
+    // Broadcast à tous les clients
+    ServerRoomSettings msg;
+    msg.settings = settings;
+
+    gf::Packet packet;
+    packet.is(msg);
+
+    for (uint32_t pid : players) {
+        network.send(pid, packet);
+    }
+}
+
+void Room::handleClientChangeRoomSettings(PacketContext& ctx)
+{
+    auto data = ctx.packet.as<ClientChangeRoomSettings>();
+
+    // (optionnel) limiter au host
+    // if (ctx.senderId != *players.begin()) return;
+
+    setSettings(data.newSettings);
+
+    // Ack uniquement au client demandeur
+    ServerChangeRoomSettings ack;
+    gf::Packet packet;
+    packet.is(ack);
+    network.send(ctx.senderId, packet);
 }

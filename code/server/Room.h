@@ -43,8 +43,13 @@ public:
     void handleClientChange(PacketContext& ctx);
     void handleClientReady(PacketContext& ctx);
     void handleClientMove(PacketContext& ctx);
+    void handleClientChangeRoomSettings(PacketContext& ctx);
 
+    const RoomSettings& getSettings() const { return settings; }
+    void setSettings(const RoomSettings& newSettings);
 
+    bool isFull() const {return players.size() >= settings.roomSize;}
+    unsigned int getMaxPlayers() const {return settings.roomSize;}
 
 private:
     void startGame();
@@ -53,5 +58,11 @@ private:
 
     std::unique_ptr<BotManager> botManager;
     std::unordered_map<uint32_t, bool> preGameReady;
+
+    RoomSettings settings {
+        MAX_PLAYERS, // roomSize par défaut
+        NB_BOTS,     // nbBot par défaut
+        300          // gameDuration (ex: secondes)
+    };
 
 };
