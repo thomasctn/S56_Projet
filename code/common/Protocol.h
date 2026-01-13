@@ -251,7 +251,7 @@ Archive &operator|(Archive &ar, ServerGameState &data)
 //Réponse à tous les clients sur la fin de la partie
 struct ServerGameEnd
 {
-  static constexpr gf::Id type = "ServerGameOver"_id;
+  static constexpr gf::Id type = "ServerGameEnd"_id;
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, ServerGameEnd &data)
