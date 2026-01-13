@@ -344,6 +344,12 @@ int main()
                         break;
                     }
 
+                    case ServerGameEnd::type:{
+                        auto data = packet.as<ServerGameEnd>();
+                        screen = ClientScreen::Lobby;
+                        break;
+                    }
+
                     
                 }
             }
