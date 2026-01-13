@@ -306,6 +306,19 @@ void Room::broadcastState() {
         }
     );
 
+    if (game->isGameStarted()) {
+        unsigned int duration = 0;
+        if (settings.roomSize > 0) {
+            duration = settings.gameDuration; // durée de la partie depuis la room
+        }
+        int elapsed = static_cast<int>(game->getElapsedSeconds());
+        gs.timeLeft = (elapsed >= duration) ? 0 : (duration - elapsed);
+    } else {
+        gs.timeLeft = settings.gameDuration;
+    }
+
+        //gf::Log::info("[Room %u] Mises à jour : temps : %u\n",id, gs.timeLeft);
+
     gf::Packet packet;
     packet.is(gs);
 
