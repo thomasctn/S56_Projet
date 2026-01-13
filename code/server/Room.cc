@@ -328,7 +328,7 @@ void Room::broadcastState() {
 }
 
 uint32_t Room::generateBotId() {
-    static uint32_t nextBotId = 10000; // commence après les IDs joueurs
+    static uint32_t nextBotId = 10000; // commence après les ID joueurs
     return nextBotId++;
 }
 
