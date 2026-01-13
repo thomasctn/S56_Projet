@@ -174,7 +174,7 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& ser
                 std::chrono::duration<double> gameTime = now - chronoStart;
                 gameElapsed = gameTime.count();
                 unsigned int nbPacGommes = board.getPacgommeCount();
-                if (gameElapsed >= T_GAME || (nbPacGommes == 0)) {
+                if (room && (gameElapsed >= room->getGameDuration() || nbPacGommes == 0)) {
                     gf::Log::info("Partie terminée !\n");
                     running.store(false);
                     gameStarted.store(false);
@@ -245,7 +245,5 @@ bool Game::isPreGame() const {
 
 bool Game::isGameOver() const {
     std::lock_guard<std::mutex> lock(chronoMutex);
-    return gameStarted.load() && gameElapsed >= T_GAME;
+    return gameStarted.load() && gameElapsed >= room->getGameDuration();
 }
-
-

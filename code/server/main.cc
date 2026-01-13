@@ -141,7 +141,7 @@ int main() {
                     if (remainingTime < 0) remainingTime = 0;
                     chronoMessage = "Début de la partie dans : " + std::to_string(remainingTime) + "s";
                 } else if (game.isGameStarted()) {
-                    remainingTime = T_GAME - static_cast<int>(game.getElapsedSeconds());
+                    remainingTime = room.getGameDuration() - static_cast<int>(game.getElapsedSeconds());
                     if (remainingTime < 0) remainingTime = 0;
                     chronoMessage = "Temps restant : " + std::to_string(remainingTime) + "s";
                 } else if (game.isGameOver()) {

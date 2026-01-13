@@ -57,7 +57,9 @@ public:
     void notifyGameEnded();
     void cleanupGame();
     void onGameStopped();
-void notifyGameEndedAsync();
+    void notifyGameEndedAsync();
+    unsigned int getGameDuration() const { return settings.gameDuration; }
+
 
 private:
     void startGame();
@@ -74,7 +76,7 @@ private:
     RoomSettings settings {
         MAX_PLAYERS, // roomSize par défaut
         NB_BOTS,     // nbBot par défaut
-        300          // gameDuration (ex: secondes)
+        MIN_DURATION // gameDuration (ex: secondes)
     };
 
 };

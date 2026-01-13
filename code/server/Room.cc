@@ -335,11 +335,25 @@ void Room::setSettings(const RoomSettings& newSettings){
             newSettings.roomSize,
             players.size()
         );
+        broadcastRoomSettings();
+        return;
+    }
+
+    if (newSettings.nbBot < 0) {
+        gf::Log::warning("[Room %u] On ne peut pas avoir -1 bots\n",id);
+        broadcastRoomSettings();
+        return;
+    }
+
+    if ((newSettings.gameDuration < MIN_DURATION) || (newSettings.gameDuration > MAX_DURATION)) {
+        gf::Log::warning("[Room %u] Les temps demander sont incorects\n",id);
+        broadcastRoomSettings();
         return;
     }
 
     settings.roomSize = newSettings.roomSize;
     settings.nbBot = newSettings.nbBot;
+    settings.gameDuration = newSettings.gameDuration;
 
     gf::Log::info(
         "[Room %u] Règles mises à jour : roomSize=%u nbBot=%u duration=%u\n",
