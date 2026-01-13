@@ -2,14 +2,14 @@ But avoir la boucle de jeu fonctionnelle pour mercredi 10h
 
 A faire :
     - Pouvoir parametré les rooms
-        - mettre en place les struct de com
+        - mettre en place les struct de com (Fait)
         - mettre en place bouton coté client
-            - taille de la room (min(1) et max(?) a mettre dans constants)
+            - taille de la room (min(1) et max(?) a mettre dans constants) (fait)
             - nombre de bots
             - temps de jeu ? (je sais pas si cest bien)
             - Mettre un pseudo ?
-        - ajouter handler pour chaque struct
-        - racorder au code de room
+        - ajouter handler pour chaque struct (en cour)
+        - racorder au code de room (en cour)
             
     - Pouvoir revenir au room et lobby après y etre rentré.
         - ajouter bouton retour coter client
@@ -26,3 +26,6 @@ Bonus :
     - améliorer code
     - optimiser les échanges
     - améliorer bots (un peu debile eux)
+
+Thomas :
+- voir pour trier les log

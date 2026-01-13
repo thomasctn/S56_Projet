@@ -329,6 +329,7 @@ void Room::setSettings(const RoomSettings& newSettings){
     }
 
     settings.roomSize = newSettings.roomSize;
+    settings.nbBot = newSettings.nbBot;
 
     gf::Log::info(
         "[Room %u] Règles mises à jour : roomSize=%u nbBot=%u duration=%u\n",
