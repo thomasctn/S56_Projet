@@ -328,6 +328,16 @@ void Room::setSettings(const RoomSettings& newSettings){
         return;
     }
 
+    if (newSettings.roomSize < players.size()) {
+        gf::Log::warning(
+            "[Room %u] Nouvelle taille de room trop petite (%u) : %zu joueurs déjà présents\n",
+            id,
+            newSettings.roomSize,
+            players.size()
+        );
+        return;
+    }
+
     settings.roomSize = newSettings.roomSize;
     settings.nbBot = newSettings.nbBot;
 
