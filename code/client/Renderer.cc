@@ -343,7 +343,7 @@ void Renderer::renderWelcome() {
     rendered_window.display();
 }
 
-void Renderer::renderLobby(int connectedPlayers, int roomSize, bool amReady) {
+void Renderer::renderLobby(int connectedPlayers, int roomSize, bool amReady, int nbBots) {
     rendered_window.clear(gf::Color::Black);
 
     static gf::Font font("../common/fonts/arial.ttf");
@@ -357,8 +357,11 @@ void Renderer::renderLobby(int connectedPlayers, int roomSize, bool amReady) {
     m_minusBtnPos = gf::v1::Vector2f{margin + 140.f, 100.f};
     m_plusBtnPos  = gf::v1::Vector2f{m_minusBtnPos.x + m_btnSize.x + 60.f, 100.f};
 
+    m_minusBotBtnPos = gf::v1::Vector2f{margin + 140.f, 150.f};
+    m_plusBotBtnPos  = gf::v1::Vector2f{m_minusBotBtnPos.x + m_btnSize.x + 60.f, 150.f};
+
     m_readyBtnSize = gf::v1::Vector2f{worldSize*0.18f, worldSize*0.08f};
-    m_readyBtnPos  = gf::v1::Vector2f{margin, 200.f};
+    m_readyBtnPos  = gf::v1::Vector2f{margin, 320.f};
 
     //textes
     gf::Text title;
@@ -421,6 +424,34 @@ void Renderer::renderLobby(int connectedPlayers, int roomSize, bool amReady) {
     valueText.setPosition({m_minusBtnPos.x + m_btnSize.x + 10.f, m_minusBtnPos.y + 8.f});
     rendered_window.draw(valueText);
 
+
+    //pour les bots!
+
+    gf::Text botLabel;
+    botLabel.setFont(font);
+    botLabel.setCharacterSize(20);
+    botLabel.setColor(gf::Color::White);
+    botLabel.setString("Nb de bots :");
+    botLabel.setPosition({margin,150.f});
+    rendered_window.draw(botLabel);
+
+    minusBtn.setPosition(m_minusBotBtnPos);
+    rendered_window.draw(minusBtn);
+
+    minusText.setPosition({m_minusBotBtnPos.x + 10.f, m_minusBotBtnPos.y + 5.f});
+    rendered_window.draw(minusText);
+
+    plusBtn.setPosition(m_plusBotBtnPos);
+    rendered_window.draw(plusBtn);
+
+    plusText.setPosition({m_plusBotBtnPos.x + 10.f, m_plusBotBtnPos.y + 5.f});
+    rendered_window.draw(plusText);
+
+    valueText.setString(std::to_string(nbBots));
+    valueText.setPosition({m_minusBotBtnPos.x + m_btnSize.x + 10.f, m_minusBotBtnPos.y + 8.f});
+    rendered_window.draw(valueText);
+
+
     // pret boutton
     gf::RectangleShape readyBtn(m_readyBtnSize);
     readyBtn.setPosition(m_readyBtnPos);
@@ -445,7 +476,7 @@ void Renderer::renderLobby(int connectedPlayers, int roomSize, bool amReady) {
     readyState.setCharacterSize(20);
     readyState.setColor(gf::Color::White);
     readyState.setString(amReady ? "Vous êtes : PRÊT" : "Vous êtes : PAS PRÊT");
-    readyState.setPosition({margin, 160.f});
+    readyState.setPosition({margin, 280.f});
     rendered_window.draw(readyState);
 
     rendered_window.display();

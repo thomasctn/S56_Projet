@@ -18,10 +18,10 @@
 #include "Renderer.h"
 
 
-void sendRoomSettings(gf::TcpSocket& socket,unsigned int newRoomSize){
+void sendRoomSettings(gf::TcpSocket& socket,unsigned int newRoomSize, int newNbBots){
     RoomSettings settings;
     settings.roomSize = newRoomSize;
-    settings.nbBot = 0;
+    settings.nbBot = newNbBots;
     settings.gameDuration = 0;
 
     gf::Packet p;
@@ -52,6 +52,7 @@ int main()
     std::set<Position> pacgommes;
 
     int roomSize = 2; // capacité actuelle de la room (modifiable)
+    int nbBots = 4;//modifiable!
 
 
     //std::mutex statesMutex;
@@ -83,6 +84,10 @@ int main()
         float b = float((id * 110) % 256) / 255.0f;
         return gf::Color4f(r, g, b, 1.0f);
     };
+
+    //test fix ecrasement page
+    auto size = renderer.getWindow().getSize();
+    renderer.handleResize(size.x, size.y);
 
     gf::ActionContainer actions;
 
@@ -191,14 +196,28 @@ int main()
                 auto btnSize = renderer.getBtnSize();
                 if(mx >= minusPos.x && mx <= minusPos.x + btnSize.x &&my >= minusPos.y && my <= minusPos.y + btnSize.y){
                     if(roomSize > 1) roomSize--;
-                    sendRoomSettings(socket, roomSize);
+                    sendRoomSettings(socket, roomSize, nbBots);
                 }
 
                 //bouton +
                 auto plusPos = renderer.getPlusBtnPos();
                 if(mx >= plusPos.x && mx <= plusPos.x + btnSize.x &&my >= plusPos.y && my <= plusPos.y + btnSize.y){
                     if(roomSize < 5) roomSize++;
-                    sendRoomSettings(socket, roomSize);
+                    sendRoomSettings(socket, roomSize,nbBots);
+                }
+
+                //bouton - bot
+                auto minusBotPos = renderer.getMinusBotBtnPos();
+                if(mx >= minusBotPos.x && mx <= minusBotPos.x + btnSize.x &&my >= minusBotPos.y && my <= minusBotPos.y + btnSize.y){
+                    if(nbBots > 1) nbBots--;
+                    sendRoomSettings(socket, roomSize, nbBots);
+                }
+
+                //bouton + bot
+                auto plusBotPos = renderer.getPlusBotBtnPos();
+                if(mx >= plusBotPos.x && mx <= plusBotPos.x + btnSize.x &&my >= plusBotPos.y && my <= plusBotPos.y + btnSize.y){
+                    if(nbBots < 5) nbBots++;
+                    sendRoomSettings(socket, roomSize,nbBots);
                 }
 
                 //bouton PRET
@@ -272,7 +291,8 @@ int main()
                     case ServerRoomSettings::type:{
                         auto data = packet.as<ServerRoomSettings>();
                         roomSize = int(data.settings.roomSize);
-                        gf::Log::info("ServerRoomSettings reçu : roomSize=%u\n", data.settings.roomSize);
+                        nbBots = int(data.settings.nbBot);
+                        gf::Log::info("ServerRoomSettings reçu : roomSize=%u, nbBots=%u\n", data.settings.roomSize,data.settings.nbBot);
                         break;
                     }
 
@@ -325,7 +345,7 @@ int main()
         }
         else if(screen == ClientScreen::Lobby) {
             //renderer.drawLobby(connectedPlayers, maxPlayers); 
-            renderer.renderLobby(connectedPlayers, roomSize, amReady);
+            renderer.renderLobby(connectedPlayers, roomSize, amReady, nbBots);
         }
         else{ //Playing
             renderer.render(states, myId, board, pacgommes);

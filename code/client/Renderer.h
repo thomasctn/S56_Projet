@@ -23,7 +23,7 @@ class Renderer{
     void renderPacGommes(const std::set<Position>& pacgommes,float tileSize,float offsetX,float offsetY);
 
     void renderWelcome();
-    void renderLobby(int connectedPlayers,int roomSize,bool amReady);
+    void renderLobby(int connectedPlayers,int roomSize,bool amReady, int nbBots);
 
     
 
@@ -39,6 +39,8 @@ class Renderer{
 
     gf::v1::Vector2f getMinusBtnPos() const { return m_minusBtnPos; }
     gf::v1::Vector2f getPlusBtnPos() const { return m_plusBtnPos; }
+    gf::v1::Vector2f getMinusBotBtnPos() const { return m_minusBotBtnPos; }
+    gf::v1::Vector2f getPlusBotBtnPos() const { return m_plusBotBtnPos; }
     gf::v1::Vector2f getReadyBtnPos() const { return m_readyBtnPos; }
 
     gf::v1::Vector2f getBtnSize() const { return m_btnSize; }           // - et +
@@ -87,6 +89,9 @@ class Renderer{
 gf::v1::Vector2f m_minusBtnPos;
 gf::v1::Vector2f m_plusBtnPos;
 gf::v1::Vector2f m_readyBtnPos;
+
+gf::v1::Vector2f m_minusBotBtnPos;
+gf::v1::Vector2f m_plusBotBtnPos;
 
 gf::v1::Vector2f m_btnSize;       // pour - et +
 gf::v1::Vector2f m_readyBtnSize;  // pour le bouton PRET
