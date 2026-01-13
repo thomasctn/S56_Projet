@@ -11,36 +11,28 @@ Room::Room(uint32_t id, ServerNetwork& network)
 
 void Room::addPlayer(uint32_t playerId) {
     if (players.size() >= settings.roomSize) {
-        gf::Log::warning(
-            "[Room %u] Room pleine (%zu / %u), joueur %u refusé\n",
-            id,
-            players.size(),
-            settings.roomSize,
-            playerId
-        );
+        gf::Log::warning("[Room %u] Room pleine\n", id);
         return;
     }
-
 
     players.insert(playerId);
     gf::Log::info("[Room %u] Joueur %u ajouté\n", id, playerId);
 
-    // Envoyer la confirmation au joueur qui a rejoint
+    ServerAssignClientId idMsg;
+    idMsg.clientId = playerId;
+
+    gf::Packet idPacket;
+    idPacket.is(idMsg);
+    network.send(playerId, idPacket);
+
     gf::Packet joinPacket;
     joinPacket.is(ServerJoinRoom{});
     network.send(playerId, joinPacket);
 
-    // Broadcast de la liste des joueurs à tous
     broadcastRoomPlayers();
     broadcastRoomSettings();
-
-    // Démarrage automatique si la room est pleine et que la partie n'existe pas encore
-    /*
-    if (!game && players.size() == MAX_PLAYERS) {
-        startGame();
-    }
-    */
 }
+
 
 
 void Room::removePlayer(uint32_t playerId) {

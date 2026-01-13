@@ -348,3 +348,14 @@ Archive &operator|(Archive &ar, ClientMove &data)
 {
   return ar | data.moveDir;
 }
+
+
+struct ServerAssignClientId {
+    static constexpr gf::Id type = "ServerAssignClientId"_id;
+    uint32_t clientId;
+};
+
+template <typename Archive>
+Archive& operator|(Archive& ar, ServerAssignClientId& data) {
+    return ar | data.clientId;
+}
