@@ -15,14 +15,15 @@
 #include <mutex>
 #include <queue>
 #include "../common/Types.h"
+#include "../common/Constants.h"
 #include "Renderer.h"
 
 
-void sendRoomSettings(gf::TcpSocket& socket,unsigned int newRoomSize, int newNbBots){
+void sendRoomSettings(gf::TcpSocket& socket,unsigned int newRoomSize, int newNbBots, int newGameDur){
     RoomSettings settings;
     settings.roomSize = newRoomSize;
     settings.nbBot = newNbBots;
-    settings.gameDuration = 0;
+    settings.gameDuration = newGameDur;
 
     gf::Packet p;
     p.is(ClientChangeRoomSettings{settings});
@@ -51,8 +52,9 @@ int main()
     BoardCommon board;
     std::set<Position> pacgommes;
 
-    int roomSize = 2; // capacité actuelle de la room (modifiable)
-    int nbBots = 4;//modifiable!
+    int roomSize = int(MAX_PLAYERS); // capacité actuelle de la room (modifiable)
+    int nbBots = int(NB_BOTS);//modifiable! //avec int parcque thomas a mis ses trucs en size_t et il sait pas?
+    int gameDur = T_GAME;
 
 
     //std::mutex statesMutex;
@@ -195,29 +197,43 @@ int main()
                 auto minusPos = renderer.getMinusBtnPos();
                 auto btnSize = renderer.getBtnSize();
                 if(mx >= minusPos.x && mx <= minusPos.x + btnSize.x &&my >= minusPos.y && my <= minusPos.y + btnSize.y){
-                    if(roomSize > 1) roomSize--;
-                    sendRoomSettings(socket, roomSize, nbBots);
+                    if(roomSize > MIN_NB_PLAYERS) roomSize--;
+                    sendRoomSettings(socket, roomSize, nbBots, gameDur);
                 }
 
                 //bouton +
                 auto plusPos = renderer.getPlusBtnPos();
                 if(mx >= plusPos.x && mx <= plusPos.x + btnSize.x &&my >= plusPos.y && my <= plusPos.y + btnSize.y){
-                    if(roomSize < 5) roomSize++;
-                    sendRoomSettings(socket, roomSize,nbBots);
+                    if(roomSize < MAX_NB_PLAYERS) roomSize++;
+                    sendRoomSettings(socket, roomSize,nbBots, gameDur);
                 }
 
                 //bouton - bot
                 auto minusBotPos = renderer.getMinusBotBtnPos();
                 if(mx >= minusBotPos.x && mx <= minusBotPos.x + btnSize.x &&my >= minusBotPos.y && my <= minusBotPos.y + btnSize.y){
-                    if(nbBots > 1) nbBots--;
-                    sendRoomSettings(socket, roomSize, nbBots);
+                    if(nbBots > MIN_NB_BOTS) nbBots--;
+                    sendRoomSettings(socket, roomSize, nbBots, gameDur);
                 }
 
                 //bouton + bot
                 auto plusBotPos = renderer.getPlusBotBtnPos();
                 if(mx >= plusBotPos.x && mx <= plusBotPos.x + btnSize.x &&my >= plusBotPos.y && my <= plusBotPos.y + btnSize.y){
-                    if(nbBots < 5) nbBots++;
-                    sendRoomSettings(socket, roomSize,nbBots);
+                    if(nbBots < MAX_NB_BOTS) nbBots++;
+                    sendRoomSettings(socket, roomSize,nbBots, gameDur);
+                }
+
+                //bouton - durée
+                auto minusDurPos = renderer.getMinusDurBtnPos();
+                if(mx >= minusDurPos.x && mx <= minusDurPos.x + btnSize.x &&my >= minusDurPos.y && my <= minusDurPos.y + btnSize.y){
+                    if(gameDur > MIN_DURATION) gameDur=gameDur-20;
+                    sendRoomSettings(socket, roomSize, nbBots, gameDur);
+                }
+
+                //bouton + durée
+                auto plusDurPos = renderer.getPlusDurBtnPos();
+                if(mx >= plusDurPos.x && mx <= plusDurPos.x + plusDurPos.x &&my >= plusDurPos.y && my <= plusDurPos.y + btnSize.y){
+                    if(gameDur < MAX_DURATION) gameDur=gameDur+20;;
+                    sendRoomSettings(socket, roomSize,nbBots, gameDur);
                 }
 
                 //bouton PRET
@@ -345,7 +361,7 @@ int main()
         }
         else if(screen == ClientScreen::Lobby) {
             //renderer.drawLobby(connectedPlayers, maxPlayers); 
-            renderer.renderLobby(connectedPlayers, roomSize, amReady, nbBots);
+            renderer.renderLobby(connectedPlayers, roomSize, amReady, nbBots, gameDur);
         }
         else{ //Playing
             renderer.render(states, myId, board, pacgommes);
