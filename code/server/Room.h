@@ -60,6 +60,8 @@ public:
     void notifyGameEndedAsync();
     unsigned int getGameDuration() const { return settings.gameDuration; }
 
+    std::unordered_map<uint32_t, PlayerRole> preGameRoles;
+
 
 private:
     void startGame();

@@ -11,51 +11,53 @@ Room::Room(uint32_t id, ServerNetwork& network)
 
 void Room::addPlayer(uint32_t playerId) {
     if (players.size() >= settings.roomSize) {
-        gf::Log::warning(
-            "[Room %u] Room pleine (%zu / %u), joueur %u refusé\n",
-            id,
-            players.size(),
-            settings.roomSize,
-            playerId
-        );
+        gf::Log::warning("[Room %u] Room pleine (%zu / %u), joueur %u refusé\n",
+                         id, players.size(), settings.roomSize, playerId);
         return;
     }
 
-
     players.insert(playerId);
     gf::Log::info("[Room %u] Joueur %u ajouté\n", id, playerId);
+
+    // Pré‑assigner un rôle si game n'existe pas
+    if (!game) {
+        // Choisir un rôle par défaut : 1er PacMan, le reste Ghost
+        PlayerRole role = PlayerRole::Ghost;
+        bool hasPacMan = false;
+        for (auto& [_, r] : preGameRoles)
+            if (r == PlayerRole::PacMan)
+                hasPacMan = true;
+
+        if (!hasPacMan)
+            role = PlayerRole::PacMan;
+
+        preGameRoles[playerId] = role;
+        gf::Log::info("[Room %u] Joueur %u rôle pré-game assigné : %s\n",
+                      id, playerId,
+                      (role == PlayerRole::PacMan ? "PacMan" : "Ghost"));
+    }
 
     gf::Packet joinPacket;
     joinPacket.is(ServerJoinRoom{});
     network.send(playerId, joinPacket);
 
-    // Broadcast de la liste des joueurs à tous
     broadcastRoomPlayers();
     broadcastRoomSettings();
-
-    // Démarrage automatique si la room est pleine et que la partie n'existe pas encore
-    /*
-    if (!game && players.size() == MAX_PLAYERS) {
-        startGame();
-    }
-    */
 }
+
 
 
 void Room::removePlayer(uint32_t playerId) {
     players.erase(playerId);
     gf::Log::info("[Room %u] Joueur %u retiré\n", id, playerId);
 
-    // Envoyer confirmation au joueur qui quitte
     gf::Packet leavePacket;
     leavePacket.is(ServerLeaveRoom{});
     network.send(playerId, leavePacket);
 
-    // Broadcast de la liste mise à jour aux autres joueurs
     broadcastRoomPlayers();
     broadcastRoomSettings();
 
-    // Si le joueur était dans la partie en cours, le retirer également
     if (game) {
         game->removePlayer(playerId);
     }
@@ -79,11 +81,16 @@ void Room::startGame() {
     size_t i = 0;
     for (uint32_t playerId : players) {
         if (game->getPlayers().find(playerId) == game->getPlayers().end()) {
-            PlayerRole role = (i == 0) ? PlayerRole::PacMan : PlayerRole::Ghost;
+            PlayerRole role = PlayerRole::Spectator;
+            auto it = preGameRoles.find(playerId);
+            if (it != preGameRoles.end())
+                role = it->second;
+
             game->addPlayer(playerId, 100.0f, 100.0f, role);
         }
-        ++i;
     }
+
+
 
     // --- Ajouter les bots ---
     int humans = players.size();
@@ -225,16 +232,45 @@ void Room::handleClientReady(PacketContext& ctx) {
 
 
 void Room::handleClientChange(PacketContext& ctx) {
-    auto& player = game->getPlayerInfo(ctx.senderId);
-    player.role = (player.role == PlayerRole::PacMan) ? PlayerRole::Ghost : PlayerRole::PacMan;
+    if (game) {
+        return;
+    } else {
+        auto it = preGameRoles.find(ctx.senderId);
+        PlayerRole currentRole = (it != preGameRoles.end()) ? it->second : PlayerRole::PacMan;
+
+        // Vérifier qu'au moins un PacMan reste
+        if (currentRole == PlayerRole::PacMan) {
+            bool otherPacManExists = false;
+            for (auto& [id, r] : preGameRoles) {
+                if (id != ctx.senderId && r == PlayerRole::PacMan) {
+                    otherPacManExists = true;
+                    break;
+                }
+            }
+            if (!otherPacManExists) {
+                gf::Log::info("[Room %u] Changement de rôle refusé pour joueur %u : au moins un PacMan requis\n",
+                              id, ctx.senderId);
+                return;
+            }
+        }
+
+        PlayerRole newRole = (currentRole == PlayerRole::PacMan) ? PlayerRole::Ghost : PlayerRole::PacMan;
+        preGameRoles[ctx.senderId] = newRole;
+
+        gf::Log::info("[Room %u] Joueur %u choisit rôle pré-game : %s\n",
+                      id, ctx.senderId,
+                      (newRole == PlayerRole::PacMan ? "PacMan" : "Ghost"));
+    }
+
     ServerChangeRoomCharacterData msg;
     gf::Packet answer;
     answer.is(msg);
-    player.socket.sendPacket(answer);
-    //broadcast
+    network.send(ctx.senderId, answer);
     broadcastRoomPlayers();
-
 }
+
+
+
 
 PlayerData Room::getPlayerData(uint32_t playerId) const {
     if (!game) return {};
@@ -263,13 +299,47 @@ bool Room::allPlayersReady() const {
 void Room::broadcastRoomPlayers()
 {
     ServerListRoomPlayers list;
-    for (uint32_t pid : players)
-        list.players.push_back(getPlayerData(pid));
+
+    for (uint32_t pid : players) {
+        PlayerData pdata;
+
+        if (game) {
+            const Player& p = game->getPlayerInfo(pid);
+            pdata = p.getState();
+        } else {
+            pdata.id = pid;
+            pdata.role = preGameRoles.count(pid) ? preGameRoles.at(pid) : PlayerRole::Spectator;
+            pdata.ready = preGameReady.count(pid) ? preGameReady.at(pid) : false;
+        }
+
+        list.players.push_back(pdata);
+    }
+
+    /*
+    // --- Log pour debug ---
+    gf::Log::info("[Room %u] BroadcastRoomPlayers : %zu joueurs\n", id, list.players.size());
+    for (auto& p : list.players) {
+        const char* roleStr = "Unknown";
+        switch(p.role) {
+            case PlayerRole::PacMan:    roleStr = "PacMan"; break;
+            case PlayerRole::Ghost:     roleStr = "Ghost"; break;
+            case PlayerRole::Spectator: roleStr = "Spectator"; break;
+        }
+        gf::Log::info(" -> Player %u : role=%s, ready=%s\n",
+                      p.id,
+                      roleStr,
+                      p.ready ? "true" : "false");
+    }
+    */
+
     gf::Packet packet;
     packet.is(list);
-    for (uint32_t pid : players)
+
+    for (uint32_t pid : players) {
         network.send(pid, packet);
+    }
 }
+
 
 void Room::broadcastRoomSettings()
 {

@@ -60,28 +60,14 @@ public:
         botManager = manager;
     }
 
-    // arrête juste la boucle, sans join
     void stopGameLoopSignal() {
         running = false;
     }
 
-    // join, à appeler depuis un autre thread
     void joinGameLoop() {
         if (gameThread.joinable() && std::this_thread::get_id() != gameThread.get_id())
             gameThread.join();
     }
-
-std::mutex gameMutex;
-
-// Retourne une copie du map des joueurs protégée par le mutex
-std::unordered_map<uint32_t, Player*> getPlayersSafe() {
-    std::lock_guard<std::mutex> lock(gameMutex);
-    std::unordered_map<uint32_t, Player*> copy;
-    for (auto& [id, p] : players) {
-        copy[id] = p.get(); // pointeur brut pour lecture seulement
-    }
-    return copy;
-}
 
 
 
