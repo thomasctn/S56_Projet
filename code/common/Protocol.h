@@ -350,12 +350,12 @@ Archive &operator|(Archive &ar, ClientMove &data)
 }
 
 
-struct ServerJoin {
-    static constexpr gf::Id type = "ServerJoin"_id;
+struct ServerConnect {
+    static constexpr gf::Id type = "ServerConnect"_id;
     uint32_t clientId;
 };
 
 template <typename Archive>
-Archive& operator|(Archive& ar, ServerJoin& data) {
+Archive& operator|(Archive& ar, ServerConnect& data) {
     return ar | data.clientId;
 }

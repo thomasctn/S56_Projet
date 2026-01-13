@@ -1,5 +1,7 @@
 #include "ServerNetwork.h"
 #include "../common/Constants.h"
+#include "../common/Protocol.h"
+
 #include "Lobby.h"
 #include "Room.h"
 #include "Game.h"

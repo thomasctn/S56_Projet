@@ -44,7 +44,7 @@ void ServerNetwork::handleNewClient() {
     selector.addSocket(connection.socket);
     connections.emplace(id, std::move(connection));
 
-    ServerJoin idMsg;
+    ServerConnect idMsg;
     idMsg.clientId = id;
     gf::Packet packet;
     packet.is(idMsg);
