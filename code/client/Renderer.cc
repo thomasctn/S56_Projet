@@ -343,7 +343,7 @@ void Renderer::renderWelcome() {
     rendered_window.display();
 }
 
-void Renderer::renderLobby(int connectedPlayers, int roomSize, bool amReady, int nbBots, int gameDur) {
+void Renderer::renderLobby(int connectedPlayers, int roomSize, bool amReady, int nbBots, int gameDur, PlayerRole myRole) {
     rendered_window.clear(gf::Color::Black);
 
     static gf::Font font("../common/fonts/arial.ttf");
@@ -363,8 +363,11 @@ void Renderer::renderLobby(int connectedPlayers, int roomSize, bool amReady, int
     m_minusDurBtnPos = gf::v1::Vector2f{margin + 140.f, 200.f};
     m_plusDurBtnPos  = gf::v1::Vector2f{m_minusDurBtnPos.x + m_btnSize.x + 60.f, 200.f};
 
+    m_CRBtnPos = gf::v1::Vector2f{margin + 140.f, 250.f};
+
+
     m_readyBtnSize = gf::v1::Vector2f{worldSize*0.18f, worldSize*0.08f};
-    m_readyBtnPos  = gf::v1::Vector2f{margin, 370.f};
+    m_readyBtnPos  = gf::v1::Vector2f{margin, 420.f};
 
     //textes
     gf::Text title;
@@ -480,6 +483,42 @@ void Renderer::renderLobby(int connectedPlayers, int roomSize, bool amReady, int
     valueText.setPosition({m_minusDurBtnPos.x + m_btnSize.x + 10.f, m_minusDurBtnPos.y + 8.f});
     rendered_window.draw(valueText);
 
+    //pour le role
+    gf::Text roleLabel;
+    roleLabel.setFont(font);
+    roleLabel.setCharacterSize(20);
+    roleLabel.setColor(gf::Color::White);
+
+    if(myRole == PlayerRole::PacMan){
+        roleLabel.setString("Vous etes \nactuellement :\nPACMAN");
+    }else{
+        roleLabel.setString("Vous etes \nactuellement :\nUN FANTOME");
+    }
+
+    roleLabel.setPosition({margin, 250.f});
+    rendered_window.draw(roleLabel);
+
+    gf::RectangleShape CRBtn(m_readyBtnSize);
+    CRBtn.setPosition(m_CRBtnPos);
+    CRBtn.setColor(gf::Color::fromRgb(0.8f, 0.3f, 0.6f));
+
+    rendered_window.draw(CRBtn);
+
+    gf::Text CRText;
+    CRText.setFont(font);
+    CRText.setCharacterSize(int(m_readyBtnSize.y * 0.35f));
+    CRText.setColor(gf::Color::White);
+
+    if (myRole == PlayerRole::PacMan) {
+        CRText.setString("Devenir un fantome ?");
+    } else {
+        CRText.setString("Devenir Pacman ?");
+    }
+    CRText.setPosition({m_CRBtnPos.x + m_readyBtnSize.x * 0.08f,m_CRBtnPos.y + m_readyBtnSize.y * 0.25f});
+
+    rendered_window.draw(CRText);
+
+
 
     // pret boutton
     gf::RectangleShape readyBtn(m_readyBtnSize);
@@ -505,7 +544,7 @@ void Renderer::renderLobby(int connectedPlayers, int roomSize, bool amReady, int
     readyState.setCharacterSize(20);
     readyState.setColor(gf::Color::White);
     readyState.setString(amReady ? "Vous êtes : PRÊT" : "Vous êtes : PAS PRÊT");
-    readyState.setPosition({margin, 330.f});
+    readyState.setPosition({margin, 380.f});
     rendered_window.draw(readyState);
 
     rendered_window.display();

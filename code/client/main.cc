@@ -32,6 +32,19 @@ void sendRoomSettings(gf::TcpSocket& socket,unsigned int newRoomSize, int newNbB
     gf::Log::info("ClientChangeRoomSettings envoye : roomSize=%u\n", newRoomSize);
 }
 
+void updateMyRoleFromPlayers(const std::vector<PlayerData>& players,uint32_t myId,PlayerRole& myRole){
+ 
+
+    for (const PlayerData& p : players) {
+        if (p.id == myId) {
+            myRole = p.role;
+            gf::Log::info("Mon role maj : %d\n", int(myRole));
+            return;
+        }
+    }
+}
+
+
 
 Renderer renderer;
 
@@ -55,6 +68,7 @@ int main()
     int roomSize = int(MAX_PLAYERS); // capacité actuelle de la room (modifiable)
     int nbBots = int(NB_BOTS);//modifiable! //avec int parcque thomas a mis ses trucs en size_t et il sait pas?
     int gameDur = T_GAME;
+    PlayerRole myRole;
 
 
     //std::mutex statesMutex;
@@ -245,6 +259,34 @@ int main()
                     p.is(ClientReady{amReady});
                     socket.sendPacket(p);
                 }
+
+                //bouton changement de role
+                auto CRPos = renderer.getChangeRoleBtnPos();
+                if(mx >= CRPos.x && mx <= CRPos.x + readySize.x &&my >= CRPos.y && my <= CRPos.y + readySize.y){
+                    PlayerData newData;
+                    newData.id = myId;
+
+                    // on inverse le roel
+                    if(myRole == PlayerRole::PacMan){
+                        newData.role = PlayerRole::Ghost;
+                    }else{
+                        newData.role = PlayerRole::PacMan;
+                    }
+                    // on fout nimporte quoi dans le reste
+                    newData.ready = amReady;
+                    newData.score = 0;//le reste est juste la car je dois le remplir faut que server ignore
+                    newData.x = 0.f;   
+                    newData.y = 0.f;
+                    newData.color = 0;  
+                    newData.name = "";
+
+                    gf::Packet p;
+                    p.is(ClientChangeRoomCharacterData{ newData });
+                    socket.sendPacket(p);
+
+                    gf::Log::info("Demande changement de rôle envoyée (%d -> %d)\n",int(myRole),int(newData.role));
+                }
+
             }
 
 
@@ -318,9 +360,19 @@ int main()
                         break;
                     }
 
+                    case ServerAssignClientId::type: {
+                        auto data = packet.as<ServerAssignClientId>();
+                        myId = data.clientId;
+
+                        gf::Log::info("ID client assigné par le serveur : %u\n", myId);
+                        break;
+                    }
+
+
                     case ServerListRoomPlayers::type: {
                         auto data = packet.as<ServerListRoomPlayers>();
                         connectedPlayers = data.players.size();
+                        updateMyRoleFromPlayers(data.players, myId, myRole);
                         gf::Log::info("Lobby: %d / %d joueurs\n", connectedPlayers, roomSize);
                         break;
                     }
@@ -330,6 +382,8 @@ int main()
 
                         states = data.players;  
                         board=data.board;
+
+                        updateMyRoleFromPlayers(data.players, myId, myRole);
 
                         screen = ClientScreen::Playing; //passage en mode jeu, on montre la carte
                         
@@ -369,7 +423,7 @@ int main()
         }
         else if(screen == ClientScreen::Lobby) {
             //renderer.drawLobby(connectedPlayers, maxPlayers); 
-            renderer.renderLobby(connectedPlayers, roomSize, amReady, nbBots, gameDur);
+            renderer.renderLobby(connectedPlayers, roomSize, amReady, nbBots, gameDur, myRole);
         }
         else{ //Playing
             renderer.render(states, myId, board, pacgommes);
