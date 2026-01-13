@@ -308,6 +308,7 @@ int main()
                         auto data = packet.as<ServerRoomSettings>();
                         roomSize = int(data.settings.roomSize);
                         nbBots = int(data.settings.nbBot);
+                        gameDur = int(data.settings.gameDuration);
                         gf::Log::info("ServerRoomSettings reçu : roomSize=%u, nbBots=%u\n", data.settings.roomSize,data.settings.nbBot);
                         break;
                     }
@@ -347,6 +348,7 @@ int main()
                     case ServerGameEnd::type:{
                         auto data = packet.as<ServerGameEnd>();
                         screen = ClientScreen::Lobby;
+                        amReady=false;
                         break;
                     }
 
