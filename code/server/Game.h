@@ -60,6 +60,16 @@ public:
         botManager = manager;
     }
 
+    // arrête juste la boucle, sans join
+    void stopGameLoopSignal() {
+        running = false;
+    }
+
+    // join, à appeler depuis un autre thread
+    void joinGameLoop() {
+        if (gameThread.joinable() && std::this_thread::get_id() != gameThread.get_id())
+            gameThread.join();
+    }
 
     
 private:

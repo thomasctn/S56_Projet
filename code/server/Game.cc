@@ -6,7 +6,7 @@
 
 
 Game::Game(int width, int height) : board(width, height) {
-    board.placeRandomPacGommes(20);
+    board.placeRandomPacGommes(NB_PACGOMME);
 }
 
 
@@ -173,11 +173,16 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& ser
                 // --- phase de jeu actif ---
                 std::chrono::duration<double> gameTime = now - chronoStart;
                 gameElapsed = gameTime.count();
-                if (gameElapsed >= T_GAME) {
+                unsigned int nbPacGommes = board.getPacgommeCount();
+                if (gameElapsed >= T_GAME || (nbPacGommes == 0)) {
                     gf::Log::info("Partie terminée !\n");
                     running.store(false);
                     gameStarted.store(false);
-                    break;
+                if (room) {
+                    room->endGame();
+                }
+
+                break;
                 }
 
                 // --- logique ---
@@ -190,9 +195,11 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& ser
 
 void Game::stopGameLoop() {
     running = false;
-    if (gameThread.joinable())
+
+    if (gameThread.joinable() && std::this_thread::get_id() != gameThread.get_id())
         gameThread.join();
 }
+
 
 void Game::spawnPlayer(Player& p) {
     if (p.getRole() == PlayerRole::Ghost) {

@@ -53,10 +53,20 @@ public:
     bool isFull() const {return players.size() >= settings.roomSize;}
     unsigned int getMaxPlayers() const {return settings.roomSize;}
 
+    void endGame();
+    void notifyGameEnded();
+    void cleanupGame();
+    void onGameStopped();
+void notifyGameEndedAsync();
+
 private:
     void startGame();
+
     void setRoom(Room& r) { room = &r; }
     uint32_t generateBotId();
+
+    void resetPlayersState();
+
 
     std::unique_ptr<BotManager> botManager;
     std::unordered_map<uint32_t, bool> preGameReady;

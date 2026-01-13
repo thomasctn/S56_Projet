@@ -37,6 +37,8 @@ public:
     bool removePacgomme(unsigned int x, unsigned int y);
     BoardCommon toCommonData();
 
+    unsigned int getPacgommeCount() const {return pacgommes.size();}
+
     
 
 private:

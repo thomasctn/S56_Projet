@@ -218,7 +218,7 @@ void Room::handleClientReady(PacketContext& ctx) {
         network.send(pid, readyPacket);
 
     // Vérifier si tous les joueurs sont prêts
-    if (allPlayersReady()) {
+    if (allPlayersReady() && (players.size() == settings.roomSize)) {
         startGame();
     }
 }
@@ -356,3 +356,61 @@ void Room::handleClientChangeRoomSettings(PacketContext& ctx)
     network.send(ctx.senderId, packet);
     setSettings(data.newSettings);
 }
+
+void Room::endGame() {
+    notifyGameEnded();
+    resetPlayersState();
+    std::thread([this]() {
+        cleanupGame();
+    }).detach();
+}
+
+
+
+void Room::notifyGameEnded() {
+    gf::Log::info("[Room %u] Notification de fin de partie\n", id);
+
+    ServerGameEnd msg;
+    gf::Packet packet;
+    packet.is(msg);
+
+    for (uint32_t pid : players) {
+        network.send(pid, packet);
+    }
+}
+
+void Room::cleanupGame() {
+    if (!game) return;
+
+    gf::Log::info("[Room %u] Nettoyage de la partie\n", id);
+
+    game->stopGameLoop();
+    game->joinGameLoop();
+
+    botManager.reset();
+    game.reset();
+    preGameReady.clear();
+
+    gf::Log::info("[Room %u] Nettoyage fini\n", id);
+
+}
+
+
+
+
+void Room::resetPlayersState() {
+    gf::Log::info("[Room %u] Reset états de joueurs\n", id);
+    for (uint32_t pid : players) {
+        preGameReady[pid] = false;
+    }
+}
+
+void Room::notifyGameEndedAsync() {
+    notifyGameEnded();
+    resetPlayersState();
+    std::thread([this]() {
+        cleanupGame();
+    }).detach();
+}
+
+
