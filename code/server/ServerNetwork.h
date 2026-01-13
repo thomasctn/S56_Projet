@@ -8,6 +8,7 @@
 #include <gf/Packet.h>
 #include "ServerNetwork.h"
 #include "Lobby.h"
+#include "../common/Protocol.h"
 #include <gf/Log.h>
 
 

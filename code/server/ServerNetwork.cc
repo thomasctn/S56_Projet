@@ -44,10 +44,17 @@ void ServerNetwork::handleNewClient() {
     selector.addSocket(connection.socket);
     connections.emplace(id, std::move(connection));
 
+    ServerJoin idMsg;
+    idMsg.clientId = id;
+    gf::Packet packet;
+    packet.is(idMsg);
+    connection.socket.sendPacket(packet);
+
     lobby->onPlayerConnected(id);
 
     gf::Log::info("Client connecté (id=%u)\n", id);
 }
+
 
 void ServerNetwork::handleClientData() {
     std::vector<uint32_t> disconnected;
