@@ -63,16 +63,13 @@ int main() {
 
             window.clear(gf::Color::Black);
 
-            // --- Récupération de la Room et du Game ---
-            try {
-                Room& room = server.getLobby().getRoom(displayRoomId);
-                Game* gamePtr = &room.getGame();
-                if (gamePtr) {
-                    Game& game = *gamePtr;
-                
+        try {
+            Room& room = server.getLobby().getRoom(displayRoomId);
+            Game* gamePtr = &room.getGame();
 
-                auto& board = game.getBoard();
-                auto& players = game.getPlayers();
+            if (gamePtr) {
+                Game& game = *gamePtr;
+                const Board& board = game.getBoard();
 
                 int mapWidth  = board.getWidth();
                 int mapHeight = board.getHeight();
@@ -81,7 +78,7 @@ int main() {
                 float offsetX = (windowWidth  - tileSize * mapWidth) / 2.0f;
                 float offsetY = (windowHeight - tileSize * mapHeight) / 2.0f;
 
-                // --- Dessiner le plateau ---
+                // Dessin plateau
                 for (int y = 0; y < mapHeight; ++y) {
                     for (int x = 0; x < mapWidth; ++x) {
                         const Case& cell = board.getCase(x, y);
@@ -97,18 +94,17 @@ int main() {
                         window.draw(tile);
 
                         if (board.hasPacgomme(x,y)) {
-                            gf::CircleShape pacGommeShape(tileSize / 6.0f); 
+                            gf::CircleShape pacGommeShape(tileSize / 6.0f);
                             pacGommeShape.setOrigin({tileSize/12.0f, tileSize/12.0f});
                             pacGommeShape.setPosition({x * tileSize + offsetX + tileSize/2,
-                                                       y * tileSize + offsetY + tileSize/2});
+                                                    y * tileSize + offsetY + tileSize/2});
                             pacGommeShape.setColor(gf::Color::Yellow);
                             window.draw(pacGommeShape);
                         }
                     }
                 }
 
-                // --- Dessiner les joueurs ---
-                for (auto& [id, playerPtr] : players) {
+                for (auto& [id, playerPtr] : game.getPlayers()) {
                     if (!playerPtr) continue;
                     Player& p = *playerPtr;
 
@@ -134,19 +130,15 @@ int main() {
                     window.draw(scoreText);
                 }
 
-                // --- Affichage du chrono ---
+                // Affichage chrono
                 std::string chronoMessage;
-                int remainingTime = 0;
-
                 if (game.isPreGame()) {
-                    remainingTime = PRE_GAME_DELAY - static_cast<int>(game.getPreGameElapsed());
-                    if (remainingTime < 0) remainingTime = 0;
-                    chronoMessage = "Début de la partie dans : " + std::to_string(remainingTime) + "s";
+                    int remainingTime = PRE_GAME_DELAY - static_cast<int>(game.getPreGameElapsed());
+                    chronoMessage = "Début dans : " + std::to_string(std::max(0, remainingTime)) + "s";
                 } else if (game.isGameStarted()) {
-                    remainingTime = room.getGameDuration() - static_cast<int>(game.getElapsedSeconds());
-                    if (remainingTime < 0) remainingTime = 0;
-                    chronoMessage = "Temps restant : " + std::to_string(remainingTime) + "s";
-                } else if (game.isGameOver()) {
+                    int remainingTime = room.getGameDuration() - static_cast<int>(game.getElapsedSeconds());
+                    chronoMessage = "Temps restant : " + std::to_string(std::max(0, remainingTime)) + "s";
+                } else {
                     chronoMessage = "Partie terminée !";
                 }
 
@@ -159,13 +151,16 @@ int main() {
                 chronoText.setPosition({12.0f, 20.0f});
                 window.draw(chronoText);
             }
-            } catch (const std::out_of_range& e) {
-                gf::Log::error("Room %d introuvable !\n", displayRoomId);
-            }
+
+        } catch (const std::out_of_range& e) {
+            gf::Log::error("Room %d introuvable !\n", displayRoomId);
+        }
+
 
             window.display();
             std::this_thread::sleep_for(std::chrono::milliseconds(16));
         }
+
 
         if (mainWindow.isOpen()) mainWindow.close();
     }

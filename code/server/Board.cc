@@ -455,7 +455,7 @@ void Board::printWithPlayers(const std::vector<Player> &players) const {
     }
 }
 
-bool Board::hasPacgomme(unsigned int x, unsigned int y)
+bool Board::hasPacgomme(unsigned int x, unsigned int y) const
 {
     return pacgommes.find(Position(x,y)) != pacgommes.end();
 }

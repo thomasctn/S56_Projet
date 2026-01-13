@@ -33,7 +33,7 @@ public:
     unsigned int getHeight() const { return height; }
 
     std::set<Position> getPacgommes() const {return pacgommes;}
-    bool hasPacgomme(unsigned int x, unsigned int y);
+    bool hasPacgomme(unsigned int x, unsigned int y) const;
     bool removePacgomme(unsigned int x, unsigned int y);
     BoardCommon toCommonData();
 
