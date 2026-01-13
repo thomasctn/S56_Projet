@@ -241,11 +241,12 @@ struct ServerGameState
   std::vector<PlayerData> clientStates;
   BoardCommon board;
   std::set<Position> pacgommes;
+  unsigned int timeLeft;
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, ServerGameState &data)
 {
-  return ar | data.clientStates | data.board | data.pacgommes;
+  return ar | data.clientStates | data.board | data.pacgommes | data.timeLeft;
 }
 
 //Réponse à tous les clients sur la fin de la partie
