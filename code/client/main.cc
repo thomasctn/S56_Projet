@@ -360,8 +360,8 @@ int main()
                         break;
                     }
 
-                    case ServerAssignClientId::type: {
-                        auto data = packet.as<ServerAssignClientId>();
+                    case ServerConnect::type: {
+                        auto data = packet.as<ServerConnect>();
                         myId = data.clientId;
 
                         gf::Log::info("ID client assigné par le serveur : %u\n", myId);
