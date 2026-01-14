@@ -19,6 +19,8 @@
 #include "Renderer.h"
 #include "WelcomeScene.h"
 #include "WelcomeEntity.h"
+#include "LobbyScene.h"
+
 
 
 
@@ -110,6 +112,8 @@ int main()
 
     //scene welcome
     WelcomeScene welcomeScene(renderer);
+    LobbyScene lobbyScene(renderer);
+
     //WelcomeEntity welcome(renderer);
 
 
@@ -198,93 +202,73 @@ int main()
 
             
 
-            //boutons - et + du lobby
-            if(event.type == gf::EventType::MouseButtonPressed && event.mouseButton.button == gf::MouseButton::Left){
-                auto winSize = renderer.getWindow().getSize(); 
-                float mx = event.mouseButton.coords.x * (renderer.getWorldSize() / float(winSize.x));
-                float my = event.mouseButton.coords.y * (renderer.getWorldSize() / float(winSize.y));
-
-                //bouton -
-                auto minusPos = renderer.getMinusBtnPos();
-                auto btnSize = renderer.getBtnSize();
-                if(mx >= minusPos.x && mx <= minusPos.x + btnSize.x &&my >= minusPos.y && my <= minusPos.y + btnSize.y){
-                    if(roomSize > MIN_NB_PLAYERS) roomSize--;
-                    sendRoomSettings(socket, roomSize, nbBots, gameDur);
-                }
-
-                //bouton +
-                auto plusPos = renderer.getPlusBtnPos();
-                if(mx >= plusPos.x && mx <= plusPos.x + btnSize.x &&my >= plusPos.y && my <= plusPos.y + btnSize.y){
-                    if(roomSize < MAX_NB_PLAYERS) roomSize++;
-                    sendRoomSettings(socket, roomSize,nbBots, gameDur);
-                }
-
-                //bouton - bot
-                auto minusBotPos = renderer.getMinusBotBtnPos();
-                if(mx >= minusBotPos.x && mx <= minusBotPos.x + btnSize.x &&my >= minusBotPos.y && my <= minusBotPos.y + btnSize.y){
-                    if(nbBots > MIN_NB_BOTS) nbBots--;
-                    sendRoomSettings(socket, roomSize, nbBots, gameDur);
-                }
-
-                //bouton + bot
-                auto plusBotPos = renderer.getPlusBotBtnPos();
-                if(mx >= plusBotPos.x && mx <= plusBotPos.x + btnSize.x &&my >= plusBotPos.y && my <= plusBotPos.y + btnSize.y){
-                    if(nbBots < MAX_NB_BOTS) nbBots++;
-                    sendRoomSettings(socket, roomSize,nbBots, gameDur);
-                }
-
-                //bouton - durée
-                auto minusDurPos = renderer.getMinusDurBtnPos();
-                if(mx >= minusDurPos.x && mx <= minusDurPos.x + btnSize.x &&my >= minusDurPos.y && my <= minusDurPos.y + btnSize.y){
-                    if(gameDur > MIN_DURATION) gameDur=gameDur-20;
-                    sendRoomSettings(socket, roomSize, nbBots, gameDur);
-                }
-
-                //bouton + durée
-                auto plusDurPos = renderer.getPlusDurBtnPos();
-                if(mx >= plusDurPos.x && mx <= plusDurPos.x + plusDurPos.x &&my >= plusDurPos.y && my <= plusDurPos.y + btnSize.y){
-                    if(gameDur < MAX_DURATION) gameDur=gameDur+20;;
-                    sendRoomSettings(socket, roomSize,nbBots, gameDur);
-                }
-
-                //bouton PRET
-                auto readyPos = renderer.getReadyBtnPos();
-                auto readySize = renderer.getReadyBtnSize();
-                if(mx >= readyPos.x && mx <= readyPos.x + readySize.x &&my >= readyPos.y && my <= readyPos.y + readySize.y){
-                    amReady = !amReady;
-                    gf::Packet p;
-                    p.is(ClientReady{amReady});
-                    socket.sendPacket(p);
-                }
-
-                //bouton changement de role
-                auto CRPos = renderer.getChangeRoleBtnPos();
-                if(mx >= CRPos.x && mx <= CRPos.x + readySize.x &&my >= CRPos.y && my <= CRPos.y + readySize.y){
-                    PlayerData newData;
-                    newData.id = myId;
-
-                    // on inverse le roel
-                    if(myRole == PlayerRole::PacMan){
-                        newData.role = PlayerRole::Ghost;
-                    }else{
-                        newData.role = PlayerRole::PacMan;
+            // interaction lobby via LobbyScene
+            if (screen == ClientScreen::Lobby) {
+                LobbyAction act = lobbyScene.processEvent(event);
+                switch (act){
+                    case LobbyAction::RoomDec:
+                        if (roomSize > MIN_NB_PLAYERS){
+                            roomSize--;
+                            sendRoomSettings(socket, roomSize, nbBots, gameDur);
+                        }
+                        break;
+                    case LobbyAction::RoomInc:
+                        if (roomSize < MAX_NB_PLAYERS){
+                            roomSize++;
+                            sendRoomSettings(socket, roomSize, nbBots, gameDur);
+                        }
+                        break;
+                    case LobbyAction::BotDec:
+                        if (nbBots > MIN_NB_BOTS){
+                            nbBots--;
+                            sendRoomSettings(socket, roomSize, nbBots, gameDur);
+                        }
+                        break;
+                    case LobbyAction::BotInc:
+                        if (nbBots < MAX_NB_BOTS){
+                            nbBots++;
+                            sendRoomSettings(socket, roomSize, nbBots, gameDur);
+                        }
+                        break;
+                    case LobbyAction::DurDec:
+                        if (gameDur > MIN_DURATION){
+                            gameDur = gameDur - 20;
+                            sendRoomSettings(socket, roomSize, nbBots, gameDur);
+                        }
+                        break;
+                    case LobbyAction::DurInc:
+                        if (gameDur < MAX_DURATION){
+                            gameDur = gameDur + 20;
+                            sendRoomSettings(socket, roomSize, nbBots, gameDur);
+                        }
+                        break;
+                    case LobbyAction::ToggleReady: {
+                        amReady = !amReady;
+                        gf::Packet p;
+                        p.is(ClientReady{amReady});
+                        socket.sendPacket(p);
+                        break;
                     }
-                    // on fout nimporte quoi dans le reste
-                    newData.ready = amReady;
-                    newData.score = 0;//le reste est juste la car je dois le remplir faut que server ignore
-                    newData.x = 0.f;   
-                    newData.y = 0.f;
-                    newData.color = 0;  
-                    newData.name = "";
-
-                    gf::Packet p;
-                    p.is(ClientChangeRoomCharacterData{ newData });
-                    socket.sendPacket(p);
-
-                    gf::Log::info("Demande changement de rôle envoyée (%d -> %d)\n",int(myRole),int(newData.role));
+                    case LobbyAction::ChangeRole: {
+                        PlayerData newData;
+                        newData.id = myId;
+                        newData.role = (myRole == PlayerRole::PacMan) ? PlayerRole::Ghost : PlayerRole::PacMan;
+                        newData.ready = amReady;
+                        newData.score = 0;
+                        newData.x = 0.f;
+                        newData.y = 0.f;
+                        newData.color = 0;
+                        newData.name = "";
+                        gf::Packet p;
+                        p.is(ClientChangeRoomCharacterData{ newData });
+                        socket.sendPacket(p);
+                        gf::Log::info("Demande changement de rôle envoyée (%d -> %d)\n", int(myRole), int(newData.role));
+                        break;
+                    }
+                    default: break;
                 }
+            }   
 
-            }
 
 
 
@@ -420,7 +404,7 @@ int main()
         }
         else if(screen == ClientScreen::Lobby) {
             //renderer.drawLobby(connectedPlayers, maxPlayers); 
-            renderer.renderLobby(connectedPlayers, roomSize, amReady, nbBots, gameDur, myRole);
+            lobbyScene.render(connectedPlayers, roomSize, amReady, nbBots, gameDur, myRole);
         }
         else{ //Playing
             renderer.render(states, myId, board, pacgommes);
