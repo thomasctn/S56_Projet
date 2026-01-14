@@ -17,6 +17,9 @@
 #include "../common/Types.h"
 #include "../common/Constants.h"
 #include "Renderer.h"
+#include "WelcomeScene.h"
+#include "WelcomeEntity.h"
+
 
 
 void sendRoomSettings(gf::TcpSocket& socket,unsigned int newRoomSize, int newNbBots, int newGameDur){
@@ -105,6 +108,11 @@ int main()
     auto size = renderer.getWindow().getSize();
     renderer.handleResize(size.x, size.y);
 
+    //scene welcome
+    WelcomeScene welcomeScene(renderer);
+    //WelcomeEntity welcome(renderer);
+
+
     gf::ActionContainer actions;
 
     //directions
@@ -172,33 +180,22 @@ int main()
         {   
             actions.processEvent(event); //important actions
             //mettre un bouton si on est dans le welcome!
-            if (screen == ClientScreen::Welcome && event.type == gf::EventType::MouseButtonPressed){
-                if (event.mouseButton.button == gf::MouseButton::Left){ //clic gauche
+            if (screen == ClientScreen::Welcome) {
+                if (welcomeScene.processEvent(event)) {
+                    gf::Log::info("Bouton ENTRER cliqué (par WelcomeScene)\n");
 
-                    int mx = event.mouseButton.coords.x;
-                    int my = event.mouseButton.coords.y;
-
-                    // zone bouton
-                    int bx= 20;
-                    int by= 80;
-                    int bw= 200;
-                    int bh= 80;
-
-                    if (mx >= bx && mx <= bx + bw && my >= by && my <= by + bh){ //si on a clqiue au bon endroit
-                        gf::Log::info("Bouton ENTRER cliqué\n");
-
-                        if (!askedToJoin){ //on a pas deja demandé
-                            askedToJoin = true;
-                            gf::Packet p;
-                            p.is(ClientJoinRoom{});   
-                            socket.sendPacket(p);
-
-                            gf::Log::info("ClientJoinRoom envoye\n");
-                            screen = ClientScreen::Lobby; //passe a la salle d'attente
-                        }
+                    if(!askedToJoin){
+                        askedToJoin = true;
+                        gf::Packet p;
+                        p.is(ClientJoinRoom{});
+                        socket.sendPacket(p);
                     }
+
+                    screen = ClientScreen::Lobby;
                 }
             }
+
+
             
 
             //boutons - et + du lobby
@@ -419,7 +416,7 @@ int main()
         //renderer.render(states, myId, board);
 
         if(screen == ClientScreen::Welcome) {
-            renderer.renderWelcome(); 
+            welcomeScene.render();
         }
         else if(screen == ClientScreen::Lobby) {
             //renderer.drawLobby(connectedPlayers, maxPlayers); 

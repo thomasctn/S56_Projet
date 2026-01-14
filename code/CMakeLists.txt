@@ -26,6 +26,8 @@ target_link_libraries(server PRIVATE gf::core gf::graphics gf::net)
 add_executable(client
     client/main.cc
     client/Renderer.cc
+    client/WelcomeScene.cc
+    client/WelcomeEntity.cc
 )
 
 target_link_libraries(client PRIVATE gf::core gf::graphics gf::net)

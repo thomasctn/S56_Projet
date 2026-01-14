@@ -25,6 +25,9 @@ class Renderer{
     void renderWelcome();
     void renderLobby(int connectedPlayers,int roomSize,bool amReady, int nbBots, int gameDur, PlayerRole myRole);
 
+    //modif pour que scenes fonctionnent
+    void clearWindow();
+    gf::RenderWindow& getRenderWindow();
     
 
     
