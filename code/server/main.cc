@@ -6,7 +6,6 @@
 #include "Room.h"
 #include "Game.h"
 
-
 #include <gf/Log.h>
 #include <gf/Window.h>
 #include <gf/RenderWindow.h>
@@ -24,7 +23,7 @@ ServerNetwork* gServer = nullptr;
 std::atomic<bool> gRunning{true}; // drapeau global pour ctrl+c
 
 void sigintHandler(int) {
-    gRunning = false;          // signal pour la boucle principale
+    gRunning = false;
     if (gServer) gServer->stop();
 }
 
@@ -48,11 +47,16 @@ int main() {
         gf::RenderWindow window(mainWindow);
 
         const float RENDER_SIZE = 500.0f;
-
-        // Choisir la Room à afficher
         RoomId displayRoomId = 1;
 
-        while (mainWindow.isOpen() && gRunning) {
+        static gf::Font font("../common/fonts/arial.ttf");
+
+
+
+        bool renderRunning = true;
+
+        while (mainWindow.isOpen() && gRunning && renderRunning) {
+            // --- Gestion events ---
             gf::Event event;
             while (mainWindow.pollEvent(event)) {
                 if (event.type == gf::EventType::Closed) {
@@ -63,17 +67,27 @@ int main() {
 
             window.clear(gf::Color::Black);
 
-        try {
-            Room& room = server.getLobby().getRoom(displayRoomId);
-            Game* gamePtr = &room.getGame();
+            Room* roomPtr = nullptr;
+            Game* game = nullptr;
 
-            if (gamePtr) {
-                Game& game = *gamePtr;
-                const Board& board = game.getBoard();
+            try {
+                roomPtr = &server.getLobby().getRoom(displayRoomId);
+                if (roomPtr) game = &roomPtr->getGame();
+            } catch (...) {
+                gf::Log::error("Room/Game introuvable !");
+                renderRunning = false;
+            }
 
+            if (game) {
+                // Vérifier si la partie est terminée
+                if (!game->isPreGame() && !game->isGameStarted()) {
+                    renderRunning = false; // sortir proprement
+                    continue;
+                }
+
+                const Board& board = game->getBoard();
                 int mapWidth  = board.getWidth();
                 int mapHeight = board.getHeight();
-
                 float tileSize = std::min(RENDER_SIZE / mapWidth, RENDER_SIZE / mapHeight);
                 float offsetX = (windowWidth  - tileSize * mapWidth) / 2.0f;
                 float offsetY = (windowHeight - tileSize * mapHeight) / 2.0f;
@@ -81,11 +95,13 @@ int main() {
                 // Dessin plateau
                 for (int y = 0; y < mapHeight; ++y) {
                     for (int x = 0; x < mapWidth; ++x) {
-                        const Case& cell = board.getCase(x, y);
+                        const Case* cell = &board.getCase(x, y);
+                        if (!cell) continue;
+
                         gf::RectangleShape tile({tileSize, tileSize});
                         tile.setPosition({x * tileSize + offsetX, y * tileSize + offsetY});
 
-                        switch (cell.getType()) {
+                        switch (cell->getType()) {
                             case CellType::Wall:  tile.setColor(gf::Color::White); break;
                             case CellType::Hut:   tile.setColor(gf::Color::Red); break;
                             case CellType::Floor: tile.setColor(gf::Color::fromRgb(0.3f, 0.3f, 0.3f)); break;
@@ -97,70 +113,65 @@ int main() {
                             gf::CircleShape pacGommeShape(tileSize / 6.0f);
                             pacGommeShape.setOrigin({tileSize/12.0f, tileSize/12.0f});
                             pacGommeShape.setPosition({x * tileSize + offsetX + tileSize/2,
-                                                    y * tileSize + offsetY + tileSize/2});
+                                                      y * tileSize + offsetY + tileSize/2});
                             pacGommeShape.setColor(gf::Color::Yellow);
                             window.draw(pacGommeShape);
                         }
                     }
                 }
 
-                for (auto& [id, playerPtr] : game.getPlayers()) {
-                    if (!playerPtr) continue;
-                    Player& p = *playerPtr;
+                // Joueurs
+                struct PlayerSnapshot { float x,y; PlayerRole role; int score; };
+                std::vector<PlayerSnapshot> players;
+                for (auto& [id, pPtr] : game->getPlayers()) {
+                    if (!pPtr) continue;
+                    players.push_back({pPtr->x, pPtr->y, pPtr->getRole(), pPtr->score});
+                }
 
+                // Dessin joueurs
+                for (auto& p : players) {
                     gf::RectangleShape playerRect({tileSize, tileSize});
-                    float px = p.x / 50.0f * tileSize + offsetX;
-                    float py = p.y / 50.0f * tileSize + offsetY;
-                    playerRect.setPosition({px, py});
-
-                    switch (p.getRole()) {
+                    playerRect.setPosition({p.x / 50.f * tileSize + offsetX, p.y / 50.f * tileSize + offsetY});
+                    switch (p.role) {
                         case PlayerRole::PacMan:    playerRect.setColor(gf::Color::Yellow); break;
                         case PlayerRole::Ghost:     playerRect.setColor(gf::Color::Violet); break;
                         case PlayerRole::Spectator: playerRect.setColor(gf::Color::Cyan); break;
                     }
                     window.draw(playerRect);
 
-                    static gf::Font font("../common/fonts/arial.ttf");
                     gf::Text scoreText;
                     scoreText.setFont(font);
                     scoreText.setCharacterSize(16);
                     scoreText.setColor(gf::Color::White);
                     scoreText.setString(std::to_string(p.score));
-                    scoreText.setPosition({px + 5, py - 18});
+                    scoreText.setPosition({p.x / 50.f * tileSize + offsetX + 5, p.y / 50.f * tileSize + offsetY - 18});
                     window.draw(scoreText);
                 }
 
-                // Affichage chrono
+                // Chrono
                 std::string chronoMessage;
-                if (game.isPreGame()) {
-                    int remainingTime = PRE_GAME_DELAY - static_cast<int>(game.getPreGameElapsed());
+                if (game->isPreGame()) {
+                    int remainingTime = PRE_GAME_DELAY - static_cast<int>(game->getPreGameElapsed());
                     chronoMessage = "Début dans : " + std::to_string(std::max(0, remainingTime)) + "s";
-                } else if (game.isGameStarted()) {
-                    int remainingTime = room.getGameDuration() - static_cast<int>(game.getElapsedSeconds());
+                } else if (game->isGameStarted()) {
+                    int remainingTime = roomPtr->getGameDuration() - static_cast<int>(game->getElapsedSeconds());
                     chronoMessage = "Temps restant : " + std::to_string(std::max(0, remainingTime)) + "s";
                 } else {
                     chronoMessage = "Partie terminée !";
                 }
 
-                static gf::Font font("../common/fonts/arial.ttf");
                 gf::Text chronoText;
                 chronoText.setFont(font);
                 chronoText.setCharacterSize(24);
                 chronoText.setColor(gf::Color::White);
                 chronoText.setString(chronoMessage);
-                chronoText.setPosition({12.0f, 20.0f});
+                chronoText.setPosition({12.f, 20.f});
                 window.draw(chronoText);
             }
-
-        } catch (const std::out_of_range& e) {
-            gf::Log::error("Room %d introuvable !\n", displayRoomId);
-        }
-
 
             window.display();
             std::this_thread::sleep_for(std::chrono::milliseconds(16));
         }
-
 
         if (mainWindow.isOpen()) mainWindow.close();
     }

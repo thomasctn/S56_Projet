@@ -69,6 +69,7 @@ public:
             gameThread.join();
     }
 
+    mutable std::mutex chronoMutex;
 
 
 
@@ -80,7 +81,6 @@ private:
     std::chrono::steady_clock::time_point chronoStart;
     std::chrono::steady_clock::time_point preGameStart;
 
-    mutable std::mutex chronoMutex;
     double preGameElapsed = 0.0;
     double gameElapsed = 0.0;
     const int preGameDelay = PRE_GAME_DELAY;
