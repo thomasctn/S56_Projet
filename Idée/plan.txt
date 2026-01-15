@@ -1,15 +1,15 @@
 But avoir la boucle de jeu fonctionnelle pour mercredi 10h
 
 A faire :
-    - utiliser les widjet pour les bouton.
-    - Permettre au fenetre serv et client de s'arreter sans crash
+v   - utiliser les widjet pour les bouton.
+v   - Permettre au fenetre serv et client de s'arreter sans crash
     - Afficher les temps de jeu sur le client (voir pour aussi le temps de prejeu)
     - Ajouter un ecran de fin (partit finit -> ecran -> room)
     - Ajouter une intelligence collective au bots (actuellment local)
     - améliorer l'interface lobby
     - améliorer l'interface room
     - Equilibrer les parametre de jeu.
-    - Ne pas faire crash le client si il trouve pas le serv mais le faire chercher jusqua trouver.
+v   - Ne pas faire crash le client si il trouve pas le serv mais le faire chercher jusqua trouver.
 
 Bonus :
     - améliorer visuel

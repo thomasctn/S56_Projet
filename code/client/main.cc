@@ -70,12 +70,22 @@ int main()
 {
     gf::Log::info("Démarrage du client...\n");
 
-    gf::TcpSocket socket("127.0.0.1", "5000");
-    if (!socket)
-    {
-        gf::Log::error("Impossible de se connecter au serveur !\n");
-        return -1;
+    gf::TcpSocket socket;
+    bool connected = false;
+    std::atomic<bool> running{true};
+
+
+    while (!connected && running.load()) {
+        socket = gf::TcpSocket("127.0.0.1", "5000");
+        if (socket) {
+            connected = true;
+            gf::Log::info("Connecté au serveur !\n");
+        } else {
+            gf::Log::info("Impossible de se connecter au serveur, nouvelle tentative dans 1s...\n");
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
     }
+
 
     //char currentDir = 0;
     //STRCUTURES DE DONNÉES RECUES
@@ -90,7 +100,6 @@ int main()
 
 
     //std::mutex statesMutex;
-    std::atomic<bool> running{true};
     socket.setNonBlocking();
 
     //ajout pr un lobby
