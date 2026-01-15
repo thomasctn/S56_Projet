@@ -92,6 +92,8 @@ int main()
     std::vector<PlayerData> states;
     BoardCommon board;
     std::set<Position> pacgommes;
+    unsigned int timeLeft = 999;
+    int timeLeftPre = 0;
 
     int roomSize = int(MAX_PLAYERS); // capacité actuelle de la room (modifiable)
     int nbBots = int(NB_BOTS);//modifiable! //avec int parcque thomas a mis ses trucs en size_t et il sait pas?
@@ -409,6 +411,7 @@ int main()
                         states = data.clientStates;
                         //board=data.board; (on me l'envoie mais je suis pas censé le prendre a chaque fois)
                         pacgommes = data.pacgommes;
+                        timeLeft = data.timeLeft;
                         break;
                     }
 
@@ -439,7 +442,7 @@ int main()
             lobbyScene.render(connectedPlayers, roomSize, amReady, nbBots, gameDur, myRole);
         }
         else{ //Playing
-            gameScene.render(states, myId, board, pacgommes);
+            gameScene.render(states, myId, board, pacgommes, timeLeftPre, timeLeft);
         }
         
 
