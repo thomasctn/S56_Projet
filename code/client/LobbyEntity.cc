@@ -3,6 +3,7 @@
 #include <gf/RenderStates.h>
 #include <gf/Log.h>
 #include <gf/Anchor.h>
+#include <gf/Coordinates.h>
 
 LobbyEntity::LobbyEntity(Renderer& renderer)
 : m_renderer(renderer)
@@ -76,6 +77,7 @@ void LobbyEntity::render(int connectedPlayers, int roomSize, bool amReady, int n
     gf::RenderWindow& target = m_renderer.getRenderWindow();
     m_renderer.clearWindow();
 
+    gf::Coordinates coords(target);
     gf::View view = target.getView();
     gf::Vector2f center = view.getCenter();
     gf::Vector2f size = view.getSize();
@@ -88,16 +90,23 @@ void LobbyEntity::render(int connectedPlayers, int roomSize, bool amReady, int n
 
     float uiOffsetX = width * 0.1f;
 
-    gf::Vector2f btnSize{40.f, 40.f};
-    gf::Vector2f minusBtnPos{left + margin +uiOffsetX + 140.f, top + 100.f};
-    gf::Vector2f plusBtnPos{minusBtnPos.x + btnSize.x + 60.f, minusBtnPos.y};
-    gf::Vector2f minusBotBtnPos{left + margin +uiOffsetX + 140.f, top + 150.f};
-    gf::Vector2f plusBotBtnPos{minusBotBtnPos.x + btnSize.x + 60.f, minusBotBtnPos.y};
-    gf::Vector2f minusDurBtnPos{left + margin +uiOffsetX + 140.f, top + 200.f};
-    gf::Vector2f plusDurBtnPos{minusDurBtnPos.x + btnSize.x + 60.f, minusDurBtnPos.y};
-    gf::Vector2f changeRolePos{left + margin +uiOffsetX + 140.f, top + 250.f};
-    gf::Vector2f readyBtnSize{width * 0.18f, height * 0.08f};
-    gf::Vector2f readyBtnPos{left + margin +uiOffsetX, top + height * 0.75f};
+    float textPosX = left + margin +uiOffsetX;
+    float textStartPosY = 100.f;
+
+    float btnPosX = textPosX + 180.f;
+    float btnPosX2 = btnPosX + 100.f;
+
+    unsigned int MINUS_SIZE = 24u;
+    unsigned int PLUS_SIZE = 20u;
+
+    gf::Vector2f minusBtnPos{btnPosX, textStartPosY};
+    gf::Vector2f plusBtnPos{btnPosX2, minusBtnPos.y};
+    gf::Vector2f minusBotBtnPos{btnPosX, textStartPosY + 57.5f};
+    gf::Vector2f plusBotBtnPos{btnPosX2, minusBotBtnPos.y};
+    gf::Vector2f minusDurBtnPos{btnPosX, minusBotBtnPos.y + 57.5f};
+    gf::Vector2f plusDurBtnPos{btnPosX2, minusDurBtnPos.y};
+    gf::Vector2f changeRolePos{btnPosX, minusBotBtnPos.y + 125.f};
+    gf::Vector2f readyBtnPos{textPosX, top + height * 0.75f};
 
     static gf::Font font("../common/fonts/arial.ttf");
 
@@ -122,24 +131,34 @@ void LobbyEntity::render(int connectedPlayers, int roomSize, bool amReady, int n
     roomLabel.setCharacterSize(20);
     roomLabel.setColor(gf::Color::White);
     roomLabel.setString("Joueurs max :");
-    roomLabel.setPosition({left + margin +uiOffsetX, top + 100.f});
+    roomLabel.setPosition({textPosX, minusBtnPos.y});
     target.draw(roomLabel);
 
-    gf::RectangleShape back(btnSize);
-    back.setColor(gf::Color::fromRgb(50, 70, 200));
+    m_minusBtn.setCharacterSize(MINUS_SIZE);
+    m_minusBtn.setAnchor(gf::Anchor::CenterLeft);
+    m_minusBtn.setPosition(minusBtnPos);
 
-    back.setPosition(minusBtnPos);
-    target.draw(back);
-    m_minusBtn.setCharacterSize(24);
-    m_minusBtn.setAnchor(gf::Anchor::Center);
-    m_minusBtn.setPosition({minusBtnPos.x + btnSize.x * 0.5f, minusBtnPos.y + btnSize.y * 0.5f});
+    m_minusBtn.setDefaultTextColor(gf::Color::White);
+    m_minusBtn.setSelectedTextColor(gf::Color::Black);
+    m_minusBtn.setDefaultBackgroundColor(gf::Color::Black);
+    m_minusBtn.setSelectedBackgroundColor(gf::Color::White);
+    m_minusBtn.setBackgroundOutlineThickness(MINUS_SIZE * .05f);
+    m_minusBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
+    m_minusBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
+    m_minusBtn.setPadding(MINUS_SIZE * .65f);
     target.draw(m_minusBtn);
 
-    back.setPosition(plusBtnPos);
-    target.draw(back);
-    m_plusBtn.setCharacterSize(24);
-    m_plusBtn.setAnchor(gf::Anchor::Center);
-    m_plusBtn.setPosition({plusBtnPos.x + btnSize.x * 0.5f, plusBtnPos.y + btnSize.y * 0.5f});
+    m_plusBtn.setCharacterSize(PLUS_SIZE);
+    m_plusBtn.setAnchor(gf::Anchor::CenterLeft);
+    m_plusBtn.setPosition(plusBtnPos);
+    m_plusBtn.setDefaultTextColor(gf::Color::White);
+    m_plusBtn.setSelectedTextColor(gf::Color::Black);
+    m_plusBtn.setDefaultBackgroundColor(gf::Color::Black);
+    m_plusBtn.setSelectedBackgroundColor(gf::Color::White);
+    m_plusBtn.setBackgroundOutlineThickness(MINUS_SIZE * .05f);
+    m_plusBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
+    m_plusBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
+    m_plusBtn.setPadding(PLUS_SIZE * .65f);
     target.draw(m_plusBtn);
 
     gf::Text valueText;
@@ -147,7 +166,7 @@ void LobbyEntity::render(int connectedPlayers, int roomSize, bool amReady, int n
     valueText.setCharacterSize(20);
     valueText.setColor(gf::Color::White);
     valueText.setString(std::to_string(roomSize));
-    valueText.setPosition({minusBtnPos.x + btnSize.x + 10.f, minusBtnPos.y + 8.f});
+    valueText.setPosition({(minusBtnPos.x + plusBtnPos.x - (valueText.getString().length() * 20U) / 2) / 2, minusBtnPos.y + 20U /2});
     target.draw(valueText);
 
     gf::Text botLabel;
@@ -155,25 +174,37 @@ void LobbyEntity::render(int connectedPlayers, int roomSize, bool amReady, int n
     botLabel.setCharacterSize(20);
     botLabel.setColor(gf::Color::White);
     botLabel.setString("Nb de bots :");
-    botLabel.setPosition({left + margin +uiOffsetX, top + 150.f});
+    botLabel.setPosition({textPosX, minusBotBtnPos.y});
     target.draw(botLabel);
 
-    back.setPosition(minusBotBtnPos);
-    target.draw(back);
     m_minusBotBtn.setCharacterSize(24);
-    m_minusBotBtn.setAnchor(gf::Anchor::Center);
-    m_minusBotBtn.setPosition({minusBotBtnPos.x + btnSize.x * 0.5f, minusBotBtnPos.y + btnSize.y * 0.5f});
+    m_minusBotBtn.setAnchor(gf::Anchor::CenterLeft);
+    m_minusBotBtn.setPosition(minusBotBtnPos);
+    m_minusBotBtn.setDefaultTextColor(gf::Color::White);
+    m_minusBotBtn.setSelectedTextColor(gf::Color::Black);
+    m_minusBotBtn.setDefaultBackgroundColor(gf::Color::Black);
+    m_minusBotBtn.setSelectedBackgroundColor(gf::Color::White);
+    m_minusBotBtn.setBackgroundOutlineThickness(MINUS_SIZE * .05f);
+    m_minusBotBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
+    m_minusBotBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
+    m_minusBotBtn.setPadding(MINUS_SIZE * .65f);
     target.draw(m_minusBotBtn);
 
-    back.setPosition(plusBotBtnPos);
-    target.draw(back);
-    m_plusBotBtn.setCharacterSize(24);
-    m_plusBotBtn.setAnchor(gf::Anchor::Center);
-    m_plusBotBtn.setPosition({plusBotBtnPos.x + btnSize.x * 0.5f, plusBotBtnPos.y + btnSize.y * 0.5f});
+    m_plusBotBtn.setCharacterSize(PLUS_SIZE);
+    m_plusBotBtn.setAnchor(gf::Anchor::CenterLeft);
+    m_plusBotBtn.setPosition(plusBotBtnPos);
+    m_plusBotBtn.setDefaultTextColor(gf::Color::White);
+    m_plusBotBtn.setSelectedTextColor(gf::Color::Black);
+    m_plusBotBtn.setDefaultBackgroundColor(gf::Color::Black);
+    m_plusBotBtn.setSelectedBackgroundColor(gf::Color::White);
+    m_plusBotBtn.setBackgroundOutlineThickness(MINUS_SIZE * .05f);
+    m_plusBotBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
+    m_plusBotBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
+    m_plusBotBtn.setPadding(PLUS_SIZE * .65f);
     target.draw(m_plusBotBtn);
 
     valueText.setString(std::to_string(nbBots));
-    valueText.setPosition({minusBotBtnPos.x + btnSize.x + 10.f, minusBotBtnPos.y + 8.f});
+    valueText.setPosition({(minusBotBtnPos.x + plusBotBtnPos.x - (valueText.getString().length() * 20U) / 2) / 2, minusBotBtnPos.y + 20U /2});
     target.draw(valueText);
 
     gf::Text durationLabel;
@@ -181,25 +212,37 @@ void LobbyEntity::render(int connectedPlayers, int roomSize, bool amReady, int n
     durationLabel.setCharacterSize(20);
     durationLabel.setColor(gf::Color::White);
     durationLabel.setString("Temps de jeu\n(secondes) :");
-    durationLabel.setPosition({left + margin +uiOffsetX, top + 200.f});
+    durationLabel.setPosition({textPosX, minusDurBtnPos.y});
     target.draw(durationLabel);
 
-    back.setPosition(minusDurBtnPos);
-    target.draw(back);
     m_minusDurBtn.setCharacterSize(24);
-    m_minusDurBtn.setAnchor(gf::Anchor::Center);
-    m_minusDurBtn.setPosition({minusDurBtnPos.x + btnSize.x * 0.5f, minusDurBtnPos.y + btnSize.y * 0.5f});
+    m_minusDurBtn.setAnchor(gf::Anchor::CenterLeft);
+    m_minusDurBtn.setPosition(minusDurBtnPos);
+    m_minusDurBtn.setDefaultTextColor(gf::Color::White);
+    m_minusDurBtn.setSelectedTextColor(gf::Color::Black);
+    m_minusDurBtn.setDefaultBackgroundColor(gf::Color::Black);
+    m_minusDurBtn.setSelectedBackgroundColor(gf::Color::White);
+    m_minusDurBtn.setBackgroundOutlineThickness(MINUS_SIZE * .05f);
+    m_minusDurBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
+    m_minusDurBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
+    m_minusDurBtn.setPadding(MINUS_SIZE * .65f);
     target.draw(m_minusDurBtn);
 
-    back.setPosition(plusDurBtnPos);
-    target.draw(back);
-    m_plusDurBtn.setCharacterSize(24);
-    m_plusDurBtn.setAnchor(gf::Anchor::Center);
-    m_plusDurBtn.setPosition({plusDurBtnPos.x + btnSize.x * 0.5f, plusDurBtnPos.y + btnSize.y * 0.5f});
+    m_plusDurBtn.setCharacterSize(PLUS_SIZE);
+    m_plusDurBtn.setAnchor(gf::Anchor::CenterLeft);
+    m_plusDurBtn.setPosition(plusDurBtnPos);
+    m_plusDurBtn.setDefaultTextColor(gf::Color::White);
+    m_plusDurBtn.setSelectedTextColor(gf::Color::Black);
+    m_plusDurBtn.setDefaultBackgroundColor(gf::Color::Black);
+    m_plusDurBtn.setSelectedBackgroundColor(gf::Color::White);
+    m_plusDurBtn.setBackgroundOutlineThickness(MINUS_SIZE * .05f);
+    m_plusDurBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
+    m_plusDurBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
+    m_plusDurBtn.setPadding(PLUS_SIZE * .65f);
     target.draw(m_plusDurBtn);
 
     valueText.setString(std::to_string(gameDur));
-    valueText.setPosition({minusDurBtnPos.x + btnSize.x + 10.f, minusDurBtnPos.y + 8.f});
+    valueText.setPosition({(minusDurBtnPos.x + plusDurBtnPos.x - (valueText.getString().length() * 20U) / 2) / 2, minusDurBtnPos.y + 20U /2});
     target.draw(valueText);
 
     gf::Text roleLabel;
@@ -207,29 +250,36 @@ void LobbyEntity::render(int connectedPlayers, int roomSize, bool amReady, int n
     roleLabel.setCharacterSize(20);
     roleLabel.setColor(gf::Color::White);
     roleLabel.setString(myRole == PlayerRole::PacMan ? "Vous etes\nactuellement :\nPACMAN" : "Vous etes\nactuellement :\nUN FANTOME");
-    roleLabel.setPosition({left + margin +uiOffsetX, top + 250.f});
+    roleLabel.setPosition({textPosX, changeRolePos.y});
     target.draw(roleLabel);
 
-    gf::RectangleShape crRect({readyBtnSize.x * 0.5f, readyBtnSize.y});
-    crRect.setPosition(changeRolePos);
-    crRect.setColor(gf::Color::fromRgb(204, 77, 153));
-    target.draw(crRect);
-
-    m_changeRoleBtn.setCharacterSize(int(readyBtnSize.y * 0.35f));
-    m_changeRoleBtn.setAnchor(gf::Anchor::Center);
+    m_changeRoleBtn.setCharacterSize(18U);
+    m_changeRoleBtn.setAnchor(gf::Anchor::CenterLeft);
     m_changeRoleBtn.setString(myRole == PlayerRole::PacMan ? "Devenir un fantome ?" : "Devenir Pacman ?");
-    m_changeRoleBtn.setPosition({changeRolePos.x + readyBtnSize.x * 0.25f, changeRolePos.y + readyBtnSize.y * 0.5f});
+    m_changeRoleBtn.setPosition(changeRolePos);
+    m_changeRoleBtn.setDefaultTextColor(gf::Color::White);
+    m_changeRoleBtn.setSelectedTextColor(gf::Color::Black);
+    m_changeRoleBtn.setDefaultBackgroundColor(gf::Color::Black);
+    m_changeRoleBtn.setSelectedBackgroundColor(gf::Color::White);
+    m_changeRoleBtn.setBackgroundOutlineThickness(18U * .05f);
+    m_changeRoleBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
+    m_changeRoleBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
+    m_changeRoleBtn.setPadding(18U * .65f);
     target.draw(m_changeRoleBtn);
 
-    gf::RectangleShape readyRect(readyBtnSize);
-    readyRect.setPosition(readyBtnPos);
-    readyRect.setColor(amReady ? gf::Color::fromRgb(179, 51, 51) : gf::Color::fromRgb(51, 179, 51));
-    target.draw(readyRect);
 
-    m_readyBtn.setCharacterSize(int(readyBtnSize.y * 0.5f));
-    m_readyBtn.setAnchor(gf::Anchor::Center);
+    m_readyBtn.setCharacterSize(24U);
+    m_readyBtn.setAnchor(gf::Anchor::CenterLeft);
     m_readyBtn.setString(amReady ? "PLUS PRÊT?" : "PRÊT");
-    m_readyBtn.setPosition({readyBtnPos.x + readyBtnSize.x * 0.5f, readyBtnPos.y + readyBtnSize.y * 0.5f});
+    m_readyBtn.setPosition(readyBtnPos);
+    m_readyBtn.setDefaultTextColor(gf::Color::White);
+    m_readyBtn.setSelectedTextColor(gf::Color::Black);
+    m_readyBtn.setDefaultBackgroundColor(gf::Color::Black);
+    m_readyBtn.setSelectedBackgroundColor(gf::Color::White);
+    m_readyBtn.setBackgroundOutlineThickness(24U * .05f);
+    m_readyBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
+    m_readyBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
+    m_readyBtn.setPadding(24U *.5f);
     target.draw(m_readyBtn);
 
     gf::Text readyState;

@@ -83,14 +83,17 @@ void WelcomeEntity::render() {
     float bx = left + (width - bw) * 0.5f;
     float by = top+ height * 0.45f;
 
-    gf::RectangleShape button({ bw, bh });
-    button.setPosition({ bx, by });
-    button.setColor(gf::Color::fromRgb(50, 70, 200));
-    target.draw(button);
-
     m_enterWidget.setCharacterSize(26);
     m_enterWidget.setAnchor(gf::Anchor::Center);
     m_enterWidget.setPosition({ bx + bw * 0.5f, by + bh * 0.5f });
+    m_enterWidget.setDefaultTextColor(gf::Color::White);
+    m_enterWidget.setSelectedTextColor(gf::Color::Black);
+    m_enterWidget.setDefaultBackgroundColor(gf::Color::Black);
+    m_enterWidget.setSelectedBackgroundColor(gf::Color::White);
+    m_enterWidget.setBackgroundOutlineThickness(26 * .05f);
+    m_enterWidget.setDefaultBackgroundOutlineColor(gf::Color::White);
+    m_enterWidget.setSelectedBackgroundOutlineColor(gf::Color::White);
+    m_enterWidget.setPadding(26 * .4f);
     target.draw(m_enterWidget);
 
     target.display();

@@ -32,14 +32,14 @@ private:
     Renderer& m_renderer;
     gf::Font m_font;
     gf::WidgetContainer m_container;
-    gf::TextWidget m_minusBtn;
-    gf::TextWidget m_plusBtn;
-    gf::TextWidget m_minusBotBtn;
-    gf::TextWidget m_plusBotBtn;
-    gf::TextWidget m_minusDurBtn;
-    gf::TextWidget m_plusDurBtn;
-    gf::TextWidget m_readyBtn;
-    gf::TextWidget m_changeRoleBtn;
+    gf::TextButtonWidget m_minusBtn;
+    gf::TextButtonWidget m_plusBtn;
+    gf::TextButtonWidget m_minusBotBtn;
+    gf::TextButtonWidget m_plusBotBtn;
+    gf::TextButtonWidget m_minusDurBtn;
+    gf::TextButtonWidget m_plusDurBtn;
+    gf::TextButtonWidget m_readyBtn;
+    gf::TextButtonWidget m_changeRoleBtn;
 
     LobbyAction m_lastAction;
 };

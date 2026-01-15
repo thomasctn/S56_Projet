@@ -20,7 +20,7 @@ private:
     Renderer& m_renderer;
     gf::Font m_font;
     gf::WidgetContainer m_container;
-    gf::TextWidget m_enterWidget;
+    gf::TextButtonWidget m_enterWidget;
     bool m_wasClicked;
     
 };
