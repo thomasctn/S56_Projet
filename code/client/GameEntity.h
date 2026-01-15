@@ -15,7 +15,7 @@ public:
   explicit GameEntity(Renderer& renderer);
 
   // render du jeu (map + joueurs + pacgommes)
-  void render(const std::vector<PlayerData>& states,uint32_t myId,const BoardCommon& board,const std::set<Position>& pacgommes);
+  void render(const std::vector<PlayerData>& states,uint32_t myId,const BoardCommon& board,const std::set<Position>& pacgommes, int timeLeftPre, unsigned int timeLeft);
 
 private:
   //helpers pdnt le render du jeu

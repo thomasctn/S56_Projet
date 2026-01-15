@@ -92,23 +92,7 @@ void GameEntity::renderMap(const BoardCommon &map, float tileSize, float offsetX
         }
     }
 
-    // header text (temps/titre) ? jsp ce qu'on mettra
-    static gf::Font font("../common/fonts/arial.ttf");
-    gf::Text title;
-    title.setFont(font);
-    title.setString("PacMan Game");
-    title.setCharacterSize(24);
-    title.setColor(gf::Color::White);
-
-    //position relative à la view 
-    gf::View view = win.getView();
-    gf::Vector2f center = view.getCenter();
-    gf::Vector2f size = view.getSize();
-    float left = center.x -size.x * 0.5f;
-    float top  = center.y -size.y * 0.5f;
-
-    title.setPosition({ left + 10.f, top + 10.f });
-    win.draw(title);
+    
 }
 
 void GameEntity::renderPacGommes(const std::set<Position>& pacgommes, float tileSize, float offsetX, float offsetY) {
@@ -122,7 +106,7 @@ void GameEntity::renderPacGommes(const std::set<Position>& pacgommes, float tile
     }
 }
 
-void GameEntity::render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon& board, const std::set<Position>& pacgommes) {
+void GameEntity::render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon& board, const std::set<Position>& pacgommes, int timeLeftPre, unsigned int timeLeft) {
     gf::RenderWindow& win = m_renderer.getRenderWindow();
 
     //clear via renderer helper
@@ -138,6 +122,20 @@ void GameEntity::render(const std::vector<PlayerData>& states, uint32_t myId, co
 
     //pacgommes
     renderPacGommes(pacgommes, tileSize, offsetX, offsetY);
+
+    static gf::Font font("../common/fonts/arial.ttf");
+    gf::Text timer;
+    timer.setFont(font);
+    timer.setCharacterSize(24);
+    timer.setColor(gf::Color::White);
+
+    if(timeLeftPre != 0){
+        timer.setString("Temps avant le début de la partie : "+std::to_string(timeLeftPre));
+    } else {
+        timer.setString("Temps avant la fin de la partie : "+std::to_string(timeLeft));
+    }
+    timer.setPosition({ offsetX, offsetY - 40.f });
+    win.draw(timer);
 
     //scale sprites pr tileSize
     auto texSize = m_inkyTexture.getSize();

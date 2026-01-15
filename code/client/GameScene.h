@@ -12,7 +12,7 @@ public:
   void processEvent(const gf::Event& event); //y a pas d'event pr l'instant mais bon
 
   // Render : passe au GameEntity
-  void render(const std::vector<PlayerData>& states,uint32_t myId,const BoardCommon& board,const std::set<Position>& pacgommes);
+  void render(const std::vector<PlayerData>& states,uint32_t myId,const BoardCommon& board,const std::set<Position>& pacgommes, int timeLeftPre, unsigned int timeLeft);
 
 private:
   GameEntity m_entity;
