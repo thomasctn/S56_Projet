@@ -19,7 +19,7 @@ class Renderer{
     Renderer();
     void render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map,const std::set<Position>& pacgommes);
     void renderMap(const std::vector<PlayerData>& states,  const BoardCommon map);
-    void calculateMovement(float worldSize, const BoardCommon& map,float& tileSize, float& offsetX, float& offsetY);
+    void calculateMovement( const BoardCommon& map,float& tileSize, float& offsetX, float& offsetY);
     void renderPacGommes(const std::set<Position>& pacgommes,float tileSize,float offsetX,float offsetY);
 
     void renderWelcome();
@@ -38,7 +38,7 @@ class Renderer{
         return main_window;
     }
 
-    float getWorldSize() const { return m_worldSize; }
+   // float getWorldSize() const { return m_worldSize; }
 
     gf::v1::Vector2f getMinusBtnPos() const { return m_minusBtnPos; }
     gf::v1::Vector2f getPlusBtnPos() const { return m_plusBtnPos; }
@@ -60,7 +60,10 @@ class Renderer{
     gf::RenderWindow rendered_window;
     gf::Color4f colorFromId(uint32_t id);
     gf::View m_view; // la view que l'on manipule
-    float m_worldSize = 500.f;  //taille de la map basique
+   // float m_worldSize = 500.f;  //taille de la map basique
+
+    float m_logicalWidth = 500.f; // largeur logique totale
+    float m_logicalHeight = 600.f; // hauteur logique totale (500 map + 100 pour texte)
 
     gf::Texture m_inkyTexture;
     gf::Sprite  m_inkySprite;

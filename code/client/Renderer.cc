@@ -61,9 +61,10 @@ Renderer::Renderer() : main_window("GF Sync Boxes", {800,600}), rendered_window(
     
     
     
-    m_view.setSize({m_worldSize, m_worldSize});
-    m_view.setCenter({m_worldSize/ 2.f, m_worldSize / 2.f});
+    m_view.setSize({ m_logicalWidth, m_logicalHeight });
+    m_view.setCenter({ m_logicalWidth / 2.f, m_logicalHeight / 2.f });
     rendered_window.setView(m_view);
+
 }
 
 gf::Color4f Renderer::colorFromId(uint32_t id) {
@@ -84,205 +85,149 @@ gf::RenderWindow& Renderer::getRenderWindow(){
 }
 
 
-
-void Renderer::render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map,const std::set<Position>& pacgommes){
+void Renderer::render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon map, const std::set<Position>& pacgommes){
     rendered_window.clear(gf::Color::Black);
-    renderMap(states,map);
-    
-    //AVANT : LES PXIELS JOUEURS
-    /*for (auto& s : states) {
-        gf::RectangleShape box({50.0f, 50.0f});
-        box.setPosition({s.x, s.y});
-        gf::Color4f c = (s.id == myId) ? gf::Color4f(1, 0, 0, 1) : colorFromId(s.id);
-        box.setColor(c);
-        rendered_window.draw(box);
-    }*/
 
-    //apres, test sprit:
     float tileSize, offsetX, offsetY;
-    calculateMovement(m_worldSize, map, tileSize, offsetX, offsetY);
-    renderPacGommes(pacgommes,tileSize,offsetX,offsetY);
+    calculateMovement( map, tileSize, offsetX, offsetY);
 
-    //TEMPORAIRE calculer correctement la taille du sprite!
-    auto texSize=m_inkyTexture.getSize();
-    if (texSize.x>0 && texSize.y>0){
-        float scaleX= tileSize/float(texSize.x);
-        float scaleY= tileSize/float(texSize.y);
-        m_inkySprite.setScale({scaleX, scaleY });
-        m_clydeSprite.setScale({scaleX, scaleY });
+    renderMap(states, map);
+
+    renderPacGommes(pacgommes, tileSize, offsetX, offsetY);
+
+    //taille des fantomes
+    auto texSize = m_inkyTexture.getSize();
+    if (texSize.x > 0 && texSize.y > 0) {
+        float scaleX = tileSize / float(texSize.x);
+        float scaleY = tileSize / float(texSize.y);
+        m_inkySprite.setScale({scaleX, scaleY});
+        m_clydeSprite.setScale({scaleX, scaleY});
         m_pinkySprite.setScale({scaleX, scaleY});
         m_blinkySprite.setScale({scaleX, scaleY});
-
     }
 
     int ghostIndex = 0;
 
+    //pour les joeuures
     for (const auto &s : states) {
         float px = s.x / 50.0f * tileSize + offsetX;
         float py = s.y / 50.0f * tileSize + offsetY;
-        if(s.role == PlayerRole::PacMan){ //joueur 1 est pacman. a remplacer par es roles
 
-            if (m_hasLastPacmanPos){                
-                if(px > m_lastPacmanX){ //droite
-                    if(m_pacmanDir != 'R'){
-                        m_pacmanDir = 'R';
-                        m_pacmanSprite.setAnimation(m_pacmanRightAnim);
-                    }
-                }
-                else if(px < m_lastPacmanX){ //gauche
-                    if(m_pacmanDir != 'L'){
-                        m_pacmanDir = 'L';
-                        m_pacmanSprite.setAnimation(m_pacmanLeftAnim);
-                    }
-                }
-
-                else if(py > m_lastPacmanY){ //bas
-                    if(m_pacmanDir != 'D'){
-                        m_pacmanDir = 'D';
-                        m_pacmanSprite.setAnimation(m_pacmanDownAnim);
-                    }
-                }
-                else if(py < m_lastPacmanY){//haut
-                    if(m_pacmanDir != 'U'){
-                        m_pacmanDir = 'U';
-                        m_pacmanSprite.setAnimation(m_pacmanUpAnim);
-                    }
-                }
+        if (s.role == PlayerRole::PacMan) {
+            if (m_hasLastPacmanPos){
+                if (px > m_lastPacmanX && m_pacmanDir != 'R') { m_pacmanDir = 'R'; m_pacmanSprite.setAnimation(m_pacmanRightAnim); }
+                else if (px < m_lastPacmanX && m_pacmanDir != 'L') { m_pacmanDir = 'L'; m_pacmanSprite.setAnimation(m_pacmanLeftAnim); }
+                else if (py > m_lastPacmanY && m_pacmanDir != 'D') { m_pacmanDir = 'D'; m_pacmanSprite.setAnimation(m_pacmanDownAnim); }
+                else if (py < m_lastPacmanY && m_pacmanDir != 'U') { m_pacmanDir = 'U'; m_pacmanSprite.setAnimation(m_pacmanUpAnim); }
             }
 
+            m_pacmanSprite.setPosition({px, py});
 
+            auto pacTexSize = m_pacmanRightTexture.getSize();
+            float frameWidth  = pacTexSize.x / 4.0f;
+            float frameHeight = pacTexSize.y;
+            m_pacmanSprite.setScale({tileSize / frameWidth, tileSize / frameHeight});
 
-            m_pacmanSprite.setPosition({ px, py });
-
-            auto texSize = m_pacmanRightTexture.getSize();
-            float frameWidth  = texSize.x/4.0f;
-            float frameHeight = texSize.y;
-
-            float scaleX= tileSize/frameWidth;
-            float scaleY= tileSize/frameHeight;
-
-            m_pacmanSprite.setScale({scaleX, scaleY});
-
-            m_pacmanSprite.update(gf::seconds(0.008f));  //maj de l'anim
+            m_pacmanSprite.update(gf::seconds(0.008f));
             rendered_window.draw(m_pacmanSprite);
 
-            //score
+            // score
             static gf::Font font("../common/fonts/arial.ttf");
             gf::Text scoreText;
             scoreText.setFont(font);
             scoreText.setCharacterSize(16);
             scoreText.setColor(gf::Color::White);
             scoreText.setString(std::to_string(s.score));
-            scoreText.setPosition({px + 5 , py - 18});
+            scoreText.setPosition({px + 5, py - 18});
             rendered_window.draw(scoreText);
 
             m_lastPacmanX = px;
             m_lastPacmanY = py;
             m_hasLastPacmanPos = true;
-
-        }
-        else if(s.role == PlayerRole::Ghost) {
-
-
-            if(ghostIndex == 0) {
-                m_inkySprite.setPosition({px, py }); 
-                rendered_window.draw(m_inkySprite);
+        } 
+        else if (s.role == PlayerRole::Ghost) {
+            switch (ghostIndex) {
+                case 0: 
+                    m_inkySprite.setPosition({px, py}); 
+                    rendered_window.draw(m_inkySprite); 
+                    break;
+                case 1: 
+                    m_clydeSprite.setPosition({px, py}); 
+                    rendered_window.draw(m_clydeSprite); 
+                    break;
+                case 2: 
+                    m_pinkySprite.setPosition({px, py}); 
+                    rendered_window.draw(m_pinkySprite); 
+                    break;
+                default: 
+                    m_blinkySprite.setPosition({px, py}); 
+                    rendered_window.draw(m_blinkySprite); 
+                    break;
             }
-            else if(ghostIndex == 1) {
-                m_clydeSprite.setPosition({px, py }); 
-                rendered_window.draw(m_clydeSprite);
-            }
-            else if(ghostIndex == 2) {
-                m_pinkySprite.setPosition({px, py }); 
-                rendered_window.draw(m_pinkySprite);
-            }
-            else{
-                m_blinkySprite.setPosition({px, py }); 
-                rendered_window.draw(m_blinkySprite);
-            }
-
             ghostIndex++;
         }
-
     }
 
-    /*Pour clyde
-    m_clydeSprite.setPosition({ px, py });
-            rendered_window.draw(m_clydeSprite);*/
-
-
-    /*for (const auto& s : states) {
-        m_inkySprite.setPosition({s.x, s.y});
-        rendered_window.draw(m_inkySprite);
-    }*/
-
-  
-    
     rendered_window.display();
-
-
 }
-
 
 
 void Renderer::renderMap(const std::vector<PlayerData>& states, const BoardCommon map){
     BoardCommon mapPerso = map;
-    //sans le responsive:
-    float tileSize = std::min(m_worldSize / mapPerso.width, m_worldSize / mapPerso.height); //a remplacer par ma fonction utilistaire
-    float offsetX = (m_worldSize - tileSize * mapPerso.width) / 2.f;
-    float offsetY = (m_worldSize - tileSize * mapPerso.height) / 2.f;
 
+    float tileSize = std::min(m_logicalWidth / float(mapPerso.width), m_logicalWidth / float(mapPerso.height));
+    float offsetX = (m_logicalWidth - tileSize * mapPerso.width) / 2.f;
+    float offsetY = 100.f; // décaler pour laisser l'espace texte en haut
 
-    bool isFloor = false;
     for (unsigned int y = 0; y < mapPerso.height; ++y) {
-                for (unsigned int x = 0; x < mapPerso.width; ++x) {
-                    const CaseCommon& cell = mapPerso.grid({ x, y });
+        for (unsigned int x = 0; x < mapPerso.width; ++x) {
+            const CaseCommon& cell = mapPerso.grid({ x, y });
 
-                    gf::RectangleShape tile({tileSize, tileSize});
-                    tile.setPosition({x * tileSize + offsetX, y * tileSize + offsetY});
+            gf::RectangleShape tile({tileSize, tileSize});
+            tile.setPosition({x * tileSize + offsetX, y * tileSize + offsetY});
 
-                    switch (cell.celltype) {
-                        case CellType::Wall: tile.setColor(gf::Color::White); break;
-                        case CellType::Hut:  tile.setColor(gf::Color::Red); break;
-                        case CellType::Floor: isFloor = true; tile.setColor(gf::Color::fromRgb(0.3f, 0.3f, 0.3f)); break;
-                        default: continue;
-                    }
-                    rendered_window.draw(tile);
-
-                    //affichage pac gomme
-                    if (isFloor && cell.pacGomme) {
-                        gf::CircleShape pacGomme(tileSize / 6.0f);
-                        pacGomme.setOrigin({tileSize/12.0f, tileSize/12.0f });
-
-                        pacGomme.setPosition({
-                            x * tileSize + offsetX + tileSize/2.0f,
-                            y * tileSize + offsetY + tileSize/2.0f
-                        });
-
-                        pacGomme.setColor(gf::Color::Yellow);
-                        rendered_window.draw(pacGomme);
-                    }
-                }
+            switch (cell.celltype) {
+                case CellType::Wall: tile.setColor(gf::Color::White); break;
+                case CellType::Hut:  tile.setColor(gf::Color::Red); break;
+                case CellType::Floor: tile.setColor(gf::Color::fromRgb(0.3f, 0.3f, 0.3f)); break;
+                default: continue;
             }
+            rendered_window.draw(tile);
+
+            if (cell.celltype == CellType::Floor && cell.pacGomme) {
+                gf::CircleShape pacGomme(tileSize / 6.0f);
+                pacGomme.setOrigin({tileSize/12.0f, tileSize/12.0f });
+                pacGomme.setPosition({
+                    x * tileSize + offsetX + tileSize/2.0f,
+                    y * tileSize + offsetY + tileSize/2.0f
+                });
+                pacGomme.setColor(gf::Color::Yellow);
+                rendered_window.draw(pacGomme);
+            }
+        }
+    }
+
+    //ici on pourrait mettre le temps qui retse?
+    static gf::Font font("../common/fonts/arial.ttf");
+    gf::Text title;
+    title.setFont(font);
+    title.setString("PacMan Game");
+    title.setCharacterSize(24);
+    title.setColor(gf::Color::White);
+    title.setPosition({10.f, 10.f});
+    rendered_window.draw(title);
 }
 
-void Renderer::renderPacGommes(const std::set<Position>& pacgommes,float tileSize,float offsetX,float offsetY){
 
+void Renderer::renderPacGommes(const std::set<Position>& pacgommes, float tileSize, float offsetX, float offsetY) {
     for (const auto& pg : pacgommes) {
         gf::CircleShape pacGomme(tileSize / 6.0f);
-
-        pacGomme.setOrigin({
-            tileSize / 12.0f,
-            tileSize / 12.0f
-        });
-
+        pacGomme.setOrigin({tileSize / 12.0f, tileSize / 12.0f});
         pacGomme.setPosition({
             pg.x * tileSize + offsetX + tileSize / 2.0f,
             pg.y * tileSize + offsetY + tileSize / 2.0f
         });
-
         pacGomme.setColor(gf::Color::Yellow);
-
         rendered_window.draw(pacGomme);
     }
 }
@@ -291,26 +236,26 @@ void Renderer::renderPacGommes(const std::set<Position>& pacgommes,float tileSiz
 void Renderer::handleResize(unsigned int winW, unsigned int winH)
 {
     float windowRatio = float(winW) / float(winH);
-    float worldRatio  = 1.0f; // monde carré
+    float logicalRatio = m_logicalWidth / m_logicalHeight;
 
-    if (windowRatio > worldRatio) {
-        m_view.setSize({m_worldSize* windowRatio, m_worldSize}); // fenêtre trop large
+    if (windowRatio > logicalRatio) {
+        m_view.setSize({m_logicalHeight * windowRatio, m_logicalHeight}); // fenêtre trop large
     } else {
-        m_view.setSize({m_worldSize, m_worldSize/windowRatio}); // fenêtre trop haute
+        m_view.setSize({m_logicalWidth, m_logicalWidth / windowRatio}); // fenêtre trop haute
     }
 
-    m_view.setCenter({m_worldSize / 2.f, m_worldSize / 2.f});
+    m_view.setCenter({m_logicalWidth / 2.f, m_logicalHeight / 2.f});
     rendered_window.setView(m_view);
 }
 
 
-void Renderer::calculateMovement(float worldSize, const BoardCommon &map, float &tileSize, float &offsetX, float &offsetY) {
-    tileSize = std::min(worldSize / float(map.width), worldSize / float(map.height));
 
-    offsetX = (worldSize - tileSize *float(map.width)) / 2.f;
-    offsetY = (worldSize - tileSize *float(map.height)) / 2.f;
+void Renderer::calculateMovement(const BoardCommon &map, float &tileSize, float &offsetX, float &offsetY) {
+    tileSize = std::min(m_logicalWidth / float(map.width), m_logicalWidth / float(map.height));
+    offsetX = (m_logicalWidth - tileSize * float(map.width)) / 2.f;
+    offsetY = 100.f; // espace en haut pour texte
 }
-
+/*
 
 void Renderer::renderLobby(int connectedPlayers, int roomSize, bool amReady, int nbBots, int gameDur, PlayerRole myRole) {
     rendered_window.clear(gf::Color::Black);
@@ -318,7 +263,7 @@ void Renderer::renderLobby(int connectedPlayers, int roomSize, bool amReady, int
     static gf::Font font("../common/fonts/arial.ttf");
 
     //uilisation monde
-    float worldSize = m_worldSize; //monde carré
+    //float worldSize = m_worldSize; //monde carré
     float margin = 20.f;
 
     // positions boutons
@@ -517,6 +462,6 @@ void Renderer::renderLobby(int connectedPlayers, int roomSize, bool amReady, int
     rendered_window.draw(readyState);
 
     rendered_window.display();
-}
+}*/
 
 

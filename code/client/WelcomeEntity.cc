@@ -21,23 +21,25 @@ void WelcomeEntity::resetClick() {
 
  
 bool WelcomeEntity::processEvent(const gf::Event& event){
+    gf::RenderWindow& win = m_renderer.getRenderWindow();
+
     switch (event.type) {
+
         case gf::EventType::MouseMoved: {
-            //convertit les coordenéee de la fenetre en coord de mon monde
-            auto winSize = m_renderer.getWindow().getSize();
-            float wx = event.mouseCursor.coords.x * (m_renderer.getWorldSize() / float(winSize.x));
-            float wy = event.mouseCursor.coords.y * (m_renderer.getWorldSize() / float(winSize.y));
-            m_container.pointTo({wx, wy});
+            gf::Vector2i pixelPos(int(event.mouseCursor.coords.x), int(event.mouseCursor.coords.y)); //a eventuellement changer pour le meme system que dans lobby!
+            gf::Vector2f worldPos = win.mapPixelToCoords(pixelPos); // utilisation de la view actuelle
+            m_container.pointTo(worldPos);
             return false;
         }
 
         case gf::EventType::MouseButtonPressed: {
             if (event.mouseButton.button != gf::MouseButton::Left) 
                 return false;
-            auto winSize = m_renderer.getWindow().getSize();
-            float wx = event.mouseButton.coords.x * (m_renderer.getWorldSize() / float(winSize.x));
-            float wy = event.mouseButton.coords.y * (m_renderer.getWorldSize() / float(winSize.y));
-            m_container.pointTo({wx, wy});
+
+            gf::Vector2i pixelPos(int(event.mouseButton.coords.x), int(event.mouseButton.coords.y));
+            gf::Vector2f worldPos = win.mapPixelToCoords(pixelPos); 
+            m_container.pointTo(worldPos);
+
             m_container.triggerAction();
             if (m_wasClicked) {
                 m_wasClicked = false;
@@ -52,13 +54,18 @@ bool WelcomeEntity::processEvent(const gf::Event& event){
 }
 
 
-
-
 void WelcomeEntity::render() {
     m_renderer.clearWindow();
     gf::RenderWindow& target = m_renderer.getRenderWindow();
 
-    float world = m_renderer.getWorldSize();
+    gf::View view = target.getView();
+    gf::Vector2f center= view.getCenter();
+    gf::Vector2f size = view.getSize();
+
+    float left= center.x - size.x * 0.5f;
+    float top= center.y - size.y * 0.5f;
+    float width = size.x;
+    float height = size.y;
 
     //titre
     gf::Text title;
@@ -67,25 +74,23 @@ void WelcomeEntity::render() {
     title.setColor(gf::Color::White);
     title.setString("PACMAN");
     title.setAnchor(gf::Anchor::TopCenter);
-    title.setPosition({ world * 0.5f, world * 0.1f });
+    title.setPosition({ left + width * 0.5f, top + height * 0.1f });
     target.draw(title);
 
     //bouton
-    float bw = world * 0.4f;
-    float bh = world * 0.12f;
-    float bx = (world - bw) * 0.5f;
-    float by = world * 0.45f;
+    float bw = width * 0.4f;
+    float bh = height * 0.12f;
+    float bx = left + (width - bw) * 0.5f;
+    float by = top+ height * 0.45f;
 
     gf::RectangleShape button({ bw, bh });
     button.setPosition({ bx, by });
     button.setColor(gf::Color::fromRgb(50, 70, 200));
     target.draw(button);
 
-    //texte du bouton
     m_enterWidget.setCharacterSize(26);
     m_enterWidget.setAnchor(gf::Anchor::Center);
     m_enterWidget.setPosition({ bx + bw * 0.5f, by + bh * 0.5f });
-
     target.draw(m_enterWidget);
 
     target.display();
