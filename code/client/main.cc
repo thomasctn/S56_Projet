@@ -8,6 +8,7 @@
 #include <gf/Color.h>
 #include <gf/Log.h>
 #include <thread>
+#include <atomic>
 #include <chrono>
 #include <vector>
 #include <gf/Keyboard.h>
@@ -20,6 +21,15 @@
 #include "WelcomeScene.h"
 #include "WelcomeEntity.h"
 #include "LobbyScene.h"
+
+
+void shutdownClient(std::atomic<bool>& running)
+{
+    if (!running.load()) return;
+
+    gf::Log::info("Arrêt du client...\n");
+    running.store(false);
+}
 
 
 
@@ -77,7 +87,7 @@ int main()
 
 
     //std::mutex statesMutex;
-    bool running = true;
+    std::atomic<bool> running{true};
     socket.setNonBlocking();
 
     //ajout pr un lobby
@@ -144,38 +154,40 @@ int main()
     std::mutex packetMutex;
     
 
-    std::thread receiver([&]()
-                         {
-        while (running && renderer.isOpen()) {
+    std::thread receiver([&]() {
+        while (running.load()) {
             gf::Packet packet;
-        switch (socket.recvPacket(packet))
-        {
-        case gf::SocketStatus::Data:{
-            
-            std::lock_guard<std::mutex> lock(packetMutex);
-            packetQueue.push(std::move(packet));
-            break;
-        }
-        case gf::SocketStatus::Error:
-             gf::Log::error("Erreur réseau côté client\n");
-            break;
-        case gf::SocketStatus::Close:
-            gf::Log::info("Serveur déconnecté\n");
-                running = false;
-                renderer.getWindow().close();
-            break;
-        case gf::SocketStatus::Block:
 
-            break;
-        }
+            switch (socket.recvPacket(packet)) {
+                case gf::SocketStatus::Data: {
+                    std::lock_guard<std::mutex> lock(packetMutex);
+                    packetQueue.push(std::move(packet));
+                    break;
+                }
 
+                case gf::SocketStatus::Close:
+                    gf::Log::info("Serveur déconnecté\n");
+                    running.store(false); 
+                    break;
+
+                case gf::SocketStatus::Error:
+                    if (running.load()) {
+                        gf::Log::error("Erreur réseau côté client\n");
+                    }
+                    break;
+
+                default:
+                    break;
+            }
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        } });
+        }
+    });
+
     auto lastSend = std::chrono::steady_clock::now();
 
     
 
-    while (running && renderer.isOpen())
+    while (running)
     {
         gf::Event event;
 
@@ -269,22 +281,29 @@ int main()
                 }
             }   
 
-
-
-
-
             if (event.type == gf::EventType::Closed)
             {
                 gf::Log::info("Fermeture demandée par l'utilisateur\n");
-                running = false;
+                shutdownClient(running);
+                {
+                    gf::TcpSocket tmpSocket = std::move(socket);
+                }
+
+                if (receiver.joinable())
+                    receiver.join();
+
                 renderer.getWindow().close();
             }
+
             else if (event.type == gf::EventType::Resized) { //changement taille
                 auto size = renderer.getWindow().getSize();
                 renderer.handleResize(size.x, size.y);
             }
             
         }
+
+        if (!running.load())
+            break;
 
         
         //envoi réseau de la touche
@@ -413,6 +432,11 @@ int main()
 
         std::this_thread::sleep_for(std::chrono::milliseconds(8));
     }
+
+    if (renderer.getWindow().isOpen()){
+        renderer.getWindow().close();
+    }
+
     if (receiver.joinable())
     {
         receiver.join();
