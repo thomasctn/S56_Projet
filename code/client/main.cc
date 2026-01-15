@@ -21,6 +21,9 @@
 #include "WelcomeScene.h"
 #include "WelcomeEntity.h"
 #include "LobbyScene.h"
+#include "GameScene.h"
+#include "GameEntity.h"
+
 
 
 void shutdownClient(std::atomic<bool>& running)
@@ -123,6 +126,7 @@ int main()
     //scene welcome
     WelcomeScene welcomeScene(renderer);
     LobbyScene lobbyScene(renderer);
+    GameScene gameScene(renderer);
 
     //WelcomeEntity welcome(renderer);
 
@@ -426,7 +430,7 @@ int main()
             lobbyScene.render(connectedPlayers, roomSize, amReady, nbBots, gameDur, myRole);
         }
         else{ //Playing
-            renderer.render(states, myId, board, pacgommes);
+            gameScene.render(states, myId, board, pacgommes);
         }
         
 
