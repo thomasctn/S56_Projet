@@ -359,3 +359,13 @@ template <typename Archive>
 Archive& operator|(Archive& ar, ServerConnect& data) {
     return ar | data.clientId;
 }
+
+struct ServerGamePreStart {
+    static constexpr gf::Id type = "ServerGamePreStart"_id;
+    uint32_t timeLeft;
+};
+
+template <typename Archive>
+Archive &operator|(Archive &ar, ServerGamePreStart &data){
+    return ar | data.timeLeft;
+}

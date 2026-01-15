@@ -520,3 +520,15 @@ void Room::notifyGameEndedAsync() {
 }
 
 
+void Room::broadcastPreGame(unsigned int remaining)
+{
+    ServerGamePreStart msg;
+    msg.timeLeft = static_cast<uint32_t>(remaining);
+    //gf::Log::info("[Room %u] Broadcast PreGame time : %u\n",id,remaining);
+    gf::Packet packet;
+    packet.is(msg);
+
+    for (uint32_t pid : players) {
+        network.send(pid, packet);
+    }
+}

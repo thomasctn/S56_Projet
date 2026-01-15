@@ -142,7 +142,7 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& ser
 
     gameThread = std::thread([this, &inputQueue, &server]() {
         auto lastBotUpdate = std::chrono::steady_clock::now();
-
+        unsigned int lastRemaining = preGameDelay + 1;
         while (running.load()) {
                 auto now = std::chrono::steady_clock::now();
 
@@ -163,7 +163,19 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& ser
 
             preGameElapsed = elapsed.count();
 
+
             if (!gameStarted.load()) {
+                // --- phase pré-jeu ---
+                unsigned int remaining = 0;
+                if (preGameElapsed < preGameDelay) {
+                    remaining = static_cast<unsigned int>(preGameDelay - preGameElapsed);
+                }
+
+                if (room && remaining != lastRemaining) {
+                    room->broadcastPreGame(remaining);
+                    lastRemaining = remaining;
+                }
+
                 if (preGameElapsed >= preGameDelay) {
                     gameStarted.store(true);
                     chronoStart = now;

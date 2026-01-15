@@ -38,7 +38,7 @@ public:
     void broadcastState();
     void broadcastRoomPlayers();
     void broadcastRoomSettings();
-
+    void broadcastPreGame(unsigned int timeLeft);
 
     bool allPlayersReady() const;
     PlayerData getPlayerData(uint32_t playerId) const;
