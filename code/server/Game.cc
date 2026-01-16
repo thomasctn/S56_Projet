@@ -186,14 +186,18 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& ser
                 std::chrono::duration<double> gameTime = now - chronoStart;
                 gameElapsed = gameTime.count();
                 unsigned int nbPacGommes = board.getPacgommeCount();
-                if (room && (gameElapsed >= room->getGameDuration() || nbPacGommes == 0)) {
+                if(room && gameElapsed >= room->getGameDuration() || nbPacGommes == 0) {
                     gf::Log::info("Partie terminée !\n");
                     running.store(false);
                     gameStarted.store(false);
-                if (room) {
-                    room->endGame();
-                }
-
+                    GameEndReason reason = GameEndReason::TIME_OUT;
+                    if(gameElapsed >= room->getGameDuration()) {
+                        reason = GameEndReason::TIME_OUT;
+                    }
+                    else if (nbPacGommes == 0) {
+                        reason = GameEndReason::ALL_DOT_EATEN;
+                    }
+                    room->endGame(reason);
                 break;
                 }
 

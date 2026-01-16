@@ -53,11 +53,11 @@ public:
     bool isFull() const {return players.size() >= settings.roomSize;}
     unsigned int getMaxPlayers() const {return settings.roomSize;}
 
-    void endGame();
-    void notifyGameEnded();
+    void endGame(GameEndReason reason);
+    void notifyGameEnded(GameEndReason reason);
     void cleanupGame();
     void onGameStopped();
-    void notifyGameEndedAsync();
+    void notifyGameEndedAsync(GameEndReason reason);
     unsigned int getGameDuration() const { return settings.gameDuration; }
 
     std::unordered_map<uint32_t, PlayerRole> preGameRoles;

@@ -253,11 +253,12 @@ Archive &operator|(Archive &ar, ServerGameState &data)
 struct ServerGameEnd
 {
   static constexpr gf::Id type = "ServerGameEnd"_id;
+  GameEndReason reason;
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, ServerGameEnd &data)
 {
-  return ar;
+  return ar | data.reason;
 }
 struct ServerDisconnect
 {

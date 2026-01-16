@@ -463,8 +463,8 @@ void Room::handleClientChangeRoomSettings(PacketContext& ctx)
     setSettings(data.newSettings);
 }
 
-void Room::endGame() {
-    notifyGameEnded();
+void Room::endGame(GameEndReason reason) {
+    notifyGameEnded(reason);
     resetPlayersState();
     std::thread([this]() {
         cleanupGame();
@@ -473,10 +473,11 @@ void Room::endGame() {
 
 
 
-void Room::notifyGameEnded() {
+void Room::notifyGameEnded(GameEndReason reason) {
     gf::Log::info("[Room %u] Notification de fin de partie\n", id);
 
     ServerGameEnd msg;
+    msg.reason = reason;
     gf::Packet packet;
     packet.is(msg);
 
@@ -511,8 +512,8 @@ void Room::resetPlayersState() {
     }
 }
 
-void Room::notifyGameEndedAsync() {
-    notifyGameEnded();
+void Room::notifyGameEndedAsync(GameEndReason reason) {
+    notifyGameEnded(reason);
     resetPlayersState();
     std::thread([this]() {
         cleanupGame();

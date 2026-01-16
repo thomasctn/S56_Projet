@@ -19,3 +19,9 @@ enum class Direction {
     Left,
     Right
 };
+
+enum class GameEndReason {
+    ALL_DOT_EATEN,
+    TIME_OUT,
+    PACMAN_DEATH,
+};
