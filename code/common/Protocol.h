@@ -137,12 +137,36 @@ Archive &operator|(Archive &ar, RoomSettings &data)
   return ar | data.roomSize | data.nbBot | data.gameDuration;
 }
 
+struct RoomData
+{
+  static constexpr gf::Id type = "RoomData"_id;
+  unsigned int roomID;
+  unsigned int roomSize;
+  std::string hostName;
+  unsigned int nbPlayer;
+};
+template <typename Archive>
+Archive &operator|(Archive &ar, RoomData &data)
+{
+  return ar | data.roomID | data.roomSize | data.hostName | data.nbPlayer;
+}
 
 //------------------------------------------
 
 // Un peu inspiré de https://github.com/Hatunruna/ggj2020/blob/master/code/bits/common/Protocol.h
 
 // Serveur -> client
+struct ServerListRooms
+{
+  static constexpr gf::Id type = "ServerListRooms"_id;
+  std::vector<RoomData> rooms;
+};
+template <typename Archive>
+Archive &operator|(Archive &ar, ServerListRooms &data)
+{
+  return ar | data.rooms;
+}
+
 
 //Réponse au client qui rejoind la room
 struct ServerJoinRoom
