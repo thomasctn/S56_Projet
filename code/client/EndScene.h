@@ -9,7 +9,7 @@ public:
     explicit EndScene(Renderer& renderer);
 
     bool processEvent(const gf::Event& event); //true quand on clique sur enetrer
-    void render();
+    void render(int lastScore, GameEndReason endReason);
 
 private:
     EndEntity m_entity;

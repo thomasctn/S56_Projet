@@ -11,7 +11,7 @@ class EndEntity {
 public:
     EndEntity(Renderer& renderer);
     bool processEvent(const gf::Event& event);
-    void render();
+    void render(int lastScore, GameEndReason endReason);
     bool wasClicked() const;
     void resetClick();
 

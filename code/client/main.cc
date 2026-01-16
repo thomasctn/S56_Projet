@@ -101,6 +101,9 @@ int main()
     int gameDur = T_GAME;
     PlayerRole myRole;
 
+    int lastScore;
+    GameEndReason endReason;
+
 
 
     //std::mutex statesMutex;
@@ -434,6 +437,13 @@ int main()
                         //board=data.board; (on me l'envoie mais je suis pas censé le prendre a chaque fois)
                         pacgommes = data.pacgommes;
                         timeLeft = data.timeLeft;
+
+                        for (const auto& p : data.clientStates) {
+                            if (p.role == PlayerRole::PacMan) {
+                                lastScore = p.score;
+                                break;
+                            }
+                        }
                         break;
                     }
 
@@ -441,6 +451,7 @@ int main()
                         auto data = packet.as<ServerGameEnd>();
                         screen = ClientScreen::End;
                         amReady=false;
+                        endReason = data.reason;
                         //ce serait bien que je puisse récup le score et qui a gagné!
                         break;
                     }
@@ -465,7 +476,7 @@ int main()
             lobbyScene.render(connectedPlayers, roomSize, amReady, nbBots, gameDur, myRole);
         }
         else if(screen == ClientScreen::End) {
-            endScene.render();
+            endScene.render(lastScore, endReason);
         }
         else{ //Playing
             gameScene.render(states, myId, board, pacgommes, timeLeftPre, timeLeft);

@@ -54,7 +54,7 @@ bool EndEntity::processEvent(const gf::Event& event){
 }
 
 
-void EndEntity::render() {
+void EndEntity::render(int lastScore, GameEndReason endReason) {
     m_renderer.clearWindow();
     gf::RenderWindow& target = m_renderer.getRenderWindow();
 
@@ -77,11 +77,44 @@ void EndEntity::render() {
     title.setPosition({ left + width * 0.5f, top + height * 0.1f });
     target.draw(title);
 
+    gf::Text reasonText;
+    reasonText.setFont(m_font);
+    reasonText.setCharacterSize(22);
+    reasonText.setColor(gf::Color::White);
+    reasonText.setAnchor(gf::Anchor::TopCenter);
+
+    std::string reasonStr;
+    switch (endReason) {
+        case GameEndReason::ALL_DOT_EATEN:
+            reasonStr = "Pacman a mangé toutes les pacgommes.\nPacman gagne !";
+            break;
+        case GameEndReason::TIME_OUT:
+            reasonStr = "Le temps est écoulé.\nLes fantômes gagnent.";
+            break;
+        case GameEndReason::PACMAN_DEATH:
+            reasonStr = "Pacman est mort trop de fois.\nLes fantômes gagnent.";
+            break;
+    }
+
+    reasonText.setString(reasonStr);
+    reasonText.setPosition({ left + width * 0.32f, top + height * 0.27f });
+    target.draw(reasonText);
+
+    gf::Text scoreText;
+    scoreText.setFont(m_font);
+    scoreText.setCharacterSize(20);
+    scoreText.setColor(gf::Color::White);
+    scoreText.setAnchor(gf::Anchor::TopCenter);
+    scoreText.setString("Score final de Pacman : " + std::to_string(lastScore));
+    scoreText.setPosition({ left + width * 0.32f, top + height * 0.37f });
+    target.draw(scoreText);
+
+
     //bouton
     float bw = width * 0.4f;
     float bh = height * 0.12f;
     float bx = left + (width - bw) * 0.5f;
-    float by = top+ height * 0.45f;
+    float by = top+ height * 0.55f;
 
     m_enterWidget.setCharacterSize(26);
     m_enterWidget.setAnchor(gf::Anchor::Center);

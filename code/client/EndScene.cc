@@ -8,6 +8,6 @@ bool EndScene::processEvent(const gf::Event& event) {
 }
 
 
-void EndScene::render() {
-    m_entity.render();
+void EndScene::render(int lastScore, GameEndReason endReason) {
+    m_entity.render(lastScore, endReason);
 }
