@@ -72,6 +72,7 @@ void Board::generateMaze() {
     connectHut();
     openCorners();
     //addLoops(0.15f);
+    openBorderExits(4);
     fillDeadEnds();
 
 }
@@ -363,6 +364,64 @@ bool Board::isHutWall(unsigned int x, unsigned int y) {
             y >= cy - 1 && y <= cy + 1);
 }
 
+void Board::openBorderExits(unsigned int count)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    std::vector<std::pair<unsigned int,unsigned int>> candidates;
+    std::vector<std::pair<unsigned int,unsigned int>> selected;
+
+    // Haut et bas
+    for (unsigned int x = 1; x < width - 1; ++x)
+    {
+        if (grid({x,1}).getType() == CellType::Floor)
+            candidates.emplace_back(x, 0);
+
+        if (grid({x,height-2}).getType() == CellType::Floor)
+            candidates.emplace_back(x, height-1);
+    }
+
+    // Gauche et droite
+    for (unsigned int y = 1; y < height - 1; ++y)
+    {
+        if (grid({1,y}).getType() == CellType::Floor)
+            candidates.emplace_back(0, y);
+
+        if (grid({width-2,y}).getType() == CellType::Floor)
+            candidates.emplace_back(width-1, y);
+    }
+
+    std::shuffle(candidates.begin(), candidates.end(), gen);
+
+    auto isFarEnough = [&](unsigned int x, unsigned int y)
+    {
+        for (auto& [sx, sy] : selected)
+        {
+            unsigned int dx = std::abs((int)x - (int)sx);
+            unsigned int dy = std::abs((int)y - (int)sy);
+
+            // Distance mini sur le même bord
+            if (dx + dy < 3)
+                return false;
+        }
+        return true;
+    };
+
+    for (auto& [x, y] : candidates)
+    {
+        if (selected.size() >= count)
+            break;
+
+        if (!isFarEnough(x, y))
+            continue;
+
+        selected.emplace_back(x, y);
+        grid({x,y}) = Case(CellType::Floor);
+    }
+}
+
+
 
 void Board::generateTestMaze(){
     for (unsigned int y = 0; y < height; ++y)
@@ -389,6 +448,32 @@ void Board::generateTestMaze(){
     }
 }
 
+bool Board::isHole(unsigned int x, unsigned int y) const
+{
+    if (grid({x,y}).getType() != CellType::Floor)
+        return false;
+
+    return (x == 0 || y == 0 || x == width - 1 || y == height - 1);
+}
+
+std::vector<Position> Board::getHoles() const
+{
+    std::vector<Position> holes;
+
+    for (unsigned int x = 0; x < width; ++x)
+    {
+        if (isHole(x, 0)) holes.emplace_back(x, 0);
+        if (isHole(x, height-1)) holes.emplace_back(x, height-1);
+    }
+
+    for (unsigned int y = 1; y < height-1; ++y)
+    {
+        if (isHole(0, y)) holes.emplace_back(0, y);
+        if (isHole(width-1, y)) holes.emplace_back(width-1, y);
+    }
+
+    return holes;
+}
 
 
 

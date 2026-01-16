@@ -38,6 +38,9 @@ public:
     BoardCommon toCommonData();
 
     unsigned int getPacgommeCount() const {return pacgommes.size();}
+    void openBorderExits(unsigned int count);
+    bool isHole(unsigned int x, unsigned int y) const;
+    std::vector<Position> getHoles() const;
 
     
 

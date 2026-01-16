@@ -60,6 +60,37 @@ bool Game::requestMove(uint32_t playerId, Direction dir) {
     float newX = p.x;
     float newY = p.y;
 
+    int X = static_cast<int>(p.x) / 50;
+    int Y = static_cast<int>(p.y) / 50;
+
+    // --- Tp ---
+    if (board.isHole(X, Y))
+    {
+        auto holes = board.getHoles();
+
+        // Ne pas ce tp sur le meme trou
+        holes.erase(
+            std::remove_if(holes.begin(), holes.end(),
+                [&](const Position& pos) {
+                    return pos.x == X && pos.y == Y;
+                }),
+            holes.end()
+        );
+
+        if (!holes.empty())
+        {
+            static std::mt19937 gen(std::random_device{}());
+            std::uniform_int_distribution<> dist(0, holes.size() - 1);
+
+            auto target = holes[dist(gen)];
+
+            p.x = target.x * step;
+            p.y = target.y * step;
+        }
+    }
+
+
+
     switch (dir) {
         case Direction::Up:    newY -= step; break;
         case Direction::Down:  newY += step; break;
