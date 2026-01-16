@@ -23,6 +23,7 @@
 #include "LobbyScene.h"
 #include "GameScene.h"
 #include "GameEntity.h"
+#include "EndScene.h"
 
 
 
@@ -101,6 +102,7 @@ int main()
     PlayerRole myRole;
 
 
+
     //std::mutex statesMutex;
     socket.setNonBlocking();
 
@@ -108,7 +110,8 @@ int main()
     enum class ClientScreen { 
         Welcome, 
         Lobby, 
-        Playing
+        Playing,
+        End
     };
     ClientScreen screen = ClientScreen::Welcome;
 
@@ -139,6 +142,7 @@ int main()
     LobbyScene lobbyScene(renderer);
     GameScene gameScene(renderer);
 
+    EndScene endScene(renderer);
     //WelcomeEntity welcome(renderer);
 
 
@@ -296,6 +300,18 @@ int main()
                 }
             }   
 
+
+            if (screen == ClientScreen::End) {
+                if (endScene.processEvent(event)) {
+                    gf::Log::info("Bouton retour au lobby cliqué (par EndScene)\n");
+
+                    amReady = false;
+
+                    screen = ClientScreen::Lobby;
+                }
+            }
+
+
             if (event.type == gf::EventType::Closed)
             {
                 gf::Log::info("Fermeture demandée par l'utilisateur\n");
@@ -392,6 +408,12 @@ int main()
                         break;
                     }
 
+                    case ServerGamePreStart::type:{
+                        auto data = packet.as<ServerGamePreStart>();
+                        timeLeftPre = int(data.timeLeft);
+                        break;
+                    }
+
                     case ServerGameStart::type:{
                         auto data = packet.as<ServerGameStart>();
 
@@ -417,8 +439,9 @@ int main()
 
                     case ServerGameEnd::type:{
                         auto data = packet.as<ServerGameEnd>();
-                        screen = ClientScreen::Lobby;
+                        screen = ClientScreen::End;
                         amReady=false;
+                        //ce serait bien que je puisse récup le score et qui a gagné!
                         break;
                     }
 
@@ -440,6 +463,9 @@ int main()
         else if(screen == ClientScreen::Lobby) {
             //renderer.drawLobby(connectedPlayers, maxPlayers); 
             lobbyScene.render(connectedPlayers, roomSize, amReady, nbBots, gameDur, myRole);
+        }
+        else if(screen == ClientScreen::End) {
+            endScene.render();
         }
         else{ //Playing
             gameScene.render(states, myId, board, pacgommes, timeLeftPre, timeLeft);
