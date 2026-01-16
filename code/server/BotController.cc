@@ -1,24 +1,9 @@
 #include "BotController.h"
 #include "Game.h"
 #include "Player.h"
-#include "Controller.h"
 #include "../common/Constants.h"
-
 #include <queue>
-#include <unordered_map>
-#include <vector>
-#include <optional>
-#include <iostream>
 #include <algorithm>
-
-// --- Mémoire pour les visites ---
-struct BotMemory {
-    std::unordered_map<std::pair<int,int>, int, 
-        std::hash<int>, 
-        std::equal_to<>> visitCount;
-};
-
-static BotMemory memory;
 
 // -------------------- A* utilitaire --------------------
 struct NodeDist {
@@ -71,16 +56,14 @@ std::vector<Node*> findPath(Node* start, Node* goal) {
 }
 
 // -------------------- BotController --------------------
-std::optional<Direction> BotController::update(Game& game) {
-    const auto& players = game.getPlayers();
+std::optional<Direction> BotController::update(Game& game, BotManager& manager) {
+    auto& players = game.getPlayers();
     auto it = players.find(playerId);
     if (it == players.end()) return std::nullopt;
 
     auto& me = *(it->second);
 
-    // --- Vérifier si on peut bouger ---
-    if (!game.isGameStarted())
-        return std::nullopt;
+    if (!game.isGameStarted()) return std::nullopt;
 
     int gx = static_cast<int>(me.x / CASE_SIZE);
     int gy = static_cast<int>(me.y / CASE_SIZE);
@@ -93,8 +76,8 @@ std::optional<Direction> BotController::update(Game& game) {
     if (hasLineOfSight(game.getBoard(), gx, gy, pgx, pgy)) {
         lastSeenPacMan = {pgx, pgy};
 
-        Node* start = getNode(gx, gy);
-        Node* goal  = getNode(pgx, pgy);
+        Node* start = manager.getNode(gx, gy);
+        Node* goal  = manager.getNode(pgx, pgy);
 
         if (start && goal) {
             auto path = findPath(start, goal);
@@ -105,34 +88,33 @@ std::optional<Direction> BotController::update(Game& game) {
         }
     }
 
-    // --- Si Pac-Man invisible, aller vers dernière position vue ---
+    // --- Dernière position vue ---
     if (lastSeenPacMan) {
         int lx = lastSeenPacMan->first;
         int ly = lastSeenPacMan->second;
 
-        Node* start = getNode(gx, gy);
-        Node* goal  = getNode(lx, ly);
+        Node* start = manager.getNode(gx, gy);
+        Node* goal  = manager.getNode(lx, ly);
         if (start && goal) {
             auto path = findPath(start, goal);
             if (path.size() > 1) {
                 Node* next = path[1];
                 return getDirectionTowards(me.x, me.y, next->x * CASE_SIZE, next->y * CASE_SIZE);
             } else {
-                // Arrivé à la dernière position vue
                 lastSeenPacMan = std::nullopt;
             }
         }
     }
 
     // --- Exploration ---
-    Node* currentNode = getNode(gx, gy);
+    Node* currentNode = manager.getNode(gx, gy);
     if (!currentNode) return std::nullopt;
 
     Node* bestNeighbor = nullptr;
     int minVisits = 1e6;
 
     for (Node* neighbor : currentNode->neighbors) {
-        int visits = memory.visitCount[{neighbor->x, neighbor->y}];
+        int visits = manager.globalVisitCount[{neighbor->x, neighbor->y}];
         if (visits < minVisits) {
             minVisits = visits;
             bestNeighbor = neighbor;
@@ -141,16 +123,13 @@ std::optional<Direction> BotController::update(Game& game) {
 
     if (!bestNeighbor) return std::nullopt;
 
-    memory.visitCount[{bestNeighbor->x, bestNeighbor->y}]++;
+    manager.globalVisitCount[{bestNeighbor->x, bestNeighbor->y}]++;
     return getDirectionTowards(me.x, me.y, bestNeighbor->x * CASE_SIZE, bestNeighbor->y * CASE_SIZE);
 }
 
-
-
 // -------------------- Helpers --------------------
 std::pair<float,float> BotController::getPacManPosition(const Game& game) const {
-    const auto& players = game.getPlayers();
-    for (auto& [id, p] : players) {
+    for (auto& [id, p] : game.getPlayers()) {
         if (p->role == PlayerRole::PacMan)
             return {p->x, p->y};
     }
@@ -172,7 +151,6 @@ Direction BotController::getDirectionTowards(float fromX, float fromY, float toX
     return Direction::Up;
 }
 
-// Vérifie si le bot voit Pac-Man sans obstacle
 bool BotController::hasLineOfSight(const Board& board, int x0, int y0, int x1, int y1) const {
     int dx = (x1 > x0) ? 1 : (x1 < x0) ? -1 : 0;
     int dy = (y1 > y0) ? 1 : (y1 < y0) ? -1 : 0;
@@ -183,7 +161,6 @@ bool BotController::hasLineOfSight(const Board& board, int x0, int y0, int x1, i
     if (cx == x1 && cy == y1) return true;
 
     while (cx != x1 || cy != y1) {
-        // Vérifie si on rencontre un mur
         if (board.getCase(cx, cy).getType() == CellType::Wall)
             return false;
 
@@ -193,4 +170,3 @@ bool BotController::hasLineOfSight(const Board& board, int x0, int y0, int x1, i
 
     return true;
 }
-

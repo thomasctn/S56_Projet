@@ -98,25 +98,22 @@ void Room::startGame() {
 
     for (int b = 0; b < botsToAdd; ++b) {
         uint32_t botId = generateBotId();
+
+        // Ajouter le joueur bot dans le Game
         game->addPlayer(botId, 0.f, 0.f, PlayerRole::Ghost);
         Player& bot = game->getPlayerInfo(botId);
 
-        bot.isBot = true; // <- important
-        bot.controller = new BotController(botId);
+        bot.isBot = true; // important
 
-        botManager->registerBot(botId);
+        // Créer le BotController et l'enregistrer dans BotManager
+        auto botCtrl = std::make_unique<BotController>(botId);
+        botManager->registerBot(botId, std::move(botCtrl));
     }
 
-    // Générer le graphe pour tous les bots
-    for (auto& [id, playerPtr] : game->getPlayers()) {
-        if (playerPtr->isBot) {
-            auto* botController = dynamic_cast<BotController*>(playerPtr->controller);
-            if (botController) {
-                botController->generateGraph(game->getBoard());
-                gf::Log::info("[Room] Graphe généré pour le bot %u\n", id);
-            }
-        }
-    }
+    // --- Générer le graphe global pour tous les bots ---
+    botManager->generateGraph(game->getBoard());
+    gf::Log::info("[Room] Graphe global généré pour tous les bots\n");
+
 
 
 

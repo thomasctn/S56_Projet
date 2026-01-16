@@ -1,22 +1,17 @@
 #pragma once
-#include "Controller.h"
-#include "Game.h"
 #include <optional>
 #include <utility>
 #include <vector>
 #include <unordered_map>
+#include "Game.h"
+#include "BotManager.h"
 
-struct pair_hash {
-    inline std::size_t operator()(const std::pair<int,int>& p) const {
-        return std::hash<int>()(p.first) ^ (std::hash<int>()(p.second) << 1);
-    }
-};
-
-class BotController : public Controller {
+class BotController {
 public:
     explicit BotController(uint32_t id) : playerId(id) {}
 
-    std::optional<Direction> update(Game& game) override;
+    // Recevoir BotManager pour accéder au graphe et à la trace globale
+    std::optional<Direction> update(Game& game, BotManager& manager);
 
 private:
     uint32_t playerId;
@@ -36,8 +31,6 @@ private:
     std::pair<float,float> getPacManPosition(const Game& game) const;
     bool isVisible(float fromX, float fromY, float toX, float toY) const;
     Direction getDirectionTowards(float fromX, float fromY, float toX, float toY) const;
-
     std::optional<std::pair<int,int>> lastSeenPacMan;
     bool hasLineOfSight(const Board& board, int x0, int y0, int x1, int y1) const;
-
 };
