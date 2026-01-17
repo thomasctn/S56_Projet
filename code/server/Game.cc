@@ -122,6 +122,23 @@ bool Game::requestMove(uint32_t playerId, Direction dir) {
         }
     }
 
+    // --- Ajout de trace ---
+    if (botManager) {
+        int nodeX = static_cast<int>(p.x / 50);
+        int nodeY = static_cast<int>(p.y / 50);
+
+        Node* node = botManager->getNode(nodeX, nodeY);
+        if (node) {
+            Trace t;
+            t.ownerId   = playerId;
+            t.type      = (p.getRole() == PlayerRole::PacMan) ? TraceType::PacMan : TraceType::Ghost;
+            t.intensity = 1.0f;
+
+            botManager->getTraces().add(node, t);
+        }
+    }
+
+
     return true;
 }
 
@@ -177,8 +194,14 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& ser
         while (running.load()) {
                 auto now = std::chrono::steady_clock::now();
 
+
+                
             // --- mise à jour des bots toutes les 0.5 secondes ---
             if (botManager) {
+
+                // Décroissance des traces, factor < 1 pour les réduire
+                botManager->getTraces().decay();
+
                 std::chrono::duration<double> elapsed = now - lastBotUpdate;
                 if (elapsed.count() >= 0.5) {  // 0.5s = 500ms
                     botManager->update();

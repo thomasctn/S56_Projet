@@ -62,6 +62,8 @@ public:
 
     std::unordered_map<uint32_t, PlayerRole> preGameRoles;
 
+    BotManager* getBotManager() { return botManager.get(); }
+
 
 private:
     void startGame();

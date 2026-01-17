@@ -120,6 +120,37 @@ int main() {
                     }
                 }
 
+                // --- Dessin des traces ---
+                if (roomPtr && roomPtr->getBotManager()) {
+                    auto& traceMap = roomPtr->getBotManager()->getTraces();
+                    for (auto& [node, traces] : traceMap.getAll()) { // getAll() renvoie map<Node*, vector<Trace>>
+                        for (const Trace& t : traces) {
+                            gf::RectangleShape traceRect({tileSize, tileSize});
+                            traceRect.setPosition({node->x * tileSize + offsetX, node->y * tileSize + offsetY});
+
+                            if (t.type == TraceType::PacMan) {
+                                traceRect.setColor(gf::Color::fromRgba32(
+                                    static_cast<uint8_t>(255),                      // R
+                                    static_cast<uint8_t>(0),                        // G
+                                    static_cast<uint8_t>(0),                        // B
+                                    static_cast<uint8_t>(t.intensity * 0.5f * 255) // A
+                                ));
+
+                            } else {
+                                traceRect.setColor(gf::Color::fromRgba32(
+                                    static_cast<uint8_t>(0),
+                                    static_cast<uint8_t>(0),
+                                    static_cast<uint8_t>(255),
+                                    static_cast<uint8_t>(t.intensity * 0.5f * 255)
+                                ));
+
+                            }
+
+                            window.draw(traceRect);
+                        }
+                    }
+                }
+
                 // Joueurs
                 struct PlayerSnapshot { float x,y; PlayerRole role; int score; };
                 std::vector<PlayerSnapshot> players;
