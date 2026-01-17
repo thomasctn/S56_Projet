@@ -10,9 +10,10 @@ v   - Permettre au fenetre serv et client de s'arreter sans crash
     - améliorer l'interface room
     - Equilibrer les parametre de jeu.
 v   - Ne pas faire crash le client si il trouve pas le serv mais le faire chercher jusqua trouver.
+    - revoir spawn des joueurs
 
 Bonus :
     - améliorer visuel
     - améliorer code
     - optimiser les échanges
-    - améliorer bots (un peu debile eux)
+~   - améliorer bots (un peu debile eux)
