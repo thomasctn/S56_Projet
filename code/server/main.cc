@@ -123,7 +123,7 @@ int main() {
                 // --- Dessin des traces ---
                 if (roomPtr && roomPtr->getBotManager()) {
                     auto& traceMap = roomPtr->getBotManager()->getTraces();
-                    for (auto& [node, traces] : traceMap.getAll()) { // getAll() renvoie map<Node*, vector<Trace>>
+                    for (auto& [node, traces] : traceMap.getAll()) {
                         for (const Trace& t : traces) {
                             gf::RectangleShape traceRect({tileSize, tileSize});
                             traceRect.setPosition({node->x * tileSize + offsetX, node->y * tileSize + offsetY});

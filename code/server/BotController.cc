@@ -93,7 +93,7 @@ BotController::update(Game& game, BotManager& manager) {
 }
 
 // --------------------------------------------------
-// Helpers (inchangés)
+// Helpers
 // --------------------------------------------------
 Direction
 BotController::getDirectionTowards(
