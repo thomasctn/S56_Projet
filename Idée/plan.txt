@@ -5,12 +5,15 @@ v   - utiliser les widjet pour les bouton.
 v   - Permettre au fenetre serv et client de s'arreter sans crash
     - Afficher les temps de jeu sur le client (voir pour aussi le temps de prejeu)
     - Ajouter un ecran de fin (partit finit -> ecran -> room)
-    - Ajouter une intelligence collective au bots (actuellment local)
+v   - Ajouter une intelligence collective au bots (actuellment local)
     - améliorer l'interface lobby
     - améliorer l'interface room
     - Equilibrer les parametre de jeu.
 v   - Ne pas faire crash le client si il trouve pas le serv mais le faire chercher jusqua trouver.
     - revoir spawn des joueurs
+    - voir decay
+    - refaire room
+    - pacgomme spéciale
 
 Bonus :
     - améliorer visuel
