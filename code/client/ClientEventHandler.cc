@@ -47,25 +47,18 @@ void handleClientEvents(
                     if (welcomeScene.processEvent(event)) {
                         gf::Log::info("Bouton ENTRER cliqué (par WelcomeScene)\n");
 
-                        /*if(!askedToJoin){
-                            askedToJoin = true;
-                            gf::Packet p;
-                            p.is(ClientJoinRoom{});
-                            socket.sendPacket(p);
-                        }*/
+                     
 
-                        //screen = ClientScreen::Lobby;
                         screen = ClientScreen::LobbyList;
                     }
                 }
 
-                if (screen == ClientScreen::LobbyList) {
+                else if (screen == ClientScreen::LobbyList) {
                     LobbyListAction act = lobbyListScene.processEvent(event);
 
                     if (act == LobbyListAction::CreateRoom) {
-                        //afaire : ClientCreateRoom plus tard
                         gf::Packet p;
-                        ClientCreateRoom create; //ça suffit?
+                        ClientCreateRoom create; //ça suffit? apparement oui
                         p.is(create);
                         socket.sendPacket(p);
                     }
@@ -85,47 +78,41 @@ void handleClientEvents(
                 
 
                 // interaction lobby via LobbyScene
-                if (screen == ClientScreen::Lobby) {
+                else if (screen == ClientScreen::Lobby) {
                     LobbyAction act = lobbyScene.processEvent(event);
                     switch (act){
                         case LobbyAction::RoomDec:
                             if (roomSettings.roomSize > MIN_NB_PLAYERS){
-                                //roomSettings.roomSize--;
                                 int newRoomSize = roomSettings.roomSize - 1;
                                 sendRoomSettings(socket, newRoomSize, roomSettings.nbBot, roomSettings.gameDuration);
                             }
                             break;
                         case LobbyAction::RoomInc:
                             if (roomSettings.roomSize < MAX_NB_PLAYERS){
-                                //roomSettings.roomSize++;
                                 int newRoomSize = roomSettings.roomSize +1;
                                 sendRoomSettings(socket, newRoomSize, roomSettings.nbBot, roomSettings.gameDuration);
                             }
                             break;
                         case LobbyAction::BotDec:
                             if (roomSettings.nbBot > MIN_NB_BOTS){
-                                //roomSettings.nbBot--;
                                 int newNbBots = roomSettings.nbBot -1;
                                 sendRoomSettings(socket, roomSettings.roomSize, newNbBots, roomSettings.gameDuration);
                             }
                             break;
                         case LobbyAction::BotInc:
                             if (roomSettings.nbBot < MAX_NB_BOTS){
-                                //roomSettings.nbBot++;
                                 int newNbBots = roomSettings.nbBot +1;
                                 sendRoomSettings(socket, roomSettings.roomSize, newNbBots, roomSettings.gameDuration);
                             }
                             break;
                         case LobbyAction::DurDec:
                             if (roomSettings.gameDuration > MIN_DURATION){
-                                //roomSettings.gameDuration = roomSettings.gameDuration - 20;
                                 int newGameDur = roomSettings.nbBot -20;
                                 sendRoomSettings(socket, roomSettings.roomSize, roomSettings.nbBot, newGameDur);
                             }
                             break;
                         case LobbyAction::DurInc:
                             if (roomSettings.gameDuration < MAX_DURATION){
-                                //roomSettings.gameDuration = roomSettings.gameDuration + 20;
                                 int newGameDur = roomSettings.nbBot +20;
                                 sendRoomSettings(socket, roomSettings.roomSize, roomSettings.nbBot, newGameDur);
                             }
@@ -158,7 +145,7 @@ void handleClientEvents(
                 }   
 
 
-                if (screen == ClientScreen::End) {
+                else if (screen == ClientScreen::End) {
                     if (endScene.processEvent(event)) {
                         gf::Log::info("Bouton retour au lobby cliqué (par EndScene)\n");
 
@@ -169,7 +156,7 @@ void handleClientEvents(
                 }
 
 
-                if (event.type == gf::EventType::Closed)
+                else if (event.type == gf::EventType::Closed)
                 {
                     gf::Log::info("Fermeture demandée par l'utilisateur\n");
                     shutdownClient(running);
