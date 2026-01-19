@@ -64,6 +64,9 @@ public:
 
     BotManager* getBotManager() { return botManager.get(); }
 
+    void setHostName(const std::string& name) { hostName = name; }
+    const std::string& getHostName() const { return hostName; }
+    unsigned int getPlayerCount() const { return static_cast<unsigned int>(players.size()); }
 
 private:
     void startGame();
@@ -72,6 +75,8 @@ private:
     uint32_t generateBotId();
 
     void resetPlayersState();
+
+    std::string hostName;
 
 
     std::unique_ptr<BotManager> botManager;

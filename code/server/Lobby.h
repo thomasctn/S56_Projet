@@ -8,6 +8,7 @@
 #include "ServerNetwork.h"
 #include "Room.h"
 #include "../common/Constants.h"
+#include "../common/Protocol.h"
 
 
 
@@ -25,9 +26,13 @@ public:
     void handlePacket(PacketContext& ctx);
     Room& getRoom(uint32_t id);
     void handleClientJoinRoom(PacketContext& ctx);
+    void broadcastRoomsList();
+    void sendRoomsList(uint32_t playerId);
+    ServerListRooms getRoomsList() const;
+
 
 private:
-    RoomId createRoom();
+    RoomId createRoom(const std::string& hostName);
     void destroyRoom(RoomId id);
 
 private:
