@@ -45,20 +45,26 @@ bool Board::isOccupied(unsigned int x, unsigned int y, uint32_t excludeId, const
 void Board::placeRandomPacGommes(unsigned int count) {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distX(0, getWidth() - 1);
-    std::uniform_int_distribution<> distY(0, getHeight() - 1);
+    std::uniform_int_distribution<> distX(1, getWidth() - 2);
+    std::uniform_int_distribution<> distY(1, getHeight() - 2);
+    std::uniform_int_distribution<> typeDist(0, 1); // 0 = Basic, 1 = Power
+
     unsigned int placed = 0;
     while (placed < count) {
         unsigned int x = distX(gen);
         unsigned int y = distY(gen);
-        Case& c = getCase(x, y);
 
-        if (c.getType() == CellType::Floor && pacgommes.find(Position(x,y)) == pacgommes.end()) {
-            pacgommes.insert(Position(x,y));
+        Case& c = getCase(x, y);
+        Position pos(x, y);
+
+        if (c.getType() == CellType::Floor && pacgommes.find(pos) == pacgommes.end()) {
+            PacGommeType type = (typeDist(gen) == 0) ? PacGommeType::Basic : PacGommeType::Power;
+            pacgommes[pos] = type;
             ++placed;
         }
     }
 }
+
 
 void Board::generateMaze() {
     for (unsigned int y = 0; y < height; ++y){
@@ -540,16 +546,28 @@ void Board::printWithPlayers(const std::vector<Player> &players) const {
     }
 }
 
-bool Board::hasPacgomme(unsigned int x, unsigned int y) const
-{
-    return pacgommes.find(Position(x,y)) != pacgommes.end();
+bool Board::hasPacgomme(unsigned int x, unsigned int y) const {
+    return pacgommes.find(Position(x, y)) != pacgommes.end();
 }
 
-bool Board::removePacgomme(unsigned int x, unsigned int y)
-{
-    if(!hasPacgomme(x,y))
+PacGommeType Board::takePacGomme(unsigned int x, unsigned int y) {
+    Position pos(x, y);
+    auto it = pacgommes.find(pos);
+    if (it == pacgommes.end())
+        return PacGommeType::Basic;
+
+    PacGommeType type = it->second;
+    pacgommes.erase(it);
+    return type;
+}
+
+
+bool Board::removePacgomme(unsigned int x, unsigned int y) {
+    Position pos(x, y);
+    auto it = pacgommes.find(pos);
+    if (it == pacgommes.end())
         return false;
-    pacgommes.erase(Position(x,y));
+    pacgommes.erase(it);
     return true;
 }
 

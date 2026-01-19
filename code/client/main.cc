@@ -92,7 +92,7 @@ int main()
     //STRCUTURES DE DONNÉES RECUES
     std::vector<PlayerData> states;
     BoardCommon board;
-    std::set<Position> pacgommes;
+    std::vector<std::pair<Position, PacGommeType>> pacgommes;
     unsigned int timeLeft = 999;
     int timeLeftPre = 0;
 
@@ -435,7 +435,10 @@ int main()
                         auto data = packet.as<ServerGameState>();
                         states = data.clientStates;
                         //board=data.board; (on me l'envoie mais je suis pas censé le prendre a chaque fois)
-                        pacgommes = data.pacgommes;
+                        pacgommes.clear();
+                        for (auto& [pos, type] : data.pacgommes) {
+                            pacgommes.push_back({pos, type});
+                        }
                         timeLeft = data.timeLeft;
 
                         for (const auto& p : data.clientStates) {

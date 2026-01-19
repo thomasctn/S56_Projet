@@ -25,3 +25,8 @@ enum class GameEndReason {
     TIME_OUT,
     PACMAN_DEATH,
 };
+
+enum class PacGommeType {
+    Basic,
+    Power,    // rend Pac-Man chasseur
+};

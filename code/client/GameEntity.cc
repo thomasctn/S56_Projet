@@ -77,36 +77,42 @@ void GameEntity::renderMap(const BoardCommon &map, float tileSize, float offsetX
                 case CellType::Floor: tile.setColor(gf::Color::fromRgb(0.3f, 0.3f, 0.3f)); break;
                 default: tile.setColor(gf::Color::Black); break;
             }
-            win.draw(tile);
 
-            if (cell.celltype == CellType::Floor && cell.pacGomme) {
-                gf::CircleShape pacGomme(tileSize / 6.0f);
-                pacGomme.setOrigin({tileSize/12.0f, tileSize/12.0f});
-                pacGomme.setPosition({
-                    x * tileSize + offsetX + tileSize/2.0f,
-                    y * tileSize + offsetY + tileSize/2.0f
-                });
-                pacGomme.setColor(gf::Color::Yellow);
-                win.draw(pacGomme);
-            }
+            win.draw(tile);
         }
     }
-
-    
 }
 
-void GameEntity::renderPacGommes(const std::set<Position>& pacgommes, float tileSize, float offsetX, float offsetY) {
+
+void GameEntity::renderPacGommes(const std::vector<std::pair<Position, PacGommeType>>& pacgommes, float tileSize, float offsetX, float offsetY) {
     gf::RenderWindow& win = m_renderer.getRenderWindow();
-    for (const auto& pg : pacgommes) {
+
+    for (const auto& [pos, type] : pacgommes) {
         gf::CircleShape pacGomme(tileSize / 6.0f);
-        pacGomme.setOrigin({ tileSize / 12.0f, tileSize / 12.0f });
-        pacGomme.setPosition({pg.x * tileSize + offsetX + tileSize / 2.0f,pg.y * tileSize + offsetY + tileSize / 2.0f});
-        pacGomme.setColor(gf::Color::Yellow);
+        pacGomme.setOrigin({tileSize / 12.0f, tileSize / 12.0f});
+        pacGomme.setPosition({
+            pos.x * tileSize + offsetX + tileSize / 2.0f,
+            pos.y * tileSize + offsetY + tileSize / 2.0f
+        });
+
+        switch(type) {
+            case PacGommeType::Basic:
+                pacGomme.setColor(gf::Color::Yellow);
+                break;
+            case PacGommeType::Power:
+                pacGomme.setColor(gf::Color::Green);
+                break;
+            default:
+                pacGomme.setColor(gf::Color::White);
+                break;
+        }
+
         win.draw(pacGomme);
     }
 }
 
-void GameEntity::render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon& board, const std::set<Position>& pacgommes, int timeLeftPre, unsigned int timeLeft) {
+
+void GameEntity::render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon& board, const std::vector<std::pair<Position, PacGommeType>>& pacgommes, int timeLeftPre, unsigned int timeLeft) {
     gf::RenderWindow& win = m_renderer.getRenderWindow();
 
     //clear via renderer helper

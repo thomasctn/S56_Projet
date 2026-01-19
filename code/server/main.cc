@@ -1,6 +1,8 @@
 #include "ServerNetwork.h"
 #include "../common/Constants.h"
 #include "../common/Protocol.h"
+#include "../common/Types.h"
+
 
 #include "Lobby.h"
 #include "Room.h"
@@ -109,16 +111,25 @@ int main() {
                         }
                         window.draw(tile);
 
-                        if (board.hasPacgomme(x,y)) {
+                        // --- Pacgommes ---
+                        Position pos(x,y);
+                        auto it = board.getPacgommes().find(pos); // map<Position, PacGommeType>
+                        if (it != board.getPacgommes().end()) {
+                            PacGommeType type = it->second;
                             gf::CircleShape pacGommeShape(tileSize / 6.0f);
                             pacGommeShape.setOrigin({tileSize/12.0f, tileSize/12.0f});
                             pacGommeShape.setPosition({x * tileSize + offsetX + tileSize/2,
-                                                      y * tileSize + offsetY + tileSize/2});
-                            pacGommeShape.setColor(gf::Color::Yellow);
+                                                    y * tileSize + offsetY + tileSize/2});
+                            if (type == PacGommeType::Basic) {
+                                pacGommeShape.setColor(gf::Color::Yellow);
+                            } else if (type == PacGommeType::Power) {
+                                pacGommeShape.setColor(gf::Color::Red);
+                            }
                             window.draw(pacGommeShape);
                         }
                     }
                 }
+
 
                 // --- Dessin des traces ---
                 if (roomPtr && roomPtr->getBotManager()) {

@@ -4,6 +4,7 @@
 #include <gf/Id.h>
 #include <gf/SerializationOps.h>
 #include <gf/Array2D.h>
+#include <functional>
 #include "Types.h"
 
 using namespace gf::literals;
@@ -47,32 +48,35 @@ Serveur (envoyé)
 //Faudra probablement les déplacer ces structures
 struct Position
 {
-  static constexpr gf::Id type = "Position"_id;
-  unsigned int x;
-  unsigned int y;
-  Position()
-  {
-    x = 0;
-    y = 0;
-  }
-  Position(unsigned int xp, unsigned int yp)
-  {
-    x = xp;
-    y = yp;
-  }
-  bool operator==(const Position &a) const
-  {
-    return (x == a.x && y == a.y);
-  }
-  bool operator<(const Position &a) const
-  {
-    return (x < a.x || (x == a.x && y < a.y));
-  }
+    static constexpr gf::Id type = "Position"_id;
+    unsigned int x;
+    unsigned int y;
+
+    Position() : x(0), y(0) {}
+    Position(unsigned int xp, unsigned int yp) : x(xp), y(yp) {}
+
+    bool operator==(const Position &a) const {
+        return (x == a.x && y == a.y);
+    }
+
+    bool operator<(const Position &a) const {
+        return (x < a.x || (x == a.x && y < a.y));
+    }
 };
+
+namespace std {
+    template<>
+    struct hash<Position> {
+        std::size_t operator()(const Position& p) const noexcept {
+            return std::hash<unsigned int>()(p.x) ^ (std::hash<unsigned int>()(p.y) << 1);
+        }
+    };
+}
+
 template <typename Archive>
 Archive &operator|(Archive &ar, Position &data)
 {
-  return ar | data.x | data.y;
+    return ar | data.x | data.y;
 }
 
 struct CaseCommon
@@ -250,7 +254,7 @@ struct ServerGameStart
   static constexpr gf::Id type = "ServerGameStart"_id;
   BoardCommon board;
   std::vector<PlayerData> players;
-  std::set<Position> pacgommes;
+  std::vector<std::pair<Position, PacGommeType>> pacgommes;
   RoomSettings settings;
 };
 template <typename Archive>
@@ -264,7 +268,7 @@ struct ServerGameState
   static constexpr gf::Id type = "ServerGameState"_id;
   std::vector<PlayerData> clientStates;
   BoardCommon board;
-  std::set<Position> pacgommes;
+  std::vector<std::pair<Position, PacGommeType>> pacgommes;
   unsigned int timeLeft;
 };
 template <typename Archive>
@@ -393,4 +397,16 @@ struct ServerGamePreStart {
 template <typename Archive>
 Archive &operator|(Archive &ar, ServerGamePreStart &data){
     return ar | data.timeLeft;
+}
+
+inline gf::v1::Serializer& operator|(gf::v1::Serializer& ar, const std::pair<Position, PacGommeType>& pg) {
+    ar | pg.first.x | pg.first.y | (uint8_t&)pg.second;
+    return ar;
+}
+
+inline gf::v1::Deserializer& operator|(gf::v1::Deserializer& ar, std::pair<Position, PacGommeType>& pg) {
+    uint8_t typeVal;
+    ar | pg.first.x | pg.first.y | typeVal;
+    pg.second = static_cast<PacGommeType>(typeVal);
+    return ar;
 }

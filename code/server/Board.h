@@ -10,6 +10,11 @@
 #include "Case.h"
 #include "Player.h"
 #include <random>
+#include <unordered_map>
+#include "../common/Types.h"
+
+
+
 
 
 class Board {
@@ -32,9 +37,11 @@ public:
     unsigned int getWidth() const { return width; }
     unsigned int getHeight() const { return height; }
 
-    std::set<Position> getPacgommes() const {return pacgommes;}
+    std::unordered_map<Position, PacGommeType> getPacgommes() const {return pacgommes;}
     bool hasPacgomme(unsigned int x, unsigned int y) const;
     bool removePacgomme(unsigned int x, unsigned int y);
+    PacGommeType takePacGomme(unsigned int x, unsigned int y);
+
     BoardCommon toCommonData();
 
     unsigned int getPacgommeCount() const {return pacgommes.size();}
@@ -48,7 +55,7 @@ private:
     unsigned int width;
     unsigned int height;
     gf::Array2D<Case> grid;
-    std::set<Position> pacgommes;
+    std::unordered_map<Position, PacGommeType> pacgommes;
 
     void generateTestMaze();
     void generateMaze();

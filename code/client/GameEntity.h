@@ -15,13 +15,13 @@ public:
   explicit GameEntity(Renderer& renderer);
 
   // render du jeu (map + joueurs + pacgommes)
-  void render(const std::vector<PlayerData>& states,uint32_t myId,const BoardCommon& board,const std::set<Position>& pacgommes, int timeLeftPre, unsigned int timeLeft);
+  void render(const std::vector<PlayerData>& states,uint32_t myId,const BoardCommon& board,const std::vector<std::pair<Position, PacGommeType>>& pacgommes, int timeLeftPre, unsigned int timeLeft);
 
 private:
   //helpers pdnt le render du jeu
   void calculateMovement(const BoardCommon &map, float &tileSize, float &offsetX, float &offsetY);
   void renderMap(const BoardCommon &map, float tileSize, float offsetX, float offsetY);
-  void renderPacGommes(const std::set<Position>& pacgommes, float tileSize, float offsetX, float offsetY);
+  void renderPacGommes(const std::vector<std::pair<Position, PacGommeType>>& pacgommes, float tileSize, float offsetX, float offsetY);
 
 private:
   Renderer& m_renderer;
