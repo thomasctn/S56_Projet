@@ -45,6 +45,9 @@ void Lobby::handlePacket(PacketContext& ctx) {
         case ClientCreateRoom::type:
             handleClientCreateRoom(ctx);
             break;
+        case ClientLeaveRoom::type:
+            handleClientLeaveRoom(ctx);
+            break;
         default:
             // Transmettre le paquet à la room si le joueur y est
             if (playerRoom.find(ctx.senderId) != playerRoom.end() && playerRoom[ctx.senderId] != 0) {
@@ -131,10 +134,28 @@ void Lobby::handleClientCreateRoom(PacketContext &ctx)
     sjr.room = roomId;
     joinAck.is(sjr);
     network.send(ctx.senderId, joinAck);
-
     broadcastRoomsList();
 
     gf::Log::info("[Lobby] Joueur %u ajouté à la room %u\n", ctx.senderId, roomId);
+}
+
+void Lobby::handleClientLeaveRoom(PacketContext &ctx)
+{
+    auto it = playerRoom.find(ctx.senderId);
+    if (it != playerRoom.end()) {
+        RoomId roomId = it->second;
+        auto roomIt = rooms.find(roomId);
+
+        if (roomIt != rooms.end()) {
+            roomIt->second->removePlayer(ctx.senderId);
+            gf::Log::info("[Lobby] Joueur %u retiré de la room %u\n", ctx.senderId, roomId);
+        }
+        if (roomIt->second->players.empty()) {
+            rooms.erase(roomId);
+        }
+        playerRoom.erase(it);
+        broadcastRoomsList();
+    }
 }
 
 ServerListRooms Lobby::getRoomsList() const {
