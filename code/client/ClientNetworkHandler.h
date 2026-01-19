@@ -8,6 +8,7 @@
 #include <queue>
 #include <mutex>
 #include "ClientScreen.h"
+#include "LobbyListScene.h"
 #include "../common/Types.h"
 #include "../common/Protocol.h"
 
@@ -24,6 +25,7 @@ void handleNetworkPackets(
     int& timeLeftPre,
     std::vector<PlayerData>& lobbyPlayers,
     RoomSettings& roomSettings,
+    LobbyListScene& lobbyListScene,
     uint32_t& myId,
     PlayerRole& myRole,
     int& lastScore,

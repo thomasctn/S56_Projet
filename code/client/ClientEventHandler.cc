@@ -28,6 +28,7 @@ void handleClientEvents(
     WelcomeScene& welcomeScene,
     LobbyScene& lobbyScene,
     EndScene& endScene,
+    LobbyListScene& lobbyListScene,
     gf::TcpSocket& socket,
     bool& askedToJoin,
     bool& amReady,
@@ -56,6 +57,24 @@ void handleClientEvents(
                         screen = ClientScreen::Lobby;
                     }
                 }
+
+                if (screen == ClientScreen::LobbyList) {
+                    LobbyListAction act = lobbyListScene.processEvent(event);
+
+                    if (act == LobbyListAction::CreateRoom) {
+                        //afaire : ClientCreateRoom plus tard
+                    }
+                    else if (act == LobbyListAction::JoinRoom) {
+                        unsigned int roomId = lobbyListScene.getLastRoomId();
+
+                        gf::Packet p;
+                        ClientJoinRoom join;
+                        join.room = gf::Id(roomId);
+                        p.is(join);
+                        socket.sendPacket(p);
+                    }
+                }   
+
 
 
                 

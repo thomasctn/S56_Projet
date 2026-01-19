@@ -1,5 +1,5 @@
 #pragma once
-#include <gf/Event.h>
+
 #include "LobbyListEntity.h"
 #include "Renderer.h"
 
@@ -10,6 +10,11 @@ public:
     LobbyListAction processEvent(const gf::Event& event);
 
     void render();
+
+    void setRooms(const std::vector<RoomData>& rooms);
+
+    LobbyListAction getAndResetLastAction();
+    unsigned int getLastRoomId() const;
 
 private:
     LobbyListEntity m_entity;

@@ -24,6 +24,7 @@
 #include "GameScene.h"
 #include "GameEntity.h"
 #include "EndScene.h"
+#include "LobbyListScene.h"
 #include "ClientNetworkHandler.h"
 #include "ClientEventHandler.h"
 #include "ClientScreen.h"
@@ -105,6 +106,7 @@ int main()
     LobbyScene lobbyScene(renderer);
     GameScene gameScene(renderer);
     EndScene endScene(renderer);
+    LobbyListScene lobbyListScene(renderer);
 
 
     gf::ActionContainer actions;
@@ -157,6 +159,7 @@ int main()
             welcomeScene,
             lobbyScene,
             endScene,
+            lobbyListScene,
             socket,
             askedToJoin,
             amReady,
@@ -214,6 +217,7 @@ int main()
                 timeLeftPre,
                 lobbyPlayers,
                 roomSettings,
+                lobbyListScene,
                 myId,
                 myRole,
                 lastScore,

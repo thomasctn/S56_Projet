@@ -23,6 +23,7 @@ void handleNetworkPackets(
     int& timeLeftPre,
     std::vector<PlayerData>& lobbyPlayers,
     RoomSettings& roomSettings,
+    LobbyListScene& lobbyListScene,
     uint32_t& myId,
     PlayerRole& myRole,
     int& lastScore,
@@ -52,6 +53,13 @@ void handleNetworkPackets(
                         gf::Log::info("Serveur: rejoint la room\n"); //pour l'instant aussi inutile (le serv nous met direct dans une room)
                         break;
                     }
+
+                    case ServerListRooms::type: {
+                        auto data = packet.as<ServerListRooms>();
+                        lobbyListScene.setRooms(data.rooms);
+                        break;
+                    }   
+
 
                     case ServerConnect::type: {
                         auto data = packet.as<ServerConnect>();

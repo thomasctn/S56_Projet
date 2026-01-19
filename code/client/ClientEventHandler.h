@@ -10,6 +10,7 @@
 #include "WelcomeScene.h"
 #include "LobbyScene.h"
 #include "EndScene.h"
+#include "LobbyListScene.h"
 #include "ClientScreen.h"
 #include "../common/Types.h"
 #include "../common/Constants.h"
@@ -23,6 +24,7 @@ void handleClientEvents(
     WelcomeScene& welcomeScene,
     LobbyScene& lobbyScene,
     EndScene& endScene,
+    LobbyListScene& lobbyListScene,
     gf::TcpSocket& socket,
     bool& askedToJoin,
     bool& amReady,
