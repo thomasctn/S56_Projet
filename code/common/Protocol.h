@@ -341,7 +341,7 @@ struct ClientCreateRoom
 template <typename Archive>
 Archive &operator|(Archive &ar, ClientCreateRoom &data)
 {
-  return ar | data.room;
+  return ar;
 }
 
 struct ClientJoinRoom
