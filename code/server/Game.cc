@@ -223,7 +223,9 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& ser
                 // --- phase pré-jeu ---
                 unsigned int remaining = 0;
                 if (preGameElapsed < preGameDelay) {
-                    remaining = static_cast<unsigned int>(preGameDelay - preGameElapsed);
+                    remaining = static_cast<unsigned int>(
+                        std::ceil(preGameDelay - preGameElapsed)
+                    );
                 }
 
                 if (room && remaining != lastRemaining) {
