@@ -95,8 +95,8 @@ void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, 
 
     gf::Vector2f settingsPos{textPosX, textStartPosY};
     gf::Vector2f changeRolePos{textPosX, textStartPosY+ 125.f + 57.5f + 57.5f};
-    gf::Vector2f playerListPos{textPosX + 350.0, textStartPosY};
-    gf::Vector2f readyBtnPos{textPosX, top + height * 0.75f};
+    gf::Vector2f playerListPos{textPosX + 375.f, textStartPosY};
+    gf::Vector2f readyPos{settingsPos.x, top + height * 0.75f};
     PlayerData clientData;
     for (auto& p : players) {
         if (p.id == clientID) {
@@ -130,7 +130,7 @@ void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, 
     m_readyBtn.setCharacterSize(24U);
     m_readyBtn.setAnchor(gf::Anchor::CenterLeft);
     m_readyBtn.setString(clientData.ready ? "PLUS PRÊT?" : "PRÊT");
-    m_readyBtn.setPosition(readyBtnPos);
+    m_readyBtn.setPosition({readyPos.x+16.f,readyPos.y + 50.f});
     m_readyBtn.setDefaultTextColor(gf::Color::White);
     m_readyBtn.setSelectedTextColor(gf::Color::Black);
     m_readyBtn.setDefaultBackgroundColor(gf::Color::Black);
@@ -146,7 +146,7 @@ void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, 
     readyState.setCharacterSize(20);
     readyState.setColor(gf::Color::White);
     readyState.setString(clientData.ready ? "Vous êtes : PRÊT" : "Vous êtes : PAS PRÊT");
-    readyState.setPosition({left + margin +uiOffsetX, top + 380.f});
+    readyState.setPosition(readyPos);
     target.draw(readyState);
 
     target.display();
@@ -155,12 +155,25 @@ void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, 
 void LobbyEntity::renderPlayerRow(gf::Vector2f position, PlayerData data, uint32_t clientID)
 {
     gf::RenderWindow& target = m_renderer.getRenderWindow();
+    gf::Sprite iconSprite;
+    gf::Texture iconTexture;
+    if(data.role == PlayerRole::PacMan) {
+        iconTexture = gf::Texture("../client/assets/pacman/pacman_icon.png");
+    }
+    else {
+        iconTexture = gf::Texture("../client/assets/ghosts/inky.png");
+    }
+    iconSprite.setAnchor(gf::Anchor::TopLeft);
+    iconSprite.setTexture(iconTexture);
+    iconSprite.setPosition({position.x,position.y-14.f});
+
     gf::Text playerListLabel;
     playerListLabel.setFont(m_font);
     playerListLabel.setCharacterSize(20);
     playerListLabel.setColor(gf::Color::White);
     playerListLabel.setString(data.name + (clientID == data.id ? "(vous)" : "") + (data.ready ? "(prêt)" : "(pas prêt)"));
-    playerListLabel.setPosition(position);
+    playerListLabel.setPosition({position.x + 32.f, position.y});
+    target.draw(iconSprite);
     target.draw(playerListLabel);
 }
 
@@ -177,7 +190,7 @@ void LobbyEntity::renderPLayerList(gf::Vector2f position, std::vector<PlayerData
     target.draw(playerListLabel);
     for(unsigned int i =0; i < players.size(); i++)
     {
-        renderPlayerRow({position.x, position.y + 50.f*(i+1)},players.at(i), clientID);
+        renderPlayerRow({position.x, position.y + 32.f*(i+1)},players.at(i), clientID);
     }
 
 }
@@ -234,7 +247,7 @@ void LobbyEntity::renderSettings(gf::Vector2f position, RoomSettings settings)
 
     gf::Text settingsLabel;
     settingsLabel.setFont(m_font);
-    settingsLabel.setCharacterSize(20);
+    settingsLabel.setCharacterSize(24u);
     settingsLabel.setColor(gf::Color::White);
     settingsLabel.setString("Paramètre du jeu");
     settingsLabel.setPosition(settingsTextPos);
