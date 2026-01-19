@@ -69,9 +69,12 @@ int main()
     unsigned int timeLeft = 999;
     int timeLeftPre = 0;
 
-    int roomSize = int(MAX_PLAYERS); // capacité actuelle de la room (modifiable)
-    int nbBots = int(NB_BOTS);//modifiable! //avec int parcque thomas a mis ses trucs en size_t et il sait pas?
-    int gameDur = T_GAME;
+    RoomSettings roomSettings{
+        unsigned(MAX_PLAYERS),
+        unsigned(NB_BOTS),
+        unsigned(T_GAME)
+    };
+
     PlayerRole myRole;
 
     int lastScore;
@@ -80,6 +83,7 @@ int main()
     ClientScreen screen = ClientScreen::Welcome;
 
     int connectedPlayers = 0; //normalement mis a jour par ce que le serveur me dit selon benoit plus tard
+    std::vector<PlayerData> lobbyPlayers;
 
     bool askedToJoin = false;  // pour n'envoyer la requête join qu'une fois
     bool amReady = false; //notre état local prêt/pas prêt
@@ -156,9 +160,7 @@ int main()
             socket,
             askedToJoin,
             amReady,
-            roomSize,
-            nbBots,
-            gameDur,
+            roomSettings,
             myRole,
             myId,
             receiver
@@ -210,10 +212,8 @@ int main()
                 pacgommes,
                 timeLeft,
                 timeLeftPre,
-                connectedPlayers,
-                roomSize,
-                nbBots,
-                gameDur,
+                lobbyPlayers,
+                roomSettings,
                 myId,
                 myRole,
                 lastScore,
@@ -222,6 +222,7 @@ int main()
             );
 
         }
+
 
 
         
@@ -233,7 +234,7 @@ int main()
             welcomeScene.render();
         }
         else if(screen == ClientScreen::Lobby) {
-            lobbyScene.render(connectedPlayers, roomSize, amReady, nbBots, gameDur, myRole);
+            lobbyScene.render(connectedPlayers, roomSettings.roomSize, amReady, roomSettings.nbBot, roomSettings.gameDuration, myRole);
         }
         else if(screen == ClientScreen::End) {
             endScene.render(lastScore, endReason);

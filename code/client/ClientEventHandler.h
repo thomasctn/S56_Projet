@@ -26,9 +26,7 @@ void handleClientEvents(
     gf::TcpSocket& socket,
     bool& askedToJoin,
     bool& amReady,
-    int& roomSize,
-    int& nbBots,
-    int& gameDur,
+    RoomSettings& roomSettings,
     PlayerRole& myRole,
     uint32_t myId,
     std::thread& receiver

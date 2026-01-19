@@ -21,10 +21,8 @@ void handleNetworkPackets(
     std::vector<std::pair<Position, PacGommeType>>& pacgommes,
     unsigned int& timeLeft,
     int& timeLeftPre,
-    int& connectedPlayers,
-    int& roomSize,
-    int& nbBots,
-    int& gameDur,
+    std::vector<PlayerData>& lobbyPlayers,
+    RoomSettings& roomSettings,
     uint32_t& myId,
     PlayerRole& myRole,
     int& lastScore,
@@ -43,9 +41,9 @@ void handleNetworkPackets(
 
                     case ServerRoomSettings::type:{
                         auto data = packet.as<ServerRoomSettings>();
-                        roomSize = int(data.settings.roomSize);
-                        nbBots = int(data.settings.nbBot);
-                        gameDur = int(data.settings.gameDuration);
+                        roomSettings.roomSize = int(data.settings.roomSize);
+                        roomSettings.nbBot = int(data.settings.nbBot);
+                        roomSettings.gameDuration = int(data.settings.gameDuration);
                         gf::Log::info("ServerRoomSettings reçu : roomSize=%u, nbBots=%u\n", data.settings.roomSize,data.settings.nbBot);
                         break;
                     }
@@ -66,9 +64,9 @@ void handleNetworkPackets(
 
                     case ServerListRoomPlayers::type: {
                         auto data = packet.as<ServerListRoomPlayers>();
-                        connectedPlayers = data.players.size();
-                        updateMyRoleFromPlayers(data.players, myId, myRole);
-                        gf::Log::info("Lobby: %d / %d joueurs\n", connectedPlayers, roomSize);
+                        lobbyPlayers = data.players;
+                        updateMyRoleFromPlayers(lobbyPlayers, myId, myRole);
+                        gf::Log::info("Lobby: %d / %d joueurs\n", lobbyPlayers, roomSettings.roomSize);
                         break;
                     }
 
