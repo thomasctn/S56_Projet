@@ -314,24 +314,6 @@ void Room::broadcastRoomPlayers()
 
         list.players.push_back(pdata);
     }
-
-    /*
-    // --- Log pour debug ---
-    gf::Log::info("[Room %u] BroadcastRoomPlayers : %zu joueurs\n", id, list.players.size());
-    for (auto& p : list.players) {
-        const char* roleStr = "Unknown";
-        switch(p.role) {
-            case PlayerRole::PacMan:    roleStr = "PacMan"; break;
-            case PlayerRole::Ghost:     roleStr = "Ghost"; break;
-            case PlayerRole::Spectator: roleStr = "Spectator"; break;
-        }
-        gf::Log::info(" -> Player %u : role=%s, ready=%s\n",
-                      p.id,
-                      roleStr,
-                      p.ready ? "true" : "false");
-    }
-    */
-
     gf::Packet packet;
     packet.is(list);
 

@@ -6,15 +6,17 @@ v   - Permettre au fenetre serv et client de s'arreter sans crash
 v   - Afficher les temps de jeu sur le client (voir pour aussi le temps de prejeu)
 v   - Ajouter un ecran de fin (partit finit -> ecran -> room)
 v   - Ajouter une intelligence collective au bots (actuellment local)
-    - améliorer l'interface lobby
-    - améliorer l'interface room
-    - Equilibrer les parametre de jeu.
 v   - Ne pas faire crash le client si il trouve pas le serv mais le faire chercher jusqua trouver.
 v   - revoir spawn des joueurs
 v   - voir decay
+~   - pacgomme spéciale
+        - faire pouvoir
+        - gere spawn
+    - améliorer l'interface lobby
+    - améliorer l'interface room
+    - Equilibrer les parametre de jeu.
     - refaire room
-    - pacgomme spéciale
-    - choix de room
+~   - choix de room
     - room privé ?
     - quand on est refusé une modif, qu'on nous expliques pk
     - visuel des portails?
