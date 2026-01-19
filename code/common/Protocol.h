@@ -334,6 +334,16 @@ inline gf::v1::Deserializer& operator|(gf::v1::Deserializer& ar, std::pair<Posit
 
 // Client -> serveur
 
+/*struct ClientRefreshListRooms
+{
+  static constexpr gf::Id type = "ClientRefreshListRooms"_id;
+};
+template <typename Archive>
+Archive &operator|(Archive &ar, ClientRefreshListRooms &data)
+{
+  return ar;
+}*/
+
 struct ClientCreateRoom
 {
   static constexpr gf::Id type = "ClientCreateRoom"_id;
