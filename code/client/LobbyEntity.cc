@@ -93,12 +93,9 @@ void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, 
     float textPosX = left + margin +uiOffsetX;
     float textStartPosY = 100.f;
 
-    float btnPosX = textPosX + 180.f;
-    float btnPosX2 = btnPosX + 100.f;
-
     gf::Vector2f settingsPos{textPosX, textStartPosY};
-    
-    gf::Vector2f changeRolePos{btnPosX, textStartPosY+ 125.f + 57.5f + 57.5f};
+    gf::Vector2f changeRolePos{textPosX, textStartPosY+ 125.f + 57.5f + 57.5f};
+    gf::Vector2f playerListPos{textPosX + 350.0, textStartPosY};
     gf::Vector2f readyBtnPos{textPosX, top + height * 0.75f};
     PlayerData clientData;
     for (auto& p : players) {
@@ -108,9 +105,9 @@ void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, 
         }
     }
 
-    renderPLayerList({0,0},players);
+    renderPLayerList(playerListPos,players,clientID);
     renderSettings(settingsPos,settings);
-    renderRoleSelection({0,0},clientData.role);
+    renderRoleSelection(changeRolePos,clientData.role);
 
     gf::Text title;
     title.setFont(m_font);
@@ -128,27 +125,6 @@ void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, 
     countText.setPosition({left + margin +uiOffsetX, top + 60.f});
     target.draw(countText);
 
-    gf::Text roleLabel;
-    roleLabel.setFont(m_font);
-    roleLabel.setCharacterSize(20);
-    roleLabel.setColor(gf::Color::White);
-    roleLabel.setString(clientData.role == PlayerRole::PacMan ? "Vous etes\nactuellement :\nPACMAN" : "Vous etes\nactuellement :\nUN FANTOME");
-    roleLabel.setPosition({textPosX, changeRolePos.y});
-    target.draw(roleLabel);
-
-    m_changeRoleBtn.setCharacterSize(18U);
-    m_changeRoleBtn.setAnchor(gf::Anchor::CenterLeft);
-    m_changeRoleBtn.setString(clientData.role == PlayerRole::PacMan ? "Devenir un fantome ?" : "Devenir Pacman ?");
-    m_changeRoleBtn.setPosition(changeRolePos);
-    m_changeRoleBtn.setDefaultTextColor(gf::Color::White);
-    m_changeRoleBtn.setSelectedTextColor(gf::Color::Black);
-    m_changeRoleBtn.setDefaultBackgroundColor(gf::Color::Black);
-    m_changeRoleBtn.setSelectedBackgroundColor(gf::Color::White);
-    m_changeRoleBtn.setBackgroundOutlineThickness(18U * .05f);
-    m_changeRoleBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
-    m_changeRoleBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
-    m_changeRoleBtn.setPadding(18U * .65f);
-    target.draw(m_changeRoleBtn);
 
 
     m_readyBtn.setCharacterSize(24U);
@@ -176,16 +152,63 @@ void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, 
     target.display();
 }
 
-void LobbyEntity::renderPlayerRow(gf::Vector2f position, PlayerData data, bool isClient)
+void LobbyEntity::renderPlayerRow(gf::Vector2f position, PlayerData data, int clientID)
 {
+    gf::RenderWindow& target = m_renderer.getRenderWindow();
+    gf::Text playerListLabel;
+    playerListLabel.setFont(m_font);
+    playerListLabel.setCharacterSize(20);
+    playerListLabel.setColor(gf::Color::White);
+    playerListLabel.setString(data.name + (clientID == data.id ? "(vous)" : "") + (data.ready ? "(prêt)" : "(pas prêt)"));
+    playerListLabel.setPosition(position);
+    target.draw(playerListLabel);
 }
 
-void LobbyEntity::renderPLayerList(gf::Vector2f position, std::vector<PlayerData>)
+void LobbyEntity::renderPLayerList(gf::Vector2f position, std::vector<PlayerData> players, int clientID)
 {
+    gf::RenderWindow& target = m_renderer.getRenderWindow();
+
+    gf::Text playerListLabel;
+    playerListLabel.setFont(m_font);
+    playerListLabel.setCharacterSize(24);
+    playerListLabel.setColor(gf::Color::White);
+    playerListLabel.setString("Liste des joueurs :");
+    playerListLabel.setPosition(position);
+    target.draw(playerListLabel);
+    for(unsigned int i =0; i < players.size(); i++)
+    {
+        renderPlayerRow({position.x, position.y + 50.f*(i+1)},players.at(i), clientID);
+    }
+
 }
 
 void LobbyEntity::renderRoleSelection(gf::Vector2f position, PlayerRole currentRole)
 {
+    gf::RenderWindow& target = m_renderer.getRenderWindow();
+
+    gf::Vector2f changeRoleBtnPos{position.x + 180, position.y};
+
+    gf::Text roleLabel;
+    roleLabel.setFont(m_font);
+    roleLabel.setCharacterSize(20);
+    roleLabel.setColor(gf::Color::White);
+    roleLabel.setString(currentRole == PlayerRole::PacMan ? "Vous etes\nactuellement :\nPACMAN" : "Vous etes\nactuellement :\nUN FANTOME");
+    roleLabel.setPosition(position);
+    target.draw(roleLabel);
+
+    m_changeRoleBtn.setCharacterSize(18U);
+    m_changeRoleBtn.setAnchor(gf::Anchor::CenterLeft);
+    m_changeRoleBtn.setString(currentRole == PlayerRole::PacMan ? "Devenir un fantome ?" : "Devenir Pacman ?");
+    m_changeRoleBtn.setPosition(changeRoleBtnPos);
+    m_changeRoleBtn.setDefaultTextColor(gf::Color::White);
+    m_changeRoleBtn.setSelectedTextColor(gf::Color::Black);
+    m_changeRoleBtn.setDefaultBackgroundColor(gf::Color::Black);
+    m_changeRoleBtn.setSelectedBackgroundColor(gf::Color::White);
+    m_changeRoleBtn.setBackgroundOutlineThickness(18U * .05f);
+    m_changeRoleBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
+    m_changeRoleBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
+    m_changeRoleBtn.setPadding(18U * .65f);
+    target.draw(m_changeRoleBtn);
 }
 
 void LobbyEntity::renderSettings(gf::Vector2f position, RoomSettings settings)
@@ -197,8 +220,9 @@ void LobbyEntity::renderSettings(gf::Vector2f position, RoomSettings settings)
 
     float btnPosX = position.x + 180.f;
     float btnPosX2 = btnPosX + 100.f;
-    gf::Vector2f maxPlayerTextPos{position.x, position.y};
-    gf::Vector2f nbBotsTextPos{position.x, position.y + 57.5f};
+    gf::Vector2f settingsTextPos{position.x, position.y};
+    gf::Vector2f maxPlayerTextPos{position.x, settingsTextPos.y + 57.5f};
+    gf::Vector2f nbBotsTextPos{position.x, maxPlayerTextPos.y + 57.5f};
     gf::Vector2f durationTextPos{position.x, nbBotsTextPos.y + 57.5f};
 
     gf::Vector2f minusBtnPos{btnPosX, maxPlayerTextPos.y};
@@ -207,6 +231,15 @@ void LobbyEntity::renderSettings(gf::Vector2f position, RoomSettings settings)
     gf::Vector2f plusBotBtnPos{btnPosX2, nbBotsTextPos.y};
     gf::Vector2f minusDurBtnPos{btnPosX, durationTextPos.y};
     gf::Vector2f plusDurBtnPos{btnPosX2, durationTextPos.y};
+
+    gf::Text settingsLabel;
+    settingsLabel.setFont(m_font);
+    settingsLabel.setCharacterSize(20);
+    settingsLabel.setColor(gf::Color::White);
+    settingsLabel.setString("Paramètre du jeu");
+    settingsLabel.setPosition(settingsTextPos);
+    target.draw(settingsLabel);
+
 
     gf::Text roomLabel;
     roomLabel.setFont(m_font);
