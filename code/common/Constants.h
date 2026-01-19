@@ -22,8 +22,8 @@ static constexpr float CASE_SIZE = 50;
 constexpr int MIN_NB_PLAYERS = 1;
 constexpr int MAX_NB_PLAYERS = 5;
 constexpr int MIN_NB_BOTS = 0;
-constexpr int MAX_NB_BOTS = 5 ;
-constexpr int MIN_DURATION = 10; //60 mais 10 pour test
+constexpr int MAX_NB_BOTS = 8 ;
+constexpr int MIN_DURATION = 60; //60 mais 10 pour test
 constexpr int MAX_DURATION =300;
 
 

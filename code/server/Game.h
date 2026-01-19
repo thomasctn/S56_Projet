@@ -8,6 +8,8 @@
 #include <memory>
 #include <atomic> 
 #include <mutex>
+#include <cstdlib>
+#include <ctime>
 
 #include "../common/Constants.h"
 #include "Player.h"

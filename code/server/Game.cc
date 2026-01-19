@@ -7,6 +7,7 @@
 
 Game::Game(int width, int height) : board(width, height) {
     board.placeRandomPacGommes(NB_PACGOMME);
+    srand(static_cast<unsigned int>(time(nullptr)));
 }
 
 
@@ -273,19 +274,43 @@ void Game::stopGameLoop() {
 
 void Game::spawnPlayer(Player& p) {
     if (p.getRole() == PlayerRole::Ghost) {
-        // spawn Fantome
-        p.x = (board.getWidth() / 2) * 50.0f;
-        p.y = (board.getHeight() / 2) * 50.0f;
+        int centerX = board.getWidth() / 2;
+        int centerY = board.getHeight() / 2;
+
+        int offsetX = rand() % 3 - 1;
+        int offsetY = rand() % 3 - 1;
+
+        p.x = (centerX + offsetX) * 50.0f;
+        p.y = (centerY + offsetY) * 50.0f;
     } else if (p.getRole() == PlayerRole::PacMan) {
-        // spawn PacMan
-        p.x = 50.0f;
-        p.y = 50.0f;
+        int w = board.getWidth();
+        int h = board.getHeight();
+
+        int corner = rand() % 4;
+        switch(corner) {
+            case 0:
+                p.x = 1*50.0f;
+                p.y = 1*50.0f;
+                break;
+            case 1:
+                p.x = 1*50.0f;
+                p.y = (h-2)*50.0f;
+                break;
+            case 2:
+                p.x = (w-2)*50.0f;
+                p.y = 1*50.0f;
+                break;
+            case 3:
+                p.x = (w-2)*50.0f;
+                p.y = (h-2)*50.0f;
+                break;
+        }
     } else {
-        // Spectator spawn
-        p.x = 30.0f;
-        p.y = 30.0f;
+        p.x = 2*50.0f;
+        p.y = 2*50.0f;
     }
 }
+
 
 void Game::processInputs(InputQueue& queue) {
     while (auto inputOpt = queue.pop()) {
