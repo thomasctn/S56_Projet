@@ -176,11 +176,12 @@ Archive &operator|(Archive &ar, ServerListRooms &data)
 struct ServerJoinRoom
 {
   static constexpr gf::Id type = "ServerJoinRoom"_id;
+  gf::Id room;
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, ServerJoinRoom &data)
 {
-  return ar;
+  return ar | data.room;
 }
 //Réponse au client qui quitte la room
 struct ServerLeaveRoom
@@ -299,7 +300,49 @@ Archive &operator|(Archive &ar, ServerDisconnect &)
   return ar;
 };
 
+struct ServerConnect {
+    static constexpr gf::Id type = "ServerConnect"_id;
+    uint32_t clientId;
+};
+
+template <typename Archive>
+Archive& operator|(Archive& ar, ServerConnect& data) {
+    return ar | data.clientId;
+}
+
+struct ServerGamePreStart {
+    static constexpr gf::Id type = "ServerGamePreStart"_id;
+    uint32_t timeLeft;
+};
+
+template <typename Archive>
+Archive &operator|(Archive &ar, ServerGamePreStart &data){
+    return ar | data.timeLeft;
+}
+
+inline gf::v1::Serializer& operator|(gf::v1::Serializer& ar, const std::pair<Position, PacGommeType>& pg) {
+    ar | pg.first.x | pg.first.y | (uint8_t&)pg.second;
+    return ar;
+}
+
+inline gf::v1::Deserializer& operator|(gf::v1::Deserializer& ar, std::pair<Position, PacGommeType>& pg) {
+    uint8_t typeVal;
+    ar | pg.first.x | pg.first.y | typeVal;
+    pg.second = static_cast<PacGommeType>(typeVal);
+    return ar;
+}
+
 // Client -> serveur
+
+struct ClientCreateRoom
+{
+  static constexpr gf::Id type = "ClientCreateRoom"_id;
+};
+template <typename Archive>
+Archive &operator|(Archive &ar, ClientCreateRoom &data)
+{
+  return ar | data.room;
+}
 
 struct ClientJoinRoom
 {
@@ -376,37 +419,4 @@ template <typename Archive>
 Archive &operator|(Archive &ar, ClientMove &data)
 {
   return ar | data.moveDir;
-}
-
-
-struct ServerConnect {
-    static constexpr gf::Id type = "ServerConnect"_id;
-    uint32_t clientId;
-};
-
-template <typename Archive>
-Archive& operator|(Archive& ar, ServerConnect& data) {
-    return ar | data.clientId;
-}
-
-struct ServerGamePreStart {
-    static constexpr gf::Id type = "ServerGamePreStart"_id;
-    uint32_t timeLeft;
-};
-
-template <typename Archive>
-Archive &operator|(Archive &ar, ServerGamePreStart &data){
-    return ar | data.timeLeft;
-}
-
-inline gf::v1::Serializer& operator|(gf::v1::Serializer& ar, const std::pair<Position, PacGommeType>& pg) {
-    ar | pg.first.x | pg.first.y | (uint8_t&)pg.second;
-    return ar;
-}
-
-inline gf::v1::Deserializer& operator|(gf::v1::Deserializer& ar, std::pair<Position, PacGommeType>& pg) {
-    uint8_t typeVal;
-    ar | pg.first.x | pg.first.y | typeVal;
-    pg.second = static_cast<PacGommeType>(typeVal);
-    return ar;
 }
