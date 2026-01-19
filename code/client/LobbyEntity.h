@@ -17,7 +17,8 @@ enum class LobbyAction {// actions possibles renvoyées par l'entity au main/sce
     DurDec,
     DurInc,
     ToggleReady,
-    ChangeRole
+    ChangeRole,
+    Leave
 };
 
 class LobbyEntity {
@@ -36,6 +37,7 @@ private:
     Renderer& m_renderer;
     gf::Font m_font;
     gf::WidgetContainer m_container;
+    gf::TextButtonWidget m_leaveBtn;
     gf::TextButtonWidget m_minusBtn;
     gf::TextButtonWidget m_plusBtn;
     gf::TextButtonWidget m_minusBotBtn;

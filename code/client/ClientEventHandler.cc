@@ -81,6 +81,12 @@ void handleClientEvents(
                 else if (screen == ClientScreen::Lobby) {
                     LobbyAction act = lobbyScene.processEvent(event);
                     switch (act){
+                        case LobbyAction::Leave: {
+                            gf::Packet p;
+                            p.is(ClientLeaveRoom{});
+                            socket.sendPacket(p);
+                            break;
+                        }
                         case LobbyAction::RoomDec:
                             if (roomSettings.roomSize > MIN_NB_PLAYERS){
                                 int newRoomSize = roomSettings.roomSize - 1;

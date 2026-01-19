@@ -56,6 +56,11 @@ void handleNetworkPackets(
                         
                         break;
                     }
+                    case ServerLeaveRoom::type: {
+                        gf::Log::info("Serveur: quitté la room\n");
+                        screen = ClientScreen::LobbyList;
+                        break;
+                    }
 
                     case ServerListRooms::type: {
                         auto data = packet.as<ServerListRooms>();

@@ -8,6 +8,7 @@
 LobbyEntity::LobbyEntity(Renderer& renderer)
 : m_renderer(renderer)
 , m_font("../common/fonts/arial.ttf")
+, m_leaveBtn("Quitter", m_font)
 , m_minusBtn("-", m_font)
 , m_plusBtn("+", m_font)
 , m_minusBotBtn("-", m_font)
@@ -18,6 +19,7 @@ LobbyEntity::LobbyEntity(Renderer& renderer)
 , m_changeRoleBtn("Changer", m_font)
 , m_lastAction(LobbyAction::None)
 {
+    m_leaveBtn.setCallback([this](){ m_lastAction = LobbyAction::Leave; });
     m_minusBtn.setCallback([this](){ m_lastAction = LobbyAction::RoomDec; });
     m_plusBtn.setCallback([this](){ m_lastAction = LobbyAction::RoomInc; });
     m_minusBotBtn.setCallback([this](){ m_lastAction = LobbyAction::BotDec; });
@@ -27,6 +29,7 @@ LobbyEntity::LobbyEntity(Renderer& renderer)
     m_readyBtn.setCallback([this](){ m_lastAction = LobbyAction::ToggleReady; });
     m_changeRoleBtn.setCallback([this](){ m_lastAction = LobbyAction::ChangeRole; });
 
+    m_container.addWidget(m_leaveBtn);
     m_container.addWidget(m_minusBtn); //met widgets dans le container
     m_container.addWidget(m_plusBtn);
     m_container.addWidget(m_minusBotBtn);
@@ -140,6 +143,19 @@ void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, 
     m_readyBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
     m_readyBtn.setPadding(24U *.5f);
     target.draw(m_readyBtn);
+
+    m_leaveBtn.setCharacterSize(24U);
+    m_leaveBtn.setAnchor(gf::Anchor::CenterLeft);
+    m_leaveBtn.setPosition({readyPos.x+375.f,readyPos.y + 50.f});
+    m_leaveBtn.setDefaultTextColor(gf::Color::White);
+    m_leaveBtn.setSelectedTextColor(gf::Color::Black);
+    m_leaveBtn.setDefaultBackgroundColor(gf::Color::Black);
+    m_leaveBtn.setSelectedBackgroundColor(gf::Color::Red);
+    m_leaveBtn.setBackgroundOutlineThickness(24U * .05f);
+    m_leaveBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
+    m_leaveBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
+    m_leaveBtn.setPadding(24U *.5f);
+    target.draw(m_leaveBtn);
 
     gf::Text readyState;
     readyState.setFont(m_font);
