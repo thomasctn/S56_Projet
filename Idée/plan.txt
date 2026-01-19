@@ -14,6 +14,8 @@ v   - Ne pas faire crash le client si il trouve pas le serv mais le faire cherch
     - voir decay
     - refaire room
     - pacgomme spéciale
+    - choix de room
+    - room privé ?
 
 Bonus :
     - améliorer visuel
