@@ -19,7 +19,7 @@ void handleNetworkPackets(
     ClientScreen& screen,
     std::vector<PlayerData>& states,
     BoardCommon& board,
-    std::set<Position>& pacgommes,
+    std::vector<std::pair<Position, PacGommeType>>& pacgommes,
     unsigned int& timeLeft,
     int& timeLeftPre,
     int& connectedPlayers,
