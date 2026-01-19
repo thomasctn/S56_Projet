@@ -42,7 +42,9 @@ void Lobby::handlePacket(PacketContext& ctx) {
         case ClientJoinRoom::type:
             handleClientJoinRoom(ctx);
             break;
-
+        case ClientCreateRoom::type:
+            handleClientCreateRoom(ctx);
+            break;
         default:
             // Transmettre le paquet à la room si le joueur y est
             if (playerRoom.find(ctx.senderId) != playerRoom.end() && playerRoom[ctx.senderId] != 0) {
@@ -107,6 +109,21 @@ void Lobby::handleClientJoinRoom(PacketContext& ctx) {
     playerRoom[ctx.senderId] = roomId;
     rooms.at(roomId)->addPlayer(ctx.senderId);
 
+    gf::Packet joinAck;
+    joinAck.is(ServerJoinRoom{});
+    network.send(ctx.senderId, joinAck);
+
+    broadcastRoomsList();
+
+    gf::Log::info("[Lobby] Joueur %u ajouté à la room %u\n", ctx.senderId, roomId);
+}
+
+void Lobby::handleClientCreateRoom(PacketContext &ctx)
+{
+    //Vérifier s'il n'est pas déjà dans une room
+    RoomId roomId = createRoom("Player_" + std::to_string(ctx.senderId));
+    playerRoom[ctx.senderId] = roomId;
+    rooms.at(roomId)->addPlayer(ctx.senderId);
     gf::Packet joinAck;
     joinAck.is(ServerJoinRoom{});
     network.send(ctx.senderId, joinAck);

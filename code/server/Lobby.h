@@ -26,6 +26,7 @@ public:
     void handlePacket(PacketContext& ctx);
     Room& getRoom(uint32_t id);
     void handleClientJoinRoom(PacketContext& ctx);
+    void handleClientCreateRoom(PacketContext& ctx);
     void broadcastRoomsList();
     void sendRoomsList(uint32_t playerId);
     ServerListRooms getRoomsList() const;
