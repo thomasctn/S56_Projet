@@ -234,7 +234,7 @@ int main()
             welcomeScene.render();
         }
         else if(screen == ClientScreen::Lobby) {
-            lobbyScene.render(connectedPlayers, roomSettings.roomSize, amReady, roomSettings.nbBot, roomSettings.gameDuration, myRole);
+            lobbyScene.render(lobbyPlayers, roomSettings,myId);
         }
         else if(screen == ClientScreen::End) {
             endScene.render(lastScore, endReason);

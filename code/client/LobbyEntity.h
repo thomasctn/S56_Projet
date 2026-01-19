@@ -26,7 +26,11 @@ public:
 
     LobbyAction processEvent(const gf::Event& event);
 
-    void render(int connectedPlayers,int roomSize,bool amReady,int nbBots,int gameDur, PlayerRole myRole);
+    void render(std::vector<PlayerData> players,RoomSettings settings, int clientID);
+    void renderPlayerRow(gf::Vector2f position,PlayerData data, bool isHost);
+    void renderPLayerList(gf::Vector2f position, std::vector<PlayerData>);
+    void renderRoleSelection(gf::Vector2f position, PlayerRole currentRole);
+    void renderSettings(gf::Vector2f position, RoomSettings settings);
 
 private:
     Renderer& m_renderer;

@@ -9,7 +9,7 @@ public:
 
     LobbyAction processEvent(const gf::Event& event);
 
-    void render(int connectedPlayers,int roomSize,bool amReady,int nbBots,int gameDur, PlayerRole myRole);
+    void render(std::vector<PlayerData> players,RoomSettings settings, int clientID);
 
 private:
     LobbyEntity m_entity;

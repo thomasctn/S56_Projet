@@ -73,7 +73,7 @@ LobbyAction LobbyEntity::processEvent(const gf::Event& event) {
             return LobbyAction::None;
     }
 }
-void LobbyEntity::render(int connectedPlayers, int roomSize, bool amReady, int nbBots, int gameDur, PlayerRole myRole) {
+void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, int clientID) {
     gf::RenderWindow& target = m_renderer.getRenderWindow();
     m_renderer.clearWindow();
 
@@ -96,22 +96,24 @@ void LobbyEntity::render(int connectedPlayers, int roomSize, bool amReady, int n
     float btnPosX = textPosX + 180.f;
     float btnPosX2 = btnPosX + 100.f;
 
-    unsigned int MINUS_SIZE = 24u;
-    unsigned int PLUS_SIZE = 20u;
-
-    gf::Vector2f minusBtnPos{btnPosX, textStartPosY};
-    gf::Vector2f plusBtnPos{btnPosX2, minusBtnPos.y};
-    gf::Vector2f minusBotBtnPos{btnPosX, textStartPosY + 57.5f};
-    gf::Vector2f plusBotBtnPos{btnPosX2, minusBotBtnPos.y};
-    gf::Vector2f minusDurBtnPos{btnPosX, minusBotBtnPos.y + 57.5f};
-    gf::Vector2f plusDurBtnPos{btnPosX2, minusDurBtnPos.y};
-    gf::Vector2f changeRolePos{btnPosX, minusBotBtnPos.y + 125.f};
+    gf::Vector2f settingsPos{textPosX, textStartPosY};
+    
+    gf::Vector2f changeRolePos{btnPosX, textStartPosY+ 125.f + 57.5f + 57.5f};
     gf::Vector2f readyBtnPos{textPosX, top + height * 0.75f};
+    PlayerData clientData;
+    for (auto& p : players) {
+        if (p.id == clientID) {
+            clientData = p;
+            break;
+        }
+    }
 
-    static gf::Font font("../common/fonts/arial.ttf");
+    renderPLayerList({0,0},players);
+    renderSettings(settingsPos,settings);
+    renderRoleSelection({0,0},clientData.role);
 
     gf::Text title;
-    title.setFont(font);
+    title.setFont(m_font);
     title.setCharacterSize(28);
     title.setColor(gf::Color::White);
     title.setString("En attente de joueurs...");
@@ -119,19 +121,99 @@ void LobbyEntity::render(int connectedPlayers, int roomSize, bool amReady, int n
     target.draw(title);
 
     gf::Text countText;
-    countText.setFont(font);
+    countText.setFont(m_font);
     countText.setCharacterSize(20);
     countText.setColor(gf::Color::White);
-    countText.setString(std::to_string(connectedPlayers) + " / " + std::to_string(roomSize));
+    countText.setString(std::to_string(players.size()) + " / " + std::to_string(settings.roomSize));
     countText.setPosition({left + margin +uiOffsetX, top + 60.f});
     target.draw(countText);
 
+    gf::Text roleLabel;
+    roleLabel.setFont(m_font);
+    roleLabel.setCharacterSize(20);
+    roleLabel.setColor(gf::Color::White);
+    roleLabel.setString(clientData.role == PlayerRole::PacMan ? "Vous etes\nactuellement :\nPACMAN" : "Vous etes\nactuellement :\nUN FANTOME");
+    roleLabel.setPosition({textPosX, changeRolePos.y});
+    target.draw(roleLabel);
+
+    m_changeRoleBtn.setCharacterSize(18U);
+    m_changeRoleBtn.setAnchor(gf::Anchor::CenterLeft);
+    m_changeRoleBtn.setString(clientData.role == PlayerRole::PacMan ? "Devenir un fantome ?" : "Devenir Pacman ?");
+    m_changeRoleBtn.setPosition(changeRolePos);
+    m_changeRoleBtn.setDefaultTextColor(gf::Color::White);
+    m_changeRoleBtn.setSelectedTextColor(gf::Color::Black);
+    m_changeRoleBtn.setDefaultBackgroundColor(gf::Color::Black);
+    m_changeRoleBtn.setSelectedBackgroundColor(gf::Color::White);
+    m_changeRoleBtn.setBackgroundOutlineThickness(18U * .05f);
+    m_changeRoleBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
+    m_changeRoleBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
+    m_changeRoleBtn.setPadding(18U * .65f);
+    target.draw(m_changeRoleBtn);
+
+
+    m_readyBtn.setCharacterSize(24U);
+    m_readyBtn.setAnchor(gf::Anchor::CenterLeft);
+    m_readyBtn.setString(clientData.ready ? "PLUS PRÊT?" : "PRÊT");
+    m_readyBtn.setPosition(readyBtnPos);
+    m_readyBtn.setDefaultTextColor(gf::Color::White);
+    m_readyBtn.setSelectedTextColor(gf::Color::Black);
+    m_readyBtn.setDefaultBackgroundColor(gf::Color::Black);
+    m_readyBtn.setSelectedBackgroundColor(gf::Color::White);
+    m_readyBtn.setBackgroundOutlineThickness(24U * .05f);
+    m_readyBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
+    m_readyBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
+    m_readyBtn.setPadding(24U *.5f);
+    target.draw(m_readyBtn);
+
+    gf::Text readyState;
+    readyState.setFont(m_font);
+    readyState.setCharacterSize(20);
+    readyState.setColor(gf::Color::White);
+    readyState.setString(clientData.ready ? "Vous êtes : PRÊT" : "Vous êtes : PAS PRÊT");
+    readyState.setPosition({left + margin +uiOffsetX, top + 380.f});
+    target.draw(readyState);
+
+    target.display();
+}
+
+void LobbyEntity::renderPlayerRow(gf::Vector2f position, PlayerData data, bool isClient)
+{
+}
+
+void LobbyEntity::renderPLayerList(gf::Vector2f position, std::vector<PlayerData>)
+{
+}
+
+void LobbyEntity::renderRoleSelection(gf::Vector2f position, PlayerRole currentRole)
+{
+}
+
+void LobbyEntity::renderSettings(gf::Vector2f position, RoomSettings settings)
+{
+    gf::RenderWindow& target = m_renderer.getRenderWindow();
+
+    const unsigned int MINUS_SIZE = 24u;
+    const unsigned int PLUS_SIZE = 20u;
+
+    float btnPosX = position.x + 180.f;
+    float btnPosX2 = btnPosX + 100.f;
+    gf::Vector2f maxPlayerTextPos{position.x, position.y};
+    gf::Vector2f nbBotsTextPos{position.x, position.y + 57.5f};
+    gf::Vector2f durationTextPos{position.x, nbBotsTextPos.y + 57.5f};
+
+    gf::Vector2f minusBtnPos{btnPosX, maxPlayerTextPos.y};
+    gf::Vector2f plusBtnPos{btnPosX2, maxPlayerTextPos.y};
+    gf::Vector2f minusBotBtnPos{btnPosX, nbBotsTextPos.y};
+    gf::Vector2f plusBotBtnPos{btnPosX2, nbBotsTextPos.y};
+    gf::Vector2f minusDurBtnPos{btnPosX, durationTextPos.y};
+    gf::Vector2f plusDurBtnPos{btnPosX2, durationTextPos.y};
+
     gf::Text roomLabel;
-    roomLabel.setFont(font);
+    roomLabel.setFont(m_font);
     roomLabel.setCharacterSize(20);
     roomLabel.setColor(gf::Color::White);
     roomLabel.setString("Joueurs max :");
-    roomLabel.setPosition({textPosX, minusBtnPos.y});
+    roomLabel.setPosition(maxPlayerTextPos);
     target.draw(roomLabel);
 
     m_minusBtn.setCharacterSize(MINUS_SIZE);
@@ -162,19 +244,19 @@ void LobbyEntity::render(int connectedPlayers, int roomSize, bool amReady, int n
     target.draw(m_plusBtn);
 
     gf::Text valueText;
-    valueText.setFont(font);
+    valueText.setFont(m_font);
     valueText.setCharacterSize(20);
     valueText.setColor(gf::Color::White);
-    valueText.setString(std::to_string(roomSize));
+    valueText.setString(std::to_string(settings.roomSize));
     valueText.setPosition({(minusBtnPos.x + plusBtnPos.x - (valueText.getString().length() * 20U) / 2) / 2, minusBtnPos.y + 20U /2});
     target.draw(valueText);
 
     gf::Text botLabel;
-    botLabel.setFont(font);
+    botLabel.setFont(m_font);
     botLabel.setCharacterSize(20);
     botLabel.setColor(gf::Color::White);
     botLabel.setString("Nb de bots :");
-    botLabel.setPosition({textPosX, minusBotBtnPos.y});
+    botLabel.setPosition(nbBotsTextPos);
     target.draw(botLabel);
 
     m_minusBotBtn.setCharacterSize(24);
@@ -203,16 +285,16 @@ void LobbyEntity::render(int connectedPlayers, int roomSize, bool amReady, int n
     m_plusBotBtn.setPadding(PLUS_SIZE * .65f);
     target.draw(m_plusBotBtn);
 
-    valueText.setString(std::to_string(nbBots));
+    valueText.setString(std::to_string(settings.nbBot));
     valueText.setPosition({(minusBotBtnPos.x + plusBotBtnPos.x - (valueText.getString().length() * 20U) / 2) / 2, minusBotBtnPos.y + 20U /2});
     target.draw(valueText);
 
     gf::Text durationLabel;
-    durationLabel.setFont(font);
+    durationLabel.setFont(m_font);
     durationLabel.setCharacterSize(20);
     durationLabel.setColor(gf::Color::White);
     durationLabel.setString("Temps de jeu\n(secondes) :");
-    durationLabel.setPosition({textPosX, minusDurBtnPos.y});
+    durationLabel.setPosition(durationTextPos);
     target.draw(durationLabel);
 
     m_minusDurBtn.setCharacterSize(24);
@@ -241,54 +323,7 @@ void LobbyEntity::render(int connectedPlayers, int roomSize, bool amReady, int n
     m_plusDurBtn.setPadding(PLUS_SIZE * .65f);
     target.draw(m_plusDurBtn);
 
-    valueText.setString(std::to_string(gameDur));
+    valueText.setString(std::to_string(settings.gameDuration));
     valueText.setPosition({(minusDurBtnPos.x + plusDurBtnPos.x - (valueText.getString().length() * 20U) / 2) / 2, minusDurBtnPos.y + 20U /2});
     target.draw(valueText);
-
-    gf::Text roleLabel;
-    roleLabel.setFont(font);
-    roleLabel.setCharacterSize(20);
-    roleLabel.setColor(gf::Color::White);
-    roleLabel.setString(myRole == PlayerRole::PacMan ? "Vous etes\nactuellement :\nPACMAN" : "Vous etes\nactuellement :\nUN FANTOME");
-    roleLabel.setPosition({textPosX, changeRolePos.y});
-    target.draw(roleLabel);
-
-    m_changeRoleBtn.setCharacterSize(18U);
-    m_changeRoleBtn.setAnchor(gf::Anchor::CenterLeft);
-    m_changeRoleBtn.setString(myRole == PlayerRole::PacMan ? "Devenir un fantome ?" : "Devenir Pacman ?");
-    m_changeRoleBtn.setPosition(changeRolePos);
-    m_changeRoleBtn.setDefaultTextColor(gf::Color::White);
-    m_changeRoleBtn.setSelectedTextColor(gf::Color::Black);
-    m_changeRoleBtn.setDefaultBackgroundColor(gf::Color::Black);
-    m_changeRoleBtn.setSelectedBackgroundColor(gf::Color::White);
-    m_changeRoleBtn.setBackgroundOutlineThickness(18U * .05f);
-    m_changeRoleBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
-    m_changeRoleBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
-    m_changeRoleBtn.setPadding(18U * .65f);
-    target.draw(m_changeRoleBtn);
-
-
-    m_readyBtn.setCharacterSize(24U);
-    m_readyBtn.setAnchor(gf::Anchor::CenterLeft);
-    m_readyBtn.setString(amReady ? "PLUS PRÊT?" : "PRÊT");
-    m_readyBtn.setPosition(readyBtnPos);
-    m_readyBtn.setDefaultTextColor(gf::Color::White);
-    m_readyBtn.setSelectedTextColor(gf::Color::Black);
-    m_readyBtn.setDefaultBackgroundColor(gf::Color::Black);
-    m_readyBtn.setSelectedBackgroundColor(gf::Color::White);
-    m_readyBtn.setBackgroundOutlineThickness(24U * .05f);
-    m_readyBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
-    m_readyBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
-    m_readyBtn.setPadding(24U *.5f);
-    target.draw(m_readyBtn);
-
-    gf::Text readyState;
-    readyState.setFont(font);
-    readyState.setCharacterSize(20);
-    readyState.setColor(gf::Color::White);
-    readyState.setString(amReady ? "Vous êtes : PRÊT" : "Vous êtes : PAS PRÊT");
-    readyState.setPosition({left + margin +uiOffsetX, top + 380.f});
-    target.draw(readyState);
-
-    target.display();
 }
