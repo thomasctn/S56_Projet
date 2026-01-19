@@ -4,5 +4,6 @@ enum class ClientScreen {
     Welcome,
     Lobby,
     Playing,
-    End
+    End,
+    LobbyList
 };
