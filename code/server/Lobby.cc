@@ -110,7 +110,9 @@ void Lobby::handleClientJoinRoom(PacketContext& ctx) {
     rooms.at(roomId)->addPlayer(ctx.senderId);
 
     gf::Packet joinAck;
-    joinAck.is(ServerJoinRoom{});
+    ServerJoinRoom sjr;
+    sjr.room = roomId;
+    joinAck.is(sjr);
     network.send(ctx.senderId, joinAck);
 
     broadcastRoomsList();
@@ -125,7 +127,9 @@ void Lobby::handleClientCreateRoom(PacketContext &ctx)
     playerRoom[ctx.senderId] = roomId;
     rooms.at(roomId)->addPlayer(ctx.senderId);
     gf::Packet joinAck;
-    joinAck.is(ServerJoinRoom{});
+    ServerJoinRoom sjr;
+    sjr.room = roomId;
+    joinAck.is(sjr);
     network.send(ctx.senderId, joinAck);
 
     broadcastRoomsList();
