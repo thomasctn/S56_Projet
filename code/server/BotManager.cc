@@ -63,7 +63,7 @@ void BotManager::unregisterBot(uint32_t id) {
 }
 
 // ---------------- Traces ----------------
-void BotManager::updateTraces(float) {
+void BotManager::updateTraces() {
     for (auto& [id, p] : game.getPlayers()) {
         int gx = (int)(p->x / CASE_SIZE);
         int gy = (int)(p->y / CASE_SIZE);

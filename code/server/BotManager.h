@@ -28,7 +28,7 @@ public:
     void unregisterBot(uint32_t id);
 
     void update();
-    void updateTraces(float dt);
+    void updateTraces();
 
     GraphTraceMap& getTraces() { return traceMap; }
     const GraphTraceMap& getTraces() const;

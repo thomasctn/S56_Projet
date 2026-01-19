@@ -200,8 +200,8 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& ser
             // --- mise à jour des bots toutes les 0.5 secondes ---
             if (botManager) {
 
-                // Décroissance des traces, factor < 1 pour les réduire
-                botManager->getTraces().decay();
+                botManager->updateTraces();
+
 
                 std::chrono::duration<double> elapsed = now - lastBotUpdate;
                 if (elapsed.count() >= 0.5) {  // 0.5s = 500ms

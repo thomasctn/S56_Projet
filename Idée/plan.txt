@@ -10,8 +10,8 @@ v   - Ajouter une intelligence collective au bots (actuellment local)
     - améliorer l'interface room
     - Equilibrer les parametre de jeu.
 v   - Ne pas faire crash le client si il trouve pas le serv mais le faire chercher jusqua trouver.
-    - revoir spawn des joueurs
-    - voir decay
+v   - revoir spawn des joueurs
+v   - voir decay
     - refaire room
     - pacgomme spéciale
     - choix de room
