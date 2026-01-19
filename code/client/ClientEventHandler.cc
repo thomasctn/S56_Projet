@@ -6,14 +6,17 @@
 void shutdownClient(std::atomic<bool>& running);
 
 
-void sendRoomSettings(gf::TcpSocket& socket, RoomSettings rS){
-   
+void sendRoomSettings(gf::TcpSocket& socket,unsigned int newRoomSize, int newNbBots, int newGameDur){
+    RoomSettings newSettings;
+    newSettings.roomSize = newRoomSize;
+    newSettings.nbBot = newNbBots;
+    newSettings.gameDuration = newGameDur;
 
     gf::Packet p;
-    p.is(ClientChangeRoomSettings{rS});
+    p.is(ClientChangeRoomSettings{newSettings});
     socket.sendPacket(p);
 
-    gf::Log::info("ClientChangeRoomSettings envoye : roomSettings.roomSize=%u\n", rS.roomSize);
+    gf::Log::info("ClientChangeRoomSettings envoye : roomSettings.roomSize=%u\n", newSettings.roomSize);
 }
 
 
@@ -63,38 +66,44 @@ void handleClientEvents(
                     switch (act){
                         case LobbyAction::RoomDec:
                             if (roomSettings.roomSize > MIN_NB_PLAYERS){
-                                roomSettings.roomSize--;
-                                sendRoomSettings(socket, roomSettings);
+                                //roomSettings.roomSize--;
+                                int newRoomSize = roomSettings.roomSize - 1;
+                                sendRoomSettings(socket, newRoomSize, roomSettings.nbBot, roomSettings.gameDuration);
                             }
                             break;
                         case LobbyAction::RoomInc:
                             if (roomSettings.roomSize < MAX_NB_PLAYERS){
-                                roomSettings.roomSize++;
-                                sendRoomSettings(socket, roomSettings);
+                                //roomSettings.roomSize++;
+                                int newRoomSize = roomSettings.roomSize +1;
+                                sendRoomSettings(socket, newRoomSize, roomSettings.nbBot, roomSettings.gameDuration);
                             }
                             break;
                         case LobbyAction::BotDec:
                             if (roomSettings.nbBot > MIN_NB_BOTS){
-                                roomSettings.nbBot--;
-                                sendRoomSettings(socket, roomSettings);
+                                //roomSettings.nbBot--;
+                                int newNbBots = roomSettings.nbBot -1;
+                                sendRoomSettings(socket, roomSettings.roomSize, newNbBots, roomSettings.gameDuration);
                             }
                             break;
                         case LobbyAction::BotInc:
                             if (roomSettings.nbBot < MAX_NB_BOTS){
-                                roomSettings.nbBot++;
-                                sendRoomSettings(socket, roomSettings);
+                                //roomSettings.nbBot++;
+                                int newNbBots = roomSettings.nbBot +1;
+                                sendRoomSettings(socket, roomSettings.roomSize, newNbBots, roomSettings.gameDuration);
                             }
                             break;
                         case LobbyAction::DurDec:
                             if (roomSettings.gameDuration > MIN_DURATION){
-                                roomSettings.gameDuration = roomSettings.gameDuration - 20;
-                                sendRoomSettings(socket, roomSettings);
+                                //roomSettings.gameDuration = roomSettings.gameDuration - 20;
+                                int newGameDur = roomSettings.nbBot -20;
+                                sendRoomSettings(socket, roomSettings.roomSize, roomSettings.nbBot, newGameDur);
                             }
                             break;
                         case LobbyAction::DurInc:
                             if (roomSettings.gameDuration < MAX_DURATION){
-                                roomSettings.gameDuration = roomSettings.gameDuration + 20;
-                                sendRoomSettings(socket, roomSettings);
+                                //roomSettings.gameDuration = roomSettings.gameDuration + 20;
+                                int newGameDur = roomSettings.nbBot +20;
+                                sendRoomSettings(socket, roomSettings.roomSize, roomSettings.nbBot, newGameDur);
                             }
                             break;
                         case LobbyAction::ToggleReady: {
