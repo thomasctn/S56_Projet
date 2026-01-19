@@ -47,14 +47,15 @@ void handleClientEvents(
                     if (welcomeScene.processEvent(event)) {
                         gf::Log::info("Bouton ENTRER cliqué (par WelcomeScene)\n");
 
-                        if(!askedToJoin){
+                        /*if(!askedToJoin){
                             askedToJoin = true;
                             gf::Packet p;
                             p.is(ClientJoinRoom{});
                             socket.sendPacket(p);
-                        }
+                        }*/
 
-                        screen = ClientScreen::Lobby;
+                        //screen = ClientScreen::Lobby;
+                        screen = ClientScreen::LobbyList;
                     }
                 }
 
@@ -63,6 +64,10 @@ void handleClientEvents(
 
                     if (act == LobbyListAction::CreateRoom) {
                         //afaire : ClientCreateRoom plus tard
+                        gf::Packet p;
+                        ClientCreateRoom create; //ça suffit?
+                        p.is(create);
+                        socket.sendPacket(p);
                     }
                     else if (act == LobbyListAction::JoinRoom) {
                         unsigned int roomId = lobbyListScene.getLastRoomId();

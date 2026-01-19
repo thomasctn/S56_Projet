@@ -51,6 +51,11 @@ void handleNetworkPackets(
 
                     case ServerJoinRoom::type: {
                         gf::Log::info("Serveur: rejoint la room\n"); //pour l'instant aussi inutile (le serv nous met direct dans une room)
+                        //normalement c'est ici qu'on nous dit ok pr rejoindre la room et que 
+                        //l'affichage passe a lobby
+
+                        screen = ClientScreen::Lobby;
+                        
                         break;
                     }
 

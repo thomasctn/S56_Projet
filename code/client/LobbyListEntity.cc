@@ -111,15 +111,26 @@ void LobbyListEntity::render() {
     float bx = left + (width - bw) * 0.5f;
     float by = y;
 
-    gf::RectangleShape createBg({ bw, bh }); //background deco
-    createBg.setPosition({ bx, by });
-    createBg.setColor(gf::Color::fromRgb(40, 120, 200));
-    target.draw(createBg);
+    
 
-    m_createWidget.setCharacterSize(20);
+    m_createWidget.setCharacterSize(26);
     m_createWidget.setAnchor(gf::Anchor::Center);
     m_createWidget.setPosition({ bx + bw * 0.5f, by + bh * 0.5f });
+
+    m_createWidget.setDefaultTextColor(gf::Color::White);
+    m_createWidget.setSelectedTextColor(gf::Color::Black);
+
+    m_createWidget.setDefaultBackgroundColor(gf::Color::Black);
+    m_createWidget.setSelectedBackgroundColor(gf::Color::White);
+
+    m_createWidget.setBackgroundOutlineThickness(26 * .05f);
+    m_createWidget.setDefaultBackgroundOutlineColor(gf::Color::White);
+    m_createWidget.setSelectedBackgroundOutlineColor(gf::Color::White);
+
+    m_createWidget.setPadding(26 * .4f);
+
     target.draw(m_createWidget);
+
 
     y += bh + margin;
 
@@ -156,7 +167,7 @@ void LobbyListEntity::render() {
         gf::Text roomText;
         roomText.setFont(m_font);
         roomText.setCharacterSize(16);
-        roomText.setColor(gf::Color::White);
+        roomText.setColor(gf::Color::Black);
 
         std::string label = rd.hostName + "  (" + std::to_string(rd.nbPlayer) + " / " + std::to_string(rd.roomSize) + ")";
         roomText.setString(label);
@@ -166,18 +177,27 @@ void LobbyListEntity::render() {
         //pr le bouton join
         float joinX = left + width - margin - btnW;
         float joinY = rowY + (rowH - (rowH * 0.8f)) * 0.5f;
-        gf::RectangleShape joinBg({ btnW, rowH * 0.8f });
-        joinBg.setPosition({ joinX, joinY });
-        joinBg.setColor(gf::Color::fromRgb(70, 140, 70));
-        target.draw(joinBg);
+        
 
-        //veirfie qu'on a bien fait un widget
+        //widgets++
         if (i < m_joinWidgets.size()) {
             auto &w = *m_joinWidgets[i];
             w.setCharacterSize(16);
             w.setAnchor(gf::Anchor::Center);
             w.setPosition({ joinX + btnW * 0.5f, joinY + (rowH * 0.8f) * 0.5f });
-            target.draw(w);
+            w.setDefaultTextColor(gf::Color::White);
+            w.setSelectedTextColor(gf::Color::Black);
+
+            w.setDefaultBackgroundColor(gf::Color::Black);
+            w.setSelectedBackgroundColor(gf::Color::White);
+
+            w.setBackgroundOutlineThickness(16 * .05f);
+            w.setDefaultBackgroundOutlineColor(gf::Color::White);
+            w.setSelectedBackgroundOutlineColor(gf::Color::White);
+
+            w.setPadding(16 * .4f);
+
+            target.draw(w); 
         }
     }
 

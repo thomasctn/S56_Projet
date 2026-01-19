@@ -243,6 +243,9 @@ int main()
         else if(screen == ClientScreen::End) {
             endScene.render(lastScore, endReason);
         }
+        else if(screen == ClientScreen::LobbyList) {
+            lobbyListScene.render();
+        }
         else{ //Playing
             gameScene.render(states, myId, board, pacgommes, timeLeftPre, timeLeft);
         }
