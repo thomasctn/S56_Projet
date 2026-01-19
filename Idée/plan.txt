@@ -13,22 +13,23 @@ v   - voir decay
 ~   - pacgomme spéciale
         - faire pouvoir
         - gere spawn
+~   - choix de room
 
     - améliorer l'interface lobby
     - améliorer l'interface room
     - Equilibrer les parametre de jeu.
     - refaire room
-~   - choix de room
     - room privé ?
     - quand on est refusé une modif, qu'on nous expliques pk
     - visuel des portails?
     - explication du jeu
     - reparer client role (dans room le role nest pas mit a jour)
     - temps coter client faux pourquoi ?
-    
+    - ameliorer secu vu serv
 
 Bonus :
     - améliorer visuel
     - améliorer code
     - optimiser les échanges
 ~   - améliorer bots (un peu debile eux)
+    - verifier warning
