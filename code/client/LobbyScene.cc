@@ -9,6 +9,6 @@ LobbyAction LobbyScene::processEvent(const gf::Event& event){
     return m_entity.processEvent(event);
 }
 
-void LobbyScene::render(std::vector<PlayerData> players,RoomSettings settings, int clientID){
+void LobbyScene::render(std::vector<PlayerData> players,RoomSettings settings, uint32_t clientID){
     m_entity.render(players,settings,clientID);
 }

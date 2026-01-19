@@ -9,7 +9,7 @@ public:
 
     LobbyAction processEvent(const gf::Event& event);
 
-    void render(std::vector<PlayerData> players,RoomSettings settings, int clientID);
+    void render(std::vector<PlayerData> players,RoomSettings settings, uint32_t clientID);
 
 private:
     LobbyEntity m_entity;

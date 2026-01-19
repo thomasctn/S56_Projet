@@ -73,7 +73,7 @@ LobbyAction LobbyEntity::processEvent(const gf::Event& event) {
             return LobbyAction::None;
     }
 }
-void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, int clientID) {
+void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, uint32_t clientID) {
     gf::RenderWindow& target = m_renderer.getRenderWindow();
     m_renderer.clearWindow();
 
@@ -152,7 +152,7 @@ void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, 
     target.display();
 }
 
-void LobbyEntity::renderPlayerRow(gf::Vector2f position, PlayerData data, int clientID)
+void LobbyEntity::renderPlayerRow(gf::Vector2f position, PlayerData data, uint32_t clientID)
 {
     gf::RenderWindow& target = m_renderer.getRenderWindow();
     gf::Text playerListLabel;
@@ -164,7 +164,7 @@ void LobbyEntity::renderPlayerRow(gf::Vector2f position, PlayerData data, int cl
     target.draw(playerListLabel);
 }
 
-void LobbyEntity::renderPLayerList(gf::Vector2f position, std::vector<PlayerData> players, int clientID)
+void LobbyEntity::renderPLayerList(gf::Vector2f position, std::vector<PlayerData> players, uint32_t clientID)
 {
     gf::RenderWindow& target = m_renderer.getRenderWindow();
 
