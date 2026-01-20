@@ -6,7 +6,7 @@
 
 
 Game::Game(int width, int height) : board(width, height) {
-    board.placeRandomPacGommes(NB_PACGOMME);
+    board.placeRandomPacGommes();
     srand(static_cast<unsigned int>(time(nullptr)));
 }
 

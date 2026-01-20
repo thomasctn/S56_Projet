@@ -42,28 +42,38 @@ bool Board::isOccupied(unsigned int x, unsigned int y, uint32_t excludeId, const
 
 
 
-void Board::placeRandomPacGommes(unsigned int count) {
+void Board::placeRandomPacGommes() {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> distX(1, getWidth() - 2);
     std::uniform_int_distribution<> distY(1, getHeight() - 2);
-    std::uniform_int_distribution<> typeDist(0, 1); // 0 = Basic, 1 = Power
 
-    unsigned int placed = 0;
-    while (placed < count) {
-        unsigned int x = distX(gen);
-        unsigned int y = distY(gen);
+    auto place = [&](PacGommeType type, unsigned int count) {
+        unsigned int placed = 0;
+        while (placed < count) {
+            unsigned int x = distX(gen);
+            unsigned int y = distY(gen);
 
-        Case& c = getCase(x, y);
-        Position pos(x, y);
+            Case& c = getCase(x, y);
+            Position pos(x, y);
 
-        if (c.getType() == CellType::Floor && pacgommes.find(pos) == pacgommes.end()) {
-            PacGommeType type = (typeDist(gen) == 0) ? PacGommeType::Basic : PacGommeType::Power;
-            pacgommes[pos] = type;
-            ++placed;
+            if (c.getType() == CellType::Floor &&
+                pacgommes.find(pos) == pacgommes.end()) {
+
+                pacgommes.emplace(pos, type);
+                ++placed;
+            }
         }
-    }
+    };
+
+    const unsigned int powerCount = POWER_PACGOMME_COUNT;
+    const unsigned int basicCount = PACGOMME_COUNT - powerCount;
+
+    place(PacGommeType::Power, powerCount);
+    place(PacGommeType::Basic, basicCount);
 }
+
+
 
 
 void Board::generateMaze() {

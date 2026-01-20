@@ -12,6 +12,7 @@
 #include <random>
 #include <unordered_map>
 #include "../common/Types.h"
+#include "../common/Constants.h"
 
 
 
@@ -28,7 +29,7 @@ public:
     bool isOccupied(unsigned int x, unsigned int y, uint32_t excludeId,
                     const std::vector<Player>& players) const;
     bool isInside(unsigned int x, unsigned int y) const;
-    void placeRandomPacGommes(unsigned int count);
+    void placeRandomPacGommes();
 
 
     void print() const;
