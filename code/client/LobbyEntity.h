@@ -29,8 +29,8 @@ public:
 
     void render(std::vector<PlayerData> players,RoomSettings settings, uint32_t clientID);
     void renderPlayerRow(gf::Vector2f position,PlayerData data, uint32_t clientID);
-    void renderPLayerList(gf::Vector2f position, std::vector<PlayerData> players, uint32_t clientID);
-    void renderRoleSelection(gf::Vector2f position, PlayerRole currentRole);
+    void renderPLayerList(gf::Vector2f position, std::vector<PlayerData> players, unsigned int roomSize, uint32_t clientID);
+    void renderRoleSelection(gf::Vector2f position, PlayerData clientData);
     void renderSettings(gf::Vector2f position, RoomSettings settings);
 
 private:
