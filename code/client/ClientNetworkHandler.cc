@@ -28,7 +28,8 @@ void handleNetworkPackets(
     PlayerRole& myRole,
     int& lastScore,
     GameEndReason& endReason,
-    bool amReady
+    bool amReady,
+    std::map<Position, Position>& holeLinks
 ){
 
     std::lock_guard<std::mutex> lock(packetMutex);
@@ -97,6 +98,12 @@ void handleNetworkPackets(
 
                         states = data.players;  
                         board=data.board;
+                        holeLinks = data.holeLinks;
+
+                        if(holeLinks.size() != 0){
+                            gf::Log::info(" portal trouvé, holeliks pas vide!\n");
+                        }else
+                            gf::Log::info("Pas de portal dans network!\n");
 
                         updateMyRoleFromPlayers(data.players, myId, myRole);
 

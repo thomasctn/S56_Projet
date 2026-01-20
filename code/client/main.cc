@@ -70,6 +70,8 @@ int main()
     unsigned int timeLeft = 999;
     int timeLeftPre = 0;
 
+    std::map<Position, Position> holeLinks;
+
     RoomSettings roomSettings{
         unsigned(MAX_PLAYERS),
         unsigned(NB_BOTS),
@@ -222,7 +224,8 @@ int main()
                 myRole,
                 lastScore,
                 endReason,
-                amReady
+                amReady,
+                holeLinks
             );
 
         }
@@ -247,7 +250,7 @@ int main()
             lobbyListScene.render();
         }
         else{ //Playing
-            gameScene.render(states, myId, board, pacgommes, timeLeftPre, timeLeft);
+            gameScene.render(states, myId, board, pacgommes, timeLeftPre, timeLeft, holeLinks);
         }
         
 

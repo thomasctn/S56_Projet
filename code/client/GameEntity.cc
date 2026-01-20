@@ -61,7 +61,7 @@ void GameEntity::calculateMovement(const BoardCommon &map, float &tileSize, floa
     offsetY = topMargin + (view.getCenter().y - viewSize.y * 0.5f);
 }
 
-void GameEntity::renderMap(const BoardCommon &map, float tileSize, float offsetX, float offsetY) {
+void GameEntity::renderMap(const BoardCommon &map, float tileSize, float offsetX, float offsetY, std::map<Position, Position>& holeLinks) {
     gf::RenderWindow& win = m_renderer.getRenderWindow();
 
     for (unsigned int y = 0; y < map.height; ++y) {
@@ -81,6 +81,34 @@ void GameEntity::renderMap(const BoardCommon &map, float tileSize, float offsetX
             win.draw(tile);
         }
     }
+
+   if (holeLinks.size() >= 2) {
+        auto it = holeLinks.begin();
+
+        gf::RectangleShape portalTile({tileSize, tileSize});
+
+        portalTile.setPosition({it->first.x * tileSize + offsetX, it->first.y * tileSize + offsetY});
+        portalTile.setColor(gf::Color::Magenta);
+        win.draw(portalTile);
+
+        portalTile.setPosition({it->second.x * tileSize + offsetX, it->second.y * tileSize + offsetY});
+        win.draw(portalTile);
+
+        ++it;
+
+        portalTile.setPosition({it->first.x * tileSize + offsetX, it->first.y * tileSize + offsetY});
+        portalTile.setColor(gf::Color::Blue);
+        win.draw(portalTile);
+
+        portalTile.setPosition({it->second.x * tileSize + offsetX, it->second.y * tileSize + offsetY});
+        win.draw(portalTile);
+    }else{
+        //gf::Log::info("Pas de portal!\n");
+
+    }
+
+
+
 }
 
 
@@ -112,7 +140,7 @@ void GameEntity::renderPacGommes(const std::vector<std::pair<Position, PacGommeT
 }
 
 
-void GameEntity::render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon& board, const std::vector<std::pair<Position, PacGommeType>>& pacgommes, int timeLeftPre, unsigned int timeLeft) {
+void GameEntity::render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon& board, const std::vector<std::pair<Position, PacGommeType>>& pacgommes, int timeLeftPre, unsigned int timeLeft, std::map<Position, Position>& holeLinks) {
     gf::RenderWindow& win = m_renderer.getRenderWindow();
 
     //clear via renderer helper
@@ -124,7 +152,7 @@ void GameEntity::render(const std::vector<PlayerData>& states, uint32_t myId, co
     calculateMovement(board, tileSize, offsetX, offsetY);
 
     //map
-    renderMap(board, tileSize, offsetX, offsetY);
+    renderMap(board, tileSize, offsetX, offsetY, holeLinks);
 
     //pacgommes
     renderPacGommes(pacgommes, tileSize, offsetX, offsetY);

@@ -30,7 +30,8 @@ void handleNetworkPackets(
     PlayerRole& myRole,
     int& lastScore,
     GameEndReason& endReason,
-    bool amReady
+    bool amReady,
+    std::map<Position, Position>& holeLinks
 );
 
 

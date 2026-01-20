@@ -9,7 +9,7 @@ GameScene::GameScene(Renderer& renderer)
 void GameScene::processEvent(const gf::Event& ) { //rien a faire pour l'isntant
 }
 
-void GameScene::render(const std::vector<PlayerData>& states,uint32_t myId,const BoardCommon& board, const std::vector<std::pair<Position, PacGommeType>>& pacgommes, int timeLeftPre, unsigned int timeLeft)
+void GameScene::render(const std::vector<PlayerData>& states,uint32_t myId,const BoardCommon& board, const std::vector<std::pair<Position, PacGommeType>>& pacgommes, int timeLeftPre, unsigned int timeLeft, std::map<Position, Position>& holeLinks)
 {
-    m_entity.render(states, myId, board, pacgommes,  timeLeftPre, timeLeft);
+    m_entity.render(states, myId, board, pacgommes,  timeLeftPre, timeLeft, holeLinks);
 }
