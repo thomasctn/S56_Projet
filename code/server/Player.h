@@ -11,32 +11,40 @@ class Controller;
 
 class Player {
 public:
-    Player(uint32_t id = 0, PlayerRole role = PlayerRole::Spectator);
+    Player(uint32_t id = 0, PlayerRole role = PlayerRole::Spectator, const std::string& name = "moi");
+
     PlayerRole getRole() const;
     void setRole(PlayerRole r);
+
     PlayerData getState() const;
     void setState(const PlayerData& state);
 
+    bool eat(bool isPacGomme, Player* otherPlayer = nullptr);
+
+    uint32_t getId() const { return id; }
+    int getScore() const { return score; }
+    void setScore(int s) { score = s; }
+
+    bool isReady() const { return ready; }
+    void setReady(bool r) { ready = r; }
+
     Player(const Player&) = delete;
     Player& operator=(const Player&) = delete;
-
-    // Autorisation du move
     Player(Player&&) = default;
     Player& operator=(Player&&) = default;
 
-    // --- Game ---
-    // Retourne true si quelque chose a été mangé
-    bool eat(bool isPacGomme, Player* otherPlayer = nullptr);
-    bool ready;
 public:
     uint32_t id;
     PlayerRole role;
-    float x;
-    float y;
-    uint32_t color;
-    gf::TcpSocket socket;
-    int score;
+    float x = 0.0f;
+    float y = 0.0f;
+    uint32_t color = 0xFFFFFFFF;
+    int score = 0;
+    std::string name;
     Controller* controller = nullptr;
     bool isBot = false;
 
+private:
+    bool ready = false;
 };
+

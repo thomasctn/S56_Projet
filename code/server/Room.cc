@@ -213,7 +213,7 @@ void Room::handleClientReady(PacketContext& ctx) {
     // --- Si le Game existe, mettre à jour le Player ---
     if (game) {
         auto& player = game->getPlayerInfo(ctx.senderId);
-        player.ready = data.ready;
+        player.setReady(data.ready);
     } else {
         preGameReady[ctx.senderId] = data.ready;
     }
@@ -285,7 +285,7 @@ bool Room::allPlayersReady() const {
         bool isReady = false;
         if (game) {
             const Player& p = game->getPlayerInfo(pid);
-            isReady = p.ready;
+            isReady = p.isReady();
         } else {
             auto it = preGameReady.find(pid);
             if (it != preGameReady.end())

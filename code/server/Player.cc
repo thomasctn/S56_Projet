@@ -4,13 +4,17 @@
 // ------------------
 // Constructeur
 // ------------------
-Player::Player(uint32_t id_, PlayerRole role_)
+Player::Player(uint32_t id_, PlayerRole role_, const std::string& name_)
 : id(id_)
 , role(role_)
 , x(0.0f)
 , y(0.0f)
 , color(0xFFFFFFFF)
-, score(0) {}
+, score(0)
+, ready(false)
+, name(name_)
+{}
+
 
 // ------------------
 // Accesseurs rôle
