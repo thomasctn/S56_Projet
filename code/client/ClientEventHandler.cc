@@ -41,6 +41,12 @@ void handleClientEvents(
         
     while (renderer.getWindow().pollEvent(event))
             {   
+                if (event.type == gf::EventType::Resized) { //changement taille
+                    auto size = renderer.getWindow().getSize();
+                    renderer.handleResize(size.x, size.y);
+                    gf::Log::info("Handleresize appelé\n");
+
+                }
                 actions.processEvent(event); //important actions
                 //mettre un bouton si on est dans le welcome!
                 if (screen == ClientScreen::Welcome) {
@@ -162,7 +168,7 @@ void handleClientEvents(
                 }
 
 
-                else if (event.type == gf::EventType::Closed)
+                if (event.type == gf::EventType::Closed)
                 {
                     gf::Log::info("Fermeture demandée par l'utilisateur\n");
                     shutdownClient(running);
@@ -176,10 +182,7 @@ void handleClientEvents(
                     renderer.getWindow().close();
                 }
 
-                else if (event.type == gf::EventType::Resized) { //changement taille
-                    auto size = renderer.getWindow().getSize();
-                    renderer.handleResize(size.x, size.y);
-                }
+                
                 
             }
 
