@@ -136,7 +136,7 @@ void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, 
     m_leaveBtn.setDefaultTextColor(gf::Color::White);
     m_leaveBtn.setSelectedTextColor(gf::Color::Black);
     m_leaveBtn.setDefaultBackgroundColor(gf::Color::Red);
-    m_leaveBtn.setSelectedBackgroundColor(gf::Color::Red);
+    m_leaveBtn.setSelectedBackgroundColor(gf::Color::White);
     m_leaveBtn.setBackgroundOutlineThickness(1.f);
     m_leaveBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
     m_leaveBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
@@ -206,7 +206,7 @@ void LobbyEntity::renderRoleSelection(gf::Vector2f position, PlayerData clientDa
     pseudoLabel.setCharacterSize(ROLE_TEXT_SIZE);
     pseudoLabel.setColor(gf::Color::White);
     pseudoLabel.setString(clientData.name);
-    pseudoLabel.setPosition({position.x - (pseudoLabel.getString().length() * ROLE_TEXT_SIZE) /8, position.y});
+    pseudoLabel.setPosition(position);
     target.draw(pseudoLabel);
 
     gf::Sprite iconSprite;

@@ -40,7 +40,7 @@ void Room::addPlayer(uint32_t playerId) {
         pdata.ready = false;  // par défaut non ready
         pdata.color = 0xFFFFFFFF;
         pdata.score = 0;
-        pdata.name = "moi";
+        pdata.name = "player_" + std::to_string(playerId);
 
         preGamePlayers[playerId] = pdata;
 
@@ -325,8 +325,7 @@ void Room::broadcastRoomPlayers()
             pdata.id = pid;
             auto it = preGamePlayers.find(pid);
             if (it != preGamePlayers.end()) {
-                pdata.role = it->second.role;
-                pdata.ready = it->second.ready;
+                pdata = it->second;
             } else {
                 pdata.role = PlayerRole::Spectator;
                 pdata.ready = false;
