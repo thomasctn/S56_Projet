@@ -41,14 +41,15 @@ void ServerNetwork::handleNewClient() {
     connection.id = id;
     connection.socket = std::move(socket);
 
-    selector.addSocket(connection.socket);
-    connections.emplace(id, std::move(connection));
+    auto res = connections.emplace(id, std::move(connection));
+    auto& player = res.first->second;
+    selector.addSocket(player.socket);
 
     ServerConnect idMsg;
     idMsg.clientId = id;
     gf::Packet packet;
     packet.is(idMsg);
-    connection.socket.sendPacket(packet);
+    player.socket.sendPacket(packet);
 
     lobby->onPlayerConnected(id);
 
