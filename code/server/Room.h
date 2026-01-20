@@ -60,13 +60,15 @@ public:
     void notifyGameEndedAsync(GameEndReason reason);
     unsigned int getGameDuration() const { return settings.gameDuration; }
 
-    std::unordered_map<uint32_t, PlayerRole> preGameRoles;
-
     BotManager* getBotManager() { return botManager.get(); }
 
     void setHostName(const std::string& name) { hostName = name; }
     const std::string& getHostName() const { return hostName; }
     unsigned int getPlayerCount() const { return static_cast<unsigned int>(players.size()); }
+
+    std::unordered_map<uint32_t, PlayerData> preGamePlayers;
+
+
 
 private:
     void startGame();
@@ -80,7 +82,7 @@ private:
 
 
     std::unique_ptr<BotManager> botManager;
-    std::unordered_map<uint32_t, bool> preGameReady;
+
 
     RoomSettings settings {
         MAX_PLAYERS, // roomSize par défaut

@@ -19,19 +19,31 @@ void Room::addPlayer(uint32_t playerId) {
     players.insert(playerId);
     gf::Log::info("[Room %u] Joueur %u ajouté\n", id, playerId);
 
-    // Pré‑assigner un rôle si game n'existe pas
     if (!game) {
-        // Choisir un rôle par défaut : 1er PacMan, le reste Ghost
         PlayerRole role = PlayerRole::Ghost;
+
+        // Vérifier si un PacMan existe déjà
         bool hasPacMan = false;
-        for (auto& [_, r] : preGameRoles)
-            if (r == PlayerRole::PacMan)
+        for (auto& [_, pdata] : preGamePlayers) {
+            if (pdata.role == PlayerRole::PacMan) {
                 hasPacMan = true;
+                break;
+            }
+        }
 
         if (!hasPacMan)
             role = PlayerRole::PacMan;
 
-        preGameRoles[playerId] = role;
+        PlayerData pdata;
+        pdata.id = playerId;
+        pdata.role = role;
+        pdata.ready = false;  // par défaut non ready
+        pdata.color = 0xFFFFFFFF;
+        pdata.score = 0;
+        pdata.name = "moi";
+
+        preGamePlayers[playerId] = pdata;
+
         gf::Log::info("[Room %u] Joueur %u rôle pré-game assigné : %s\n",
                       id, playerId,
                       (role == PlayerRole::PacMan ? "PacMan" : "Ghost"));
@@ -41,9 +53,11 @@ void Room::addPlayer(uint32_t playerId) {
     joinPacket.is(ServerJoinRoom{});
     network.send(playerId, joinPacket);
 
+    // Mettre à jour tous les clients
     broadcastRoomPlayers();
     broadcastRoomSettings();
 }
+
 
 
 
@@ -82,9 +96,9 @@ void Room::startGame() {
     for (uint32_t playerId : players) {
         if (game->getPlayers().find(playerId) == game->getPlayers().end()) {
             PlayerRole role = PlayerRole::Spectator;
-            auto it = preGameRoles.find(playerId);
-            if (it != preGameRoles.end())
-                role = it->second;
+            auto it = preGamePlayers.find(playerId);
+            if (it != preGamePlayers.end())
+                role = it->second.role;
 
             game->addPlayer(playerId, 100.0f, 100.0f, role);
         }
@@ -205,20 +219,23 @@ void Room::handleClientMove(PacketContext& ctx) {
 }
 
 void Room::handleClientReady(PacketContext& ctx) {
-    // Convertir le packet en ClientReady
     auto data = ctx.packet.as<ClientReady>();
 
     gf::Log::info("[Room %u] Joueur %u ready=%s\n", id, ctx.senderId, data.ready ? "true" : "false");
 
-    // --- Si le Game existe, mettre à jour le Player ---
     if (game) {
         auto& player = game->getPlayerInfo(ctx.senderId);
         player.setReady(data.ready);
     } else {
-        preGameReady[ctx.senderId] = data.ready;
+        auto it = preGamePlayers.find(ctx.senderId);
+        if (it != preGamePlayers.end()) {
+            it->second.ready = data.ready;
+        } else {
+            gf::Log::warning("[Room %u] Joueur %u non trouvé dans preGamePlayers\n", id, ctx.senderId);
+        }
     }
 
-    // Broadcast ServerReady à tous les joueurs
+    // Broadcast
     ServerReady readyMsg;
     gf::Packet readyPacket;
     readyPacket.is(readyMsg);
@@ -226,58 +243,52 @@ void Room::handleClientReady(PacketContext& ctx) {
         network.send(pid, readyPacket);
 
     // Vérifier si tous les joueurs sont prêts
-    if (allPlayersReady() && (players.size() == settings.roomSize)) {
+    if (allPlayersReady() && players.size() == settings.roomSize) {
         startGame();
     }
 }
 
-
-
 void Room::handleClientChange(PacketContext& ctx) {
-    if (game) {
-        return;
-    } else {
-        auto it = preGameRoles.find(ctx.senderId);
-        PlayerRole currentRole = (it != preGameRoles.end()) ? it->second : PlayerRole::PacMan;
+    if (game) return;
 
-        // Vérifier qu'au moins un PacMan reste
-        if (currentRole == PlayerRole::PacMan) {
-            bool otherPacManExists = false;
-            for (auto& [id, r] : preGameRoles) {
-                if (id != ctx.senderId && r == PlayerRole::PacMan) {
-                    otherPacManExists = true;
-                    break;
-                }
-            }
-            if (!otherPacManExists) {
-                gf::Log::info("[Room %u] Changement de rôle refusé pour joueur %u : au moins un PacMan requis\n",
-                              id, ctx.senderId);
-                return;
+    auto it = preGamePlayers.find(ctx.senderId);
+    if (it == preGamePlayers.end()) {
+        gf::Log::warning("[Room %u] Joueur %u non trouvé pour changement de rôle\n", id, ctx.senderId);
+        return;
+    }
+
+    PlayerData& pdata = it->second;
+    PlayerRole currentRole = pdata.role;
+
+    // Vérifier qu'au moins un PacMan reste
+    if (currentRole == PlayerRole::PacMan) {
+        bool otherPacManExists = false;
+        for (auto& [id, p] : preGamePlayers) {
+            if (id != ctx.senderId && p.role == PlayerRole::PacMan) {
+                otherPacManExists = true;
+                break;
             }
         }
-
-        PlayerRole newRole = (currentRole == PlayerRole::PacMan) ? PlayerRole::Ghost : PlayerRole::PacMan;
-        preGameRoles[ctx.senderId] = newRole;
-
-        gf::Log::info("[Room %u] Joueur %u choisit rôle pré-game : %s\n",
-                      id, ctx.senderId,
-                      (newRole == PlayerRole::PacMan ? "PacMan" : "Ghost"));
+        if (!otherPacManExists) {
+            gf::Log::info("[Room %u] Changement de rôle refusé pour joueur %u : au moins un PacMan requis\n",
+                          id, ctx.senderId);
+            return;
+        }
     }
+
+    // Changer le rôle
+    pdata.role = (currentRole == PlayerRole::PacMan) ? PlayerRole::Ghost : PlayerRole::PacMan;
+
+    gf::Log::info("[Room %u] Joueur %u choisit rôle pré-game : %s\n",
+                  id, ctx.senderId,
+                  (pdata.role == PlayerRole::PacMan ? "PacMan" : "Ghost"));
 
     ServerChangeRoomCharacterData msg;
     gf::Packet answer;
     answer.is(msg);
     network.send(ctx.senderId, answer);
+
     broadcastRoomPlayers();
-}
-
-
-
-
-PlayerData Room::getPlayerData(uint32_t playerId) const {
-    if (!game) return {};
-    const auto& player = game->getPlayerInfo(playerId);
-    return player.getState();
 }
 
 bool Room::allPlayersReady() const {
@@ -287,9 +298,9 @@ bool Room::allPlayersReady() const {
             const Player& p = game->getPlayerInfo(pid);
             isReady = p.isReady();
         } else {
-            auto it = preGameReady.find(pid);
-            if (it != preGameReady.end())
-                isReady = it->second;
+            auto it = preGamePlayers.find(pid);
+            if (it != preGamePlayers.end())
+                isReady = it->second.ready;
         }
 
         if (!isReady)
@@ -310,8 +321,14 @@ void Room::broadcastRoomPlayers()
             pdata = p.getState();
         } else {
             pdata.id = pid;
-            pdata.role = preGameRoles.count(pid) ? preGameRoles.at(pid) : PlayerRole::Spectator;
-            pdata.ready = preGameReady.count(pid) ? preGameReady.at(pid) : false;
+            auto it = preGamePlayers.find(pid);
+            if (it != preGamePlayers.end()) {
+                pdata.role = it->second.role;
+                pdata.ready = it->second.ready;
+            } else {
+                pdata.role = PlayerRole::Spectator;
+                pdata.ready = false;
+            }
         }
 
         list.players.push_back(pdata);
@@ -485,7 +502,9 @@ void Room::cleanupGame() {
 
     botManager.reset();
     game.reset();
-    preGameReady.clear();
+    for (auto& [id, pdata] : preGamePlayers) {
+        pdata.ready = false;
+    }
 
     gf::Log::info("[Room %u] Nettoyage fini\n", id);
 
@@ -496,9 +515,10 @@ void Room::cleanupGame() {
 
 void Room::resetPlayersState() {
     gf::Log::info("[Room %u] Reset états de joueurs\n", id);
-    for (uint32_t pid : players) {
-        preGameReady[pid] = false;
+    for (auto& [id, pdata] : preGamePlayers) {
+        pdata.ready = false;
     }
+
 }
 
 void Room::notifyGameEndedAsync(GameEndReason reason) {
