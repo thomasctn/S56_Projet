@@ -262,7 +262,7 @@ struct ServerGameStart
 template <typename Archive>
 Archive &operator|(Archive &ar, ServerGameStart &data)
 {
-  return ar | data.board | data.players | data.pacgommes | data.settings;
+  return ar | data.board | data.players | data.pacgommes | data.settings | data.holeLinks;
 }
 //Réponse à tous les clients sur la mise à jour de la partie
 struct ServerGameState
