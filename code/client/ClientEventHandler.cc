@@ -44,7 +44,7 @@ void handleClientEvents(
                 if (event.type == gf::EventType::Resized) { //changement taille
                     auto size = renderer.getWindow().getSize();
                     renderer.handleResize(size.x, size.y);
-                    gf::Log::info("Handleresize appelé\n");
+                    //gf::Log::info("Handleresize appelé\n");
 
                 }
                 actions.processEvent(event); //important actions
