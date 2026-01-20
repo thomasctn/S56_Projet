@@ -63,6 +63,7 @@ void Room::addPlayer(uint32_t playerId) {
 
 void Room::removePlayer(uint32_t playerId) {
     players.erase(playerId);
+    preGamePlayers.erase(playerId);
     gf::Log::info("[Room %u] Joueur %u retiré\n", id, playerId);
 
     gf::Packet leavePacket;
@@ -236,11 +237,12 @@ void Room::handleClientReady(PacketContext& ctx) {
     }
 
     // Broadcast
-    ServerReady readyMsg;
+    /*ServerReady readyMsg;
     gf::Packet readyPacket;
     readyPacket.is(readyMsg);
     for (uint32_t pid : players)
-        network.send(pid, readyPacket);
+        network.send(pid, readyPacket);*/
+    broadcastRoomPlayers();
 
     // Vérifier si tous les joueurs sont prêts
     if (allPlayersReady() && players.size() == settings.roomSize) {
