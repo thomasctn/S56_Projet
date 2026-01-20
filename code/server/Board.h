@@ -49,7 +49,9 @@ public:
     bool isHole(unsigned int x, unsigned int y) const;
     std::vector<Position> getHoles() const;
 
-    
+    std::map<Position, Position> holeLinks;
+        void linkHoles();
+    Position getLinkedHole(unsigned int x, unsigned int y) const;
 
 private:
     unsigned int width;

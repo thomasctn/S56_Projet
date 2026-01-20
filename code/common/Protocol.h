@@ -257,6 +257,7 @@ struct ServerGameStart
   std::vector<PlayerData> players;
   std::vector<std::pair<Position, PacGommeType>> pacgommes;
   RoomSettings settings;
+  std::map<Position, Position> holeLinks;
 };
 template <typename Archive>
 Archive &operator|(Archive &ar, ServerGameStart &data)

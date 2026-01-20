@@ -79,6 +79,7 @@ void Board::generateMaze() {
     openCorners();
     //addLoops(0.15f);
     openBorderExits(4);
+    linkHoles();
     fillDeadEnds();
 
 }
@@ -582,4 +583,31 @@ BoardCommon Board::toCommonData()
         }
     }
     return bc;
+}
+
+
+void Board::linkHoles() {
+    auto holes = getHoles();
+
+    if (holes.size() % 2 != 0) {
+        holes.pop_back();
+    }
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(holes.begin(), holes.end(), gen);
+
+    for (size_t i = 0; i < holes.size(); i += 2) {
+        Position a = holes[i];
+        Position b = holes[i + 1];
+        holeLinks[a] = b;
+        holeLinks[b] = a;
+    }
+}
+
+Position Board::getLinkedHole(unsigned int x, unsigned int y) const {
+    Position p(x, y);
+    auto it = holeLinks.find(p);
+    if (it != holeLinks.end()) return it->second;
+    return p;
 }

@@ -134,6 +134,8 @@ void Room::startGame() {
     for (const auto& [pos, type] : game->getBoard().getPacgommes()) {
         startMsg.pacgommes.push_back({pos, type});
     }
+
+    startMsg.holeLinks = game->getBoard().holeLinks;
     gf::Packet startPacket;
     startPacket.is(startMsg);
     for (uint32_t pid : players)
@@ -327,7 +329,7 @@ void Room::broadcastRoomSettings()
 {
     ServerRoomSettings msg;
     msg.settings = settings;
-    gf::Log::info("[Room %u] Test %u\n",id, settings.roomSize);
+    //gf::Log::info("[Room %u] Taille room %u\n",id, settings.roomSize);
     gf::Packet packet;
     packet.is(msg);
 
