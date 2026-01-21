@@ -26,6 +26,16 @@ v   - choix de room
     - quand on est refusé une modif, qu'on nous expliques pk
     - explication du jeu
     - ameliorer secu vu serv
+    - changer fonct
+    - Probleme texte lobby
+    - changer l'affichage du score ingame
+    - faire de vrai scene ?
+    - ajouter pseudo (animal + adjectif) au hasard. (on peut faire room avec ville par exemple)
+    - Temps changmement (je sais plus pourauoi jai noter ca)
+    - corriger cabane avec pacman
+    - augmenter temps de jeu
+    - reinitiliser client ready
+    - voir pour uniformiser player dans room
 
 Bonus :
     - améliorer visuel
