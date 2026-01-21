@@ -9,11 +9,14 @@ v   - Ajouter une intelligence collective au bots (actuellment local)
 v   - Ne pas faire crash le client si il trouve pas le serv mais le faire chercher jusqua trouver.
 v   - revoir spawn des joueurs
 v   - voir decay
+v   - reparer client role (dans room le role nest pas mit a jour)
+v   - temps coter client faux pourquoi ?
+v   - choix de room
 
+~   - visuel des portails?
 ~   - pacgomme spéciale
         - faire pouvoir
     v   - gere spawn
-v   - choix de room
 
     - améliorer l'interface lobby
     - améliorer l'interface room
@@ -21,15 +24,12 @@ v   - choix de room
     - refaire room
     - room privé ?
     - quand on est refusé une modif, qu'on nous expliques pk
-~   - visuel des portails?
     - explication du jeu
-    - reparer client role (dans room le role nest pas mit a jour)
-v   - temps coter client faux pourquoi ?
     - ameliorer secu vu serv
 
 Bonus :
     - améliorer visuel
     - améliorer code
     - optimiser les échanges
-~   - améliorer bots (un peu debile eux)
+v   - améliorer bots (un peu debile eux)
     - verifier warning
