@@ -20,43 +20,24 @@ void WelcomeEntity::resetClick() {
 }
 
  
-bool WelcomeEntity::processEvent(const gf::Event& event){
-    gf::RenderWindow& win = m_renderer.getRenderWindow();
+void WelcomeEntity::pointTo(gf::Vector2f coords) {
+    m_container.pointTo(coords);
+}
 
-    switch (event.type) {
-
-        case gf::EventType::MouseMoved: {
-            gf::Vector2i pixelPos(int(event.mouseCursor.coords.x), int(event.mouseCursor.coords.y)); //a eventuellement changer pour le meme system que dans lobby!
-            gf::Vector2f worldPos = win.mapPixelToCoords(pixelPos); // utilisation de la view actuelle
-            m_container.pointTo(worldPos);
-            return false;
-        }
-
-        case gf::EventType::MouseButtonPressed: {
-            if (event.mouseButton.button != gf::MouseButton::Left) 
-                return false;
-
-            gf::Vector2i pixelPos(int(event.mouseButton.coords.x), int(event.mouseButton.coords.y));
-            gf::Vector2f worldPos = win.mapPixelToCoords(pixelPos); 
-            m_container.pointTo(worldPos);
-
-            m_container.triggerAction();
-            if (m_wasClicked) {
-                m_wasClicked = false;
-                return true;
-            }
-            return false;
-        }
-
-        default:
-            return false;
+bool WelcomeEntity::trigger() {
+    m_container.triggerAction();
+    if (m_wasClicked) {
+        m_wasClicked = false;
+        return true;
     }
+    return false;
 }
 
 
-void WelcomeEntity::render() {
-    m_renderer.clearWindow();
-    gf::RenderWindow& target = m_renderer.getRenderWindow();
+
+void WelcomeEntity::render(gf::RenderTarget& target) {
+   /* m_renderer.clearWindow();
+    gf::RenderWindow& target = m_renderer.getRenderWindow();*/
 
     gf::View view = target.getView();
     gf::Vector2f center= view.getCenter();
@@ -96,5 +77,5 @@ void WelcomeEntity::render() {
     m_enterWidget.setPadding(26 * .4f);
     target.draw(m_enterWidget);
 
-    target.display();
+    //target.display();
 }

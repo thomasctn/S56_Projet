@@ -13,4 +13,5 @@ public:
 
 private:
     WelcomeEntity m_entity;
+    Renderer& m_renderer;
 };

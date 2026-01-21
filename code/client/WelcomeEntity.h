@@ -11,9 +11,11 @@ class WelcomeEntity {
 public:
     WelcomeEntity(Renderer& renderer);
     bool processEvent(const gf::Event& event);
-    void render();
+    void render(gf::RenderTarget& target);
     bool wasClicked() const;
     void resetClick();
+    void pointTo(gf::Vector2f coords);
+    bool trigger(); 
 
 
 private:
