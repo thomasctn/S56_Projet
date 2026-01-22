@@ -106,9 +106,10 @@ bool Game::requestMove(uint32_t playerId, Direction dir) {
     int gridX = static_cast<int>(p.x) / 50;
     int gridY = static_cast<int>(p.y) / 50;
 
-    if (p.getRole() == PlayerRole::PacMan && board.hasPacgomme(gridX,gridY)) {
-        p.eat(true, nullptr);
-        board.removePacgomme(gridX,gridY);
+    if (p.getRole() == PlayerRole::PacMan && board.hasPacgomme(gridX, gridY)) {
+        PacGommeType type = board.getPacGommeType(gridX, gridY);
+        p.eat(type, nullptr); // type de pac-gomme
+        board.removePacgomme(gridX, gridY);
     } else if (p.getRole() == PlayerRole::Ghost) {
         for (auto& [otherId, otherPtr] : players) {
             Player& other = *otherPtr;
@@ -116,11 +117,13 @@ bool Game::requestMove(uint32_t playerId, Direction dir) {
                 int otherX = static_cast<int>(other.x) / 50;
                 int otherY = static_cast<int>(other.y) / 50;
                 if (otherX == gridX && otherY == gridY) {
-                    p.eat(false, &other);
+                    p.eat(std::nullopt, &other); // pas de pac-gomme, interaction joueur
                 }
             }
         }
     }
+
+
 
     // --- Ajout de trace ---
     if (botManager) {
@@ -352,6 +355,8 @@ void Game::updateMovement(double dt) {
 
     for (auto& [id, playerPtr] : players) {
         Player& p = *playerPtr;
+
+        p.update(dt);
 
         if (!p.hasMoveRequest)
             continue;

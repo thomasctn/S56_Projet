@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <gf/TcpSocket.h>
+#include <optional>
 
 #include "../common/Protocol.h"
 #include "../common/Types.h"
@@ -19,7 +20,7 @@ public:
     PlayerData getState() const;
     void setState(const PlayerData& state);
 
-    bool eat(bool isPacGomme, Player* otherPlayer = nullptr);
+    bool eat(std::optional<PacGommeType> pacGommeType, Player* otherPlayer = nullptr);
 
     uint32_t getId() const { return id; }
     int getScore() const { return score; }
@@ -37,6 +38,11 @@ public:
     bool hasMoveRequest = false;
     double moveAccumulator = 0.0;
     double moveRate;
+
+    bool isVunerable;
+    double powerTimeRemaining;
+    void update(double dt);
+
 
 public:
     uint32_t id;

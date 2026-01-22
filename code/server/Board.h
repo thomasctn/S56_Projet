@@ -53,6 +53,7 @@ public:
     std::map<Position, Position> holeLinks;
         void linkHoles();
     Position getLinkedHole(unsigned int x, unsigned int y) const;
+    PacGommeType getPacGommeType(int x, int y) const;
 
 private:
     unsigned int width;

@@ -621,3 +621,12 @@ Position Board::getLinkedHole(unsigned int x, unsigned int y) const {
     if (it != holeLinks.end()) return it->second;
     return p;
 }
+
+PacGommeType Board::getPacGommeType(int x, int y) const {
+    Position pos(x, y);
+    auto it = pacgommes.find(pos);
+    if (it != pacgommes.end()) {
+        return it->second;
+    }
+    throw std::runtime_error("Pas de pac-gomme sur cette case !");
+}

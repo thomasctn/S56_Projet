@@ -2,20 +2,20 @@ But : avoir une version préfinal pour lundi 26 javier
 
 
 A faire pre-final:
-    - ameliorer secu vu serv
+x   - ameliorer secu vu serv (desativation total)
 ~   - visuel des portails?
 ~   - pacgomme spéciale
         - faire pouvoir
     v   - gere spawn
     - améliorer l'interface lobby
     - améliorer l'interface room
-    - Equilibrer les parametre de jeu.
+~   - Equilibrer les parametre de jeu.
     - reinitiliser client ready
     - Probleme texte lobby
     - changer l'affichage du score ingame
     - faire de vrai scene ?
     - Temps changmement room (on ne peut pas changer le temps)
-    - corriger cabane avec pacman
+v   - corriger cabane avec pacman
 v   - augmenter temps de jeu
     - mettre asset mur/sol/cabane
 v   - refaire mouvement
@@ -28,6 +28,7 @@ A faire final:
     - quand on est refusé une modif, qu'on nous expliques pk
     - ajouter pseudo (animal + adjectif) au hasard. (on peut faire room avec ville par exemple)
     - changer fonct
+    - supp vue serv
 
 
 
