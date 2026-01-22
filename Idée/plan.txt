@@ -1,6 +1,45 @@
-But avoir la boucle de jeu fonctionnelle pour mercredi 10h
+But : avoir une version préfinal pour lundi 26 javier
 
-A faire :
+
+A faire pre-final:
+    - ameliorer secu vu serv
+~   - visuel des portails?
+~   - pacgomme spéciale
+        - faire pouvoir
+    v   - gere spawn
+    - améliorer l'interface lobby
+    - améliorer l'interface room
+    - Equilibrer les parametre de jeu.
+    - reinitiliser client ready
+    - Probleme texte lobby
+    - changer l'affichage du score ingame
+    - faire de vrai scene ?
+    - Temps changmement room (on ne peut pas changer le temps)
+    - corriger cabane avec pacman
+    - augmenter temps de jeu
+    - mettre asset mur/sol/cabane
+    - refaire mouvement
+
+A faire final:
+    - refaire room
+    - explication du jeu
+    - room privé ?
+    - voir pour uniformiser player dans room
+    - quand on est refusé une modif, qu'on nous expliques pk
+    - ajouter pseudo (animal + adjectif) au hasard. (on peut faire room avec ville par exemple)
+    - changer fonct
+
+
+
+
+Bonus :
+    - améliorer visuel
+    - améliorer code
+    - optimiser les échanges
+v   - améliorer bots (un peu debile eux)
+    - verifier warning
+
+Fait :
 v   - utiliser les widjet pour les bouton.
 v   - Permettre au fenetre serv et client de s'arreter sans crash
 v   - Afficher les temps de jeu sur le client (voir pour aussi le temps de prejeu)
@@ -12,34 +51,3 @@ v   - voir decay
 v   - reparer client role (dans room le role nest pas mit a jour)
 v   - temps coter client faux pourquoi ?
 v   - choix de room
-
-~   - visuel des portails?
-~   - pacgomme spéciale
-        - faire pouvoir
-    v   - gere spawn
-
-    - améliorer l'interface lobby
-    - améliorer l'interface room
-    - Equilibrer les parametre de jeu.
-    - refaire room
-    - room privé ?
-    - quand on est refusé une modif, qu'on nous expliques pk
-    - explication du jeu
-    - ameliorer secu vu serv
-    - changer fonct
-    - Probleme texte lobby
-    - changer l'affichage du score ingame
-    - faire de vrai scene ?
-    - ajouter pseudo (animal + adjectif) au hasard. (on peut faire room avec ville par exemple)
-    - Temps changmement (je sais plus pourauoi jai noter ca)
-    - corriger cabane avec pacman
-    - augmenter temps de jeu
-    - reinitiliser client ready
-    - voir pour uniformiser player dans room
-
-Bonus :
-    - améliorer visuel
-    - améliorer code
-    - optimiser les échanges
-v   - améliorer bots (un peu debile eux)
-    - verifier warning
