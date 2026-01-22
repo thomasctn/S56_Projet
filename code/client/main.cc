@@ -180,7 +180,7 @@ int main()
         //envoi réseau de la touche
         if (screen == ClientScreen::Playing){ //envoie seulement si on est en jeu!!
             auto now = std::chrono::steady_clock::now();
-            if (now-lastSend > std::chrono::milliseconds(100)) {
+            if (now-lastSend > std::chrono::milliseconds(1000/CLIENT_MOVE_SPEED)) {
 
                 char dir=0;
 
