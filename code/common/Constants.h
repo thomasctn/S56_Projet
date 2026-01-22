@@ -2,7 +2,7 @@
 #pragma once
 #include <cstddef>
 // Savoir si on dev. A DESACTIVER en cas PUBLICATION sur un SERVER
-constexpr bool DEV = true;
+constexpr bool DEV = false;
 
 
 constexpr int T_GAME = 60;      // durée de la partie en secondes
@@ -32,4 +32,9 @@ static constexpr float OTHER_GHOST_REPULSION    = 3.0f;
 static constexpr float SELF_GHOST_REPULSION     = 1.0f;
 static constexpr float RANDOM_NOISE             = 0.2f;
 static constexpr float DECAY_FACTOR             = 0.95f;
+
+static constexpr float PACMAN_SPEED_MOVERATE    = 15.0f;
+static constexpr float GHOST_SPEED_MOVERATE     = 6.0f;
+static constexpr float DEFAULT_SPEED_MOVERATE   = 0.0f;
+
 

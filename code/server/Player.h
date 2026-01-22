@@ -33,6 +33,11 @@ public:
     Player(Player&&) = default;
     Player& operator=(Player&&) = default;
 
+    Direction bufferedDir = Direction::None;
+    bool hasMoveRequest = false;
+    double moveAccumulator = 0.0;
+    double moveRate;
+
 public:
     uint32_t id;
     PlayerRole role;

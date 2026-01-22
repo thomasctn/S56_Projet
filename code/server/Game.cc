@@ -170,34 +170,34 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& ser
     preGameStart = std::chrono::steady_clock::now();
 
     gameThread = std::thread([this, &inputQueue, &server]() {
-        auto lastBotUpdate = std::chrono::steady_clock::now();
         unsigned int lastRemaining = preGameDelay + 1;
+
+        static auto lastUpdate = std::chrono::steady_clock::now();
+
         while (running.load()) {
-                auto now = std::chrono::steady_clock::now();
+            auto now = std::chrono::steady_clock::now();
 
+            // --- calcul du delta time depuis le dernier tick ---
+            auto nowUpdate = std::chrono::steady_clock::now();
+            std::chrono::duration<double> dt = nowUpdate - lastUpdate;
+            lastUpdate = nowUpdate;
 
-                
-            // --- mise à jour des bots toutes les 0.5 secondes ---
+            // --- mise à jour des traces ---
             if (botManager) {
-
                 botManager->updateTraces();
-
-
-                std::chrono::duration<double> elapsed = now - lastBotUpdate;
-                if (elapsed.count() >= 0.5) {  // 0.5s = 500ms
-                    botManager->update();
-                    lastBotUpdate = now;
-                }
+                // --- update des bots ---
+                botManager->update(dt.count());
             }
 
+            // --- traitement des inputs des joueurs humains ---
             processInputs(inputQueue);
-            if(room){
+
+            if (room) {
                 room->broadcastState();
             }
+
             std::chrono::duration<double> elapsed = now - preGameStart;
-
             preGameElapsed = elapsed.count();
-
 
             if (!gameStarted.load()) {
                 // --- phase pré-jeu ---
@@ -223,28 +223,28 @@ void Game::startGameLoop(int tickMs_, InputQueue& inputQueue, ServerNetwork& ser
                 std::chrono::duration<double> gameTime = now - chronoStart;
                 gameElapsed = gameTime.count();
                 unsigned int nbPacGommes = board.getPacgommeCount();
-                if(room && gameElapsed >= room->getGameDuration() || nbPacGommes == 0) {
+                if (room && (gameElapsed >= room->getGameDuration() || nbPacGommes == 0)) {
                     gf::Log::info("Partie terminée !\n");
                     running.store(false);
                     gameStarted.store(false);
-                    GameEndReason reason = GameEndReason::TIME_OUT;
-                    if(gameElapsed >= room->getGameDuration()) {
-                        reason = GameEndReason::TIME_OUT;
-                    }
-                    else if (nbPacGommes == 0) {
-                        reason = GameEndReason::ALL_DOT_EATEN;
-                    }
+                    GameEndReason reason = (gameElapsed >= room->getGameDuration())
+                                              ? GameEndReason::TIME_OUT
+                                              : GameEndReason::ALL_DOT_EATEN;
                     room->endGame(reason);
-                break;
+                    break;
                 }
+            }
 
-                // --- logique ---
+            // --- update des mouvements des joueurs humains ---
+            if (gameStarted.load()) {
+                updateMovement(dt.count());
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(tickMs));
         }
     });
 }
+
 
 void Game::stopGameLoop() {
     running = false;
@@ -297,13 +297,16 @@ void Game::spawnPlayer(Player& p) {
 void Game::processInputs(InputQueue& queue) {
     while (auto inputOpt = queue.pop()) {
         auto& input = *inputOpt;
-        bool moved = requestMove(input.playerId, input.dir);
-        if (moved) {
-            auto& p = getPlayerInfo(input.playerId);
-            //gf::Log::info("Player %u moved to (%.1f, %.1f)", p.id, p.x, p.y);
-        }
+
+        auto it = players.find(input.playerId);
+        if (it == players.end()) continue;
+
+        Player& p = *it->second;
+        p.bufferedDir = input.dir;
+        p.hasMoveRequest = true;
     }
 }
+
 
 double Game::getPreGameElapsed() const {
     std::lock_guard<std::mutex> lock(chronoMutex);
@@ -323,4 +326,27 @@ bool Game::isPreGame() const {
 bool Game::isGameOver() const {
     std::lock_guard<std::mutex> lock(chronoMutex);
     return gameStarted.load() && gameElapsed >= room->getGameDuration();
+}
+
+void Game::updateMovement(double dt) {
+    constexpr float step = 50.0f;
+
+    for (auto& [id, playerPtr] : players) {
+        Player& p = *playerPtr;
+
+        if (!p.hasMoveRequest)
+            continue;
+
+        p.moveAccumulator += dt;
+
+        double interval = 1.0 / p.moveRate;
+        if (p.moveAccumulator < interval)
+            continue;
+
+        p.moveAccumulator -= interval;
+
+        requestMove(id, p.bufferedDir);
+
+        p.hasMoveRequest = false;
+    }
 }

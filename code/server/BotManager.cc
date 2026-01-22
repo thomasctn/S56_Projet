@@ -89,10 +89,17 @@ const GraphTraceMap& BotManager::getTraces() const {
 }
 
 // ---------------- Update ----------------
-void BotManager::update() {
+void BotManager::update(double dt) {
     for (auto& [botId, bot] : bots) {
         Player& p = game.getPlayerInfo(botId);
-        (void)p;
+
+        p.moveAccumulator += dt;
+
+        double interval = 1.0 / p.moveRate;
+        if (p.moveAccumulator < interval)
+            continue;
+
+        p.moveAccumulator -= interval;
 
         auto dirOpt = bot->update(game, *this);
         if (!dirOpt) continue;
@@ -100,6 +107,8 @@ void BotManager::update() {
         PlayerInput input;
         input.playerId = botId;
         input.dir = *dirOpt;
+
         inputQueue.push(input);
     }
 }
+

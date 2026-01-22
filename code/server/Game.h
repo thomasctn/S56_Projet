@@ -31,6 +31,8 @@ public:
     void addPlayer(uint32_t id, float x, float y, PlayerRole role);
     bool canMove(uint32_t playerId, float newX, float newY) const;
     void spawnPlayer(Player& p);
+    void updateMovement(double dt);
+
 
     std::unordered_map<uint32_t, std::unique_ptr<Player>>& getPlayers() { return players; }
     const std::unordered_map<uint32_t, std::unique_ptr<Player>>& getPlayers() const { return players; }

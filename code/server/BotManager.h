@@ -27,7 +27,7 @@ public:
     void registerBot(uint32_t id, std::unique_ptr<BotController> bot);
     void unregisterBot(uint32_t id);
 
-    void update();
+    void update(double dt);
     void updateTraces();
 
     GraphTraceMap& getTraces() { return traceMap; }

@@ -1,5 +1,6 @@
 #include "Player.h"
 #include <gf/Log.h>
+#include "../common/Constants.h"
 
 // ------------------
 // Constructeur
@@ -13,7 +14,21 @@ Player::Player(uint32_t id_, PlayerRole role_, const std::string& name_)
 , score(0)
 , ready(false)
 , name(name_)
-{}
+, moveAccumulator(0.0)
+, bufferedDir(Direction::None)
+{
+    switch (role) {
+        case PlayerRole::PacMan:
+            moveRate = PACMAN_SPEED_MOVERATE;
+            break;
+        case PlayerRole::Ghost:
+            moveRate = GHOST_SPEED_MOVERATE;
+            break;
+        default:
+            moveRate = DEFAULT_SPEED_MOVERATE;
+            break;
+    }
+}
 
 
 // ------------------
