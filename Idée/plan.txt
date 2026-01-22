@@ -16,9 +16,9 @@ A faire pre-final:
     - faire de vrai scene ?
     - Temps changmement room (on ne peut pas changer le temps)
     - corriger cabane avec pacman
-    - augmenter temps de jeu
+v   - augmenter temps de jeu
     - mettre asset mur/sol/cabane
-    - refaire mouvement
+v   - refaire mouvement
 
 A faire final:
     - refaire room

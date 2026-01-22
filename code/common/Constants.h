@@ -23,8 +23,8 @@ constexpr int MIN_NB_PLAYERS = 1;
 constexpr int MAX_NB_PLAYERS = 5;
 constexpr int MIN_NB_BOTS = 0;
 constexpr int MAX_NB_BOTS = 8 ;
-constexpr int MIN_DURATION = 60; //60 mais 10 pour test
-constexpr int MAX_DURATION =300;
+constexpr int MIN_DURATION = 120; //120 mais 10 pour test
+constexpr int MAX_DURATION =360;
 
 
 static constexpr float PACMAN_ATTRACTION        = 5.0f;

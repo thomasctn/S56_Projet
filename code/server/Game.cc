@@ -18,13 +18,23 @@ bool Game::canMove(uint32_t playerId, float newX, float newY) const {
     int gridY = static_cast<int>(newY) / 50;
 
     if (!boardRef.isInside(gridX, gridY)) return false;
-    if (!boardRef.getCase(gridX, gridY).isWalkable()) return false;
 
-    // Récupère le joueur courant
+    const auto& cell = boardRef.getCase(gridX, gridY);
+
+    // Vérifie la walkabilité générale
+    if (!cell.isWalkable()) return false;
+
+    // Règle spéciale PacMan : interdit HUT
     auto itCurrent = players.find(playerId);
     if (itCurrent == players.end()) return false;
     const Player& currentPlayer = *itCurrent->second;
 
+    if (currentPlayer.getRole() == PlayerRole::PacMan &&
+        cell.getType() == CellType::Hut) {
+        return false;
+    }
+
+    // Collision avec les autres joueurs
     for (const auto& [id, playerPtr] : players) {
         if (id == playerId) continue;
 
@@ -33,18 +43,27 @@ bool Game::canMove(uint32_t playerId, float newX, float newY) const {
         int px = static_cast<int>(other.x) / 50;
         int py = static_cast<int>(other.y) / 50;
 
-        // Fantômes peuvent marcher sur PacMan
         if (px == gridX && py == gridY) {
+            // Fantômes peuvent marcher sur PacMan
             if (currentPlayer.getRole() == PlayerRole::Ghost &&
                 other.getRole() == PlayerRole::PacMan) {
                 continue; // autorisé
             }
+
+            // PacMan peut marcher sur les fantômes
+            if (currentPlayer.getRole() == PlayerRole::PacMan &&
+                other.getRole() == PlayerRole::Ghost) {
+                continue; // autorisé
+            }
+
             return false; // sinon bloqué
         }
     }
 
     return true;
 }
+
+
 
 
 
