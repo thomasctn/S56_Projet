@@ -4,8 +4,8 @@ But : avoir une version préfinal pour lundi 26 javier
 A faire pre-final:
 x   - ameliorer secu vu serv (desativation total)
 ~   - visuel des portails?
-~   - pacgomme spéciale
-        - faire pouvoir
+v   - pacgomme spéciale
+    v   - faire pouvoir
     v   - gere spawn
     - améliorer l'interface lobby
     - améliorer l'interface room
@@ -19,6 +19,7 @@ v   - corriger cabane avec pacman
 v   - augmenter temps de jeu
     - mettre asset mur/sol/cabane
 v   - refaire mouvement
+    - ameliorer les bots
 
 A faire final:
     - refaire room
