@@ -45,38 +45,43 @@ Serveur (envoyé)
 
 */
 
-//Faudra probablement les déplacer ces structures
+// Faudra probablement les déplacer ces structures
 struct Position
 {
-    static constexpr gf::Id type = "Position"_id;
-    unsigned int x;
-    unsigned int y;
+  static constexpr gf::Id type = "Position"_id;
+  unsigned int x;
+  unsigned int y;
 
-    Position() : x(0), y(0) {}
-    Position(unsigned int xp, unsigned int yp) : x(xp), y(yp) {}
+  Position() : x(0), y(0) {}
+  Position(unsigned int xp, unsigned int yp) : x(xp), y(yp) {}
 
-    bool operator==(const Position &a) const {
-        return (x == a.x && y == a.y);
-    }
+  bool operator==(const Position &a) const
+  {
+    return (x == a.x && y == a.y);
+  }
 
-    bool operator<(const Position &a) const {
-        return (x < a.x || (x == a.x && y < a.y));
-    }
+  bool operator<(const Position &a) const
+  {
+    return (x < a.x || (x == a.x && y < a.y));
+  }
 };
 
-namespace std {
-    template<>
-    struct hash<Position> {
-        std::size_t operator()(const Position& p) const noexcept {
-            return std::hash<unsigned int>()(p.x) ^ (std::hash<unsigned int>()(p.y) << 1);
-        }
-    };
+namespace std
+{
+  template <>
+  struct hash<Position>
+  {
+    std::size_t operator()(const Position &p) const noexcept
+    {
+      return std::hash<unsigned int>()(p.x) ^ (std::hash<unsigned int>()(p.y) << 1);
+    }
+  };
 }
 
 template <typename Archive>
 Archive &operator|(Archive &ar, Position &data)
 {
-    return ar | data.x | data.y;
+  return ar | data.x | data.y;
 }
 
 struct CaseCommon
@@ -171,8 +176,7 @@ Archive &operator|(Archive &ar, ServerListRooms &data)
   return ar | data.rooms;
 }
 
-
-//Réponse au client qui rejoind la room
+// Réponse au client qui rejoind la room
 struct ServerJoinRoom
 {
   static constexpr gf::Id type = "ServerJoinRoom"_id;
@@ -183,7 +187,7 @@ Archive &operator|(Archive &ar, ServerJoinRoom &data)
 {
   return ar | data.room;
 }
-//Réponse au client qui quitte la room
+// Réponse au client qui quitte la room
 struct ServerLeaveRoom
 {
   static constexpr gf::Id type = "ServerLeaveRoom"_id;
@@ -194,7 +198,7 @@ Archive &operator|(Archive &ar, ServerLeaveRoom &data)
   return ar;
 }
 
-//Réponse au client qui change de rôle/nom/couleur
+// Réponse au client qui change de rôle/nom/couleur
 struct ServerChangeRoomCharacterData
 {
   static constexpr gf::Id type = "ServerChangeRoomCharacterData"_id;
@@ -217,7 +221,7 @@ Archive &operator|(Archive &ar, ServerListRoomPlayers &data)
   return ar | data.players;
 }
 
-//Réponse au client qui change les paramètres de la room
+// Réponse au client qui change les paramètres de la room
 struct ServerChangeRoomSettings
 {
   static constexpr gf::Id type = "ServerChangeRoomSettings"_id;
@@ -228,7 +232,7 @@ Archive &operator|(Archive &ar, ServerChangeRoomSettings &data)
   return ar;
 }
 
-//Réponse à tous les clients sur les changement de paramètre de la room
+// Réponse à tous les clients sur les changement de paramètre de la room
 struct ServerRoomSettings
 {
   static constexpr gf::Id type = "ServerRoomSettings"_id;
@@ -239,7 +243,7 @@ Archive &operator|(Archive &ar, ServerRoomSettings &data)
 {
   return ar | data.settings;
 }
-//Réponse au client qui est prêt
+// Réponse au client qui est prêt
 struct ServerReady
 {
   static constexpr gf::Id type = "ServerReady"_id;
@@ -249,7 +253,7 @@ Archive &operator|(Archive &ar, ServerReady &data)
 {
   return ar;
 }
-//Réponse à tous les clients sur le démarrage de la partie
+// Réponse à tous les clients sur le démarrage de la partie
 struct ServerGameStart
 {
   static constexpr gf::Id type = "ServerGameStart"_id;
@@ -264,7 +268,7 @@ Archive &operator|(Archive &ar, ServerGameStart &data)
 {
   return ar | data.board | data.players | data.pacgommes | data.settings | data.holeLinks;
 }
-//Réponse à tous les clients sur la mise à jour de la partie
+// Réponse à tous les clients sur la mise à jour de la partie
 struct ServerGameState
 {
   static constexpr gf::Id type = "ServerGameState"_id;
@@ -279,7 +283,7 @@ Archive &operator|(Archive &ar, ServerGameState &data)
   return ar | data.clientStates | data.board | data.pacgommes | data.timeLeft;
 }
 
-//Réponse à tous les clients sur la fin de la partie
+// Réponse à tous les clients sur la fin de la partie
 struct ServerGameEnd
 {
   static constexpr gf::Id type = "ServerGameEnd"_id;
@@ -301,36 +305,42 @@ Archive &operator|(Archive &ar, ServerDisconnect &)
   return ar;
 };
 
-struct ServerConnect {
-    static constexpr gf::Id type = "ServerConnect"_id;
-    uint32_t clientId;
+struct ServerConnect
+{
+  static constexpr gf::Id type = "ServerConnect"_id;
+  uint32_t clientId;
 };
 
 template <typename Archive>
-Archive& operator|(Archive& ar, ServerConnect& data) {
-    return ar | data.clientId;
+Archive &operator|(Archive &ar, ServerConnect &data)
+{
+  return ar | data.clientId;
 }
 
-struct ServerGamePreStart {
-    static constexpr gf::Id type = "ServerGamePreStart"_id;
-    uint32_t timeLeft;
+struct ServerGamePreStart
+{
+  static constexpr gf::Id type = "ServerGamePreStart"_id;
+  uint32_t timeLeft;
 };
 
 template <typename Archive>
-Archive &operator|(Archive &ar, ServerGamePreStart &data){
-    return ar | data.timeLeft;
+Archive &operator|(Archive &ar, ServerGamePreStart &data)
+{
+  return ar | data.timeLeft;
 }
 
-inline gf::v1::Serializer& operator|(gf::v1::Serializer& ar, const std::pair<Position, PacGommeType>& pg) {
-    ar | pg.first.x | pg.first.y | (uint8_t&)pg.second;
-    return ar;
+inline gf::v1::Serializer &operator|(gf::v1::Serializer &ar, const std::pair<Position, PacGommeType> &pg)
+{
+  ar | pg.first.x | pg.first.y | (uint8_t &)pg.second;
+  return ar;
 }
 
-inline gf::v1::Deserializer& operator|(gf::v1::Deserializer& ar, std::pair<Position, PacGommeType>& pg) {
-    uint8_t typeVal;
-    ar | pg.first.x | pg.first.y | typeVal;
-    pg.second = static_cast<PacGommeType>(typeVal);
-    return ar;
+inline gf::v1::Deserializer &operator|(gf::v1::Deserializer &ar, std::pair<Position, PacGommeType> &pg)
+{
+  uint8_t typeVal;
+  ar | pg.first.x | pg.first.y | typeVal;
+  pg.second = static_cast<PacGommeType>(typeVal);
+  return ar;
 }
 
 // Client -> serveur
@@ -344,6 +354,17 @@ Archive &operator|(Archive &ar, ClientRefreshListRooms &data)
 {
   return ar;
 }*/
+
+// Requête du client pour chager de pseudo (aléatoirement choisi par le serveur)
+struct ClientChangeName
+{
+  static constexpr gf::Id type = "ClientChangeName"_id;
+};
+template <typename Archive>
+Archive &operator|(Archive &ar, ClientChangeName &data)
+{
+  return ar;
+};
 
 struct ClientCreateRoom
 {
@@ -375,7 +396,8 @@ Archive &operator|(Archive &ar, ClientLeaveRoom &data)
 {
   return ar;
 };
-//Requête au serveur pour le changement de données du personnage du joueur
+
+// Requête au serveur pour le changement de données du personnage du joueur
 struct ClientChangeRoomCharacterData
 {
   static constexpr gf::Id type = "ClientChangeRoomCharacterData"_id;
@@ -386,7 +408,7 @@ Archive &operator|(Archive &ar, ClientChangeRoomCharacterData &data)
 {
   return ar | data.newPlayerRoomData;
 }
-//Requête au serveur pour le changement des paramètres du jeu
+// Requête au serveur pour le changement des paramètres du jeu
 struct ClientChangeRoomSettings
 {
   static constexpr gf::Id type = "ClientChangeRoomSettings"_id;
