@@ -1,17 +1,23 @@
 #pragma once
-#include <gf/Event.h>
+
+#include <gf/Scene.h>
+#include <gf/Font.h>
+
 #include "WelcomeEntity.h"
+#include <gf/Scene.h>
 
-class Renderer;
+class ClientGame;
 
-class WelcomeScene {
+class WelcomeScene : public gf::Scene {
 public:
-    explicit WelcomeScene(Renderer& renderer);
-
-    bool processEvent(const gf::Event& event); //true quand on clique sur enetrer
-    void render();
+    explicit WelcomeScene(ClientGame& game);
 
 private:
+    void doProcessEvent(gf::Event& event) override;
+    void doUpdate(gf::Time time) override;
+
+private:
+    ClientGame& m_game;
+    gf::Font m_font;
     WelcomeEntity m_entity;
-    Renderer& m_renderer;
 };

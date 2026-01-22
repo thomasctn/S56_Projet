@@ -30,6 +30,16 @@
 #include "ClientScreen.h"
 
 
+#include "ClientGame.h"
+
+int main() {
+    ClientGame game;
+    game.run("127.0.0.1", "5000");
+    return 0;
+}
+
+
+/*
 
 void shutdownClient(std::atomic<bool>& running)
 {
@@ -269,3 +279,4 @@ int main()
     gf::Log::info("Client fermé proprement\n");
     return 0;
 }
+*/
