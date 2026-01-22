@@ -83,7 +83,7 @@ void handleNetworkPackets(
                         auto data = packet.as<ServerListRoomPlayers>();
                         lobbyPlayers = data.players;
                         updateMyRoleFromPlayers(lobbyPlayers, myId, myRole);
-                        gf::Log::info("Lobby: %d / %d joueurs\n", lobbyPlayers, roomSettings.roomSize);
+                        gf::Log::info("Lobby: %zu / %u joueurs\n", lobbyPlayers.size(), roomSettings.roomSize);
                         break;
                     }
 

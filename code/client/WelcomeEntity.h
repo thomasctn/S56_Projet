@@ -1,28 +1,26 @@
 #pragma once
+
 #include <gf/Entity.h>
 #include <gf/WidgetContainer.h>
 #include <gf/Widgets.h>
-#include <gf/Text.h>
 #include <gf/Font.h>
-#include <gf/Event.h>
-#include "Renderer.h"
 
-class WelcomeEntity {
+class WelcomeEntity : public gf::Entity {
 public:
-    WelcomeEntity(Renderer& renderer);
-    bool processEvent(const gf::Event& event);
-    void render(gf::RenderTarget& target);
+    explicit WelcomeEntity(gf::Font& font);
+
+    void pointTo(gf::Vector2f coords);
+    void triggerAction();
+
     bool wasClicked() const;
     void resetClick();
-    void pointTo(gf::Vector2f coords);
-    bool trigger(); 
+    
 
+    void render(gf::RenderTarget& target, const gf::RenderStates& states) override;
 
 private:
-    Renderer& m_renderer;
-    gf::Font m_font;
-    gf::WidgetContainer m_container;
     gf::TextButtonWidget m_enterWidget;
-    bool m_wasClicked;
-    
+    gf::WidgetContainer m_container;
+    bool m_clicked = false;
+    gf::Font& m_font;
 };

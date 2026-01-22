@@ -48,8 +48,10 @@ void handleClientEvents(
 
                 }
                 actions.processEvent(event); //important actions
+
+                //gere plus le welcome vu que changement
                 //mettre un bouton si on est dans le welcome!
-                if (screen == ClientScreen::Welcome) {
+                /*if (screen == ClientScreen::Welcome) {
                     if (welcomeScene.processEvent(event)) {
                         gf::Log::info("Bouton ENTRER cliqué (par WelcomeScene)\n");
 
@@ -57,9 +59,9 @@ void handleClientEvents(
 
                         screen = ClientScreen::LobbyList;
                     }
-                }
+                }*/
 
-                else if (screen == ClientScreen::LobbyList) {
+                if (screen == ClientScreen::LobbyList) {
                     LobbyListAction act = lobbyListScene.processEvent(event);
 
                     if (act == LobbyListAction::CreateRoom) {
