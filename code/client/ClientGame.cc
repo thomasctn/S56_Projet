@@ -33,6 +33,8 @@ ClientGame::ClientGame()
     rightAction.addKeycodeKeyControl(gf::Keycode::Right);
     rightAction.setContinuous();
     actions.addAction(rightAction);
+
+    pushScene(welcomeScene);
 }
 
 ClientGame::~ClientGame() {
