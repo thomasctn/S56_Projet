@@ -16,7 +16,7 @@ constexpr size_t NB_BOTS                        = 4;
 constexpr unsigned int PACGOMME_COUNT           = 40;
 constexpr unsigned int POWER_PACGOMME_COUNT     = 4;
 
-static constexpr int VISION_RANGE               = 4;
+static constexpr int VISION_RANGE_BOTS          = 6;
 static constexpr float MOVE_INTERVAL            = 0.5f;
 static constexpr float CASE_SIZE                = 50;
 
@@ -34,7 +34,7 @@ static constexpr float SELF_GHOST_REPULSION     = 1.0f;
 static constexpr float RANDOM_NOISE             = 0.2f;
 static constexpr float DECAY_FACTOR             = 0.95f;
 
-static constexpr float PACMAN_SPEED_MOVERATE    = 15.0f;
+static constexpr float PACMAN_SPEED_MOVERATE    = 10.0f;
 static constexpr float GHOST_SPEED_MOVERATE     = 6.0f;
 static constexpr float DEFAULT_SPEED_MOVERATE   = 0.0f;
 

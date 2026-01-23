@@ -75,6 +75,8 @@ public:
 
     mutable std::mutex chronoMutex;
 
+    bool isPacManChaser() const { return pacManChaser; }
+    void setPacManChaser(bool value) { pacManChaser = value; }
 
 
 private:
@@ -98,4 +100,7 @@ private:
     void processInputs(InputQueue& queue);
 
     BotManager* botManager = nullptr;
+
+    bool pacManChaser = false;
+
 };

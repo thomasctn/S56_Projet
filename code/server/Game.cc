@@ -44,15 +44,14 @@ bool Game::canMove(uint32_t playerId, float newX, float newY) const {
         int py = static_cast<int>(other.y) / 50;
 
         if (px == gridX && py == gridY) {
-            // Fantômes peuvent marcher sur PacMan
-            if (currentPlayer.getRole() == PlayerRole::Ghost &&
-                other.getRole() == PlayerRole::PacMan) {
+            // PacMan et Ghost peuvent marcher l'un sur l'autre
+            if ((currentPlayer.getRole() == PlayerRole::Ghost && other.getRole() == PlayerRole::PacMan) ||
+                (currentPlayer.getRole() == PlayerRole::PacMan && other.getRole() == PlayerRole::Ghost)) {
                 continue; // autorisé
             }
 
-            // PacMan peut marcher sur les fantômes
-            if (currentPlayer.getRole() == PlayerRole::PacMan &&
-                other.getRole() == PlayerRole::Ghost) {
+            // Ghost sur Ghost : autorisé
+            if (currentPlayer.getRole() == PlayerRole::Ghost && other.getRole() == PlayerRole::Ghost) {
                 continue; // autorisé
             }
 

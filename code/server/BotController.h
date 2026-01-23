@@ -27,6 +27,10 @@ private:
         float toX,   float toY
     ) const;
 
+    Node* getPacmanNode(Game& game, BotManager& manager);
+    Node* findPacmanInSight(Node* start, Node* pacmanNode, int maxDepth);
+    Node* getNextNodeTowards(Node* start, Node* target);
+
 private:
     uint32_t playerId;
 };
