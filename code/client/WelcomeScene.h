@@ -2,6 +2,7 @@
 
 #include <gf/Scene.h>
 #include <gf/Font.h>
+#include <gf/Log.h>
 
 #include "WelcomeEntity.h"
 #include <gf/Scene.h>
