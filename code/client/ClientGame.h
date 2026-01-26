@@ -21,6 +21,12 @@
 
 
 class ClientGame : public gf::SceneManager {
+
+private: 
+
+    Renderer m_renderer;
+
+
 public:
     ClientGame();
     ~ClientGame();
@@ -29,12 +35,19 @@ public:
     void shutdownClient(std::atomic<bool>& running);
 
     Renderer& getRenderer();
+    
     gf::TcpSocket& getSocket();
+    bool tryPopPacket(gf::Packet& out);
+    void startNetwork(const std::string& host, const std::string& port);
     WelcomeScene welcomeScene; //toutes mes scenes
     LobbyListScene lobbyListScene;
     LobbyScene lobbyScene;
     GameScene gameScene;
     EndScene endScene;
+    void setMyId(uint32_t id);
+    uint32_t getMyId() const;
+
+
 
     
         
@@ -43,7 +56,6 @@ private:
     void connectToServer(const std::string& host, const std::string& port);
     void stopNetwork();
 
-    Renderer m_renderer;
     gf::TcpSocket m_socket;
     std::atomic<bool> m_running;
 

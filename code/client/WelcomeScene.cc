@@ -9,7 +9,8 @@ WelcomeScene::WelcomeScene(ClientGame& game)
 , m_font("../common/fonts/arial.ttf")
 , m_entity(m_font)
 {
-  addHudEntity(m_entity);
+    setClearColor(gf::Color::Black);
+    addHudEntity(m_entity);
 }
 
 void WelcomeScene::doProcessEvent(gf::Event& event) {
@@ -33,8 +34,33 @@ void WelcomeScene::doProcessEvent(gf::Event& event) {
 }
 
 void WelcomeScene::doUpdate(gf::Time time) {
+    gf::Packet packet;
+    while (m_game.tryPopPacket(packet)) {
+        switch (packet.getType()) {
+            case ServerConnect::type:{
+                auto data = packet.as<ServerConnect>();
+                m_game.setMyId(data.clientId);
+                gf::Log::info("ID client assigné par le serveur : %u\n", m_game.getMyId());
+                break;
+            }
+
+            case ServerListRooms::type:{
+                auto data = packet.as<ServerListRooms>();
+                //ici faut changer de scene/demander a changer de scene
+                break;
+            }
+
+            default:
+                break;
+        }
+    }
+
+    //logique du bouton
     if (m_entity.wasClicked()) {
         m_entity.resetClick();
-        //ici faut passer a la scene suivante?
+        //faut envoyer en reseau notre requete et changer la scene...
+        //enft non ici y a pas besoin de reseau, juste demander le schangement de scene et donc recup et affichage lobbylist
+        //mais pr dautres scene ici y aura surement besoin de dire a scenemanager/gamemamaner d'envoyer des trucs!!!
     }
 }
+

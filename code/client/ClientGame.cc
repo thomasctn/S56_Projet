@@ -34,7 +34,6 @@ ClientGame::ClientGame()
     rightAction.setContinuous();
     actions.addAction(rightAction);
 
-    pushScene(welcomeScene);
 }
 
 ClientGame::~ClientGame() {
@@ -56,6 +55,23 @@ Renderer& ClientGame::getRenderer() {
 gf::TcpSocket& ClientGame::getSocket() {
     return m_socket;
 }
+void ClientGame::setMyId(uint32_t id) {
+    myId = id;
+}
+
+uint32_t ClientGame::getMyId() const {
+    return myId;
+}
+
+
+//sort juste un packet
+bool ClientGame::tryPopPacket(gf::Packet& out) {
+    std::lock_guard<std::mutex> lock(m_packetMutex);
+    if (m_packetQueue.empty()) return false;
+    out = std::move(m_packetQueue.front());
+    m_packetQueue.pop();
+    return true;
+}
 
 void ClientGame::connectToServer(const std::string& host, const std::string& port) {
     bool connected = false;
@@ -69,6 +85,13 @@ void ClientGame::connectToServer(const std::string& host, const std::string& por
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
+}
+
+void ClientGame::startNetwork(const std::string& host, const std::string& port) {
+    m_running.store(true);
+    connectToServer(host, port);
+    m_socket.setNonBlocking();
+    m_receiver = startNetworkReceiver(m_socket, m_running, m_packetQueue, m_packetMutex);
 }
 
 void ClientGame::stopNetwork() {
@@ -85,116 +108,18 @@ void ClientGame::stopNetwork() {
 void ClientGame::run(const std::string& host, const std::string& port) {
     gf::Log::info("Démarrage ClientGame::run()\n");
 
-    gf::Log::info("Up active? %d\n", actions.getAction("Up").isActive());
+    startNetwork(host, port); //debut reseau
 
+    pushScene(welcomeScene); //premiere scene
 
-    m_running.store(true);
+    gf::SceneManager::run(); //on run
 
-    //connexion au serveur (bloquant tant que non connecté)
-    connectToServer(host, port);
+    stopNetwork(); //on ferme
 
-    //set non blocking and start receiver thread using your helper
-    m_socket.setNonBlocking();
-
-    //start network receiver (uses the free function you already have)
-    m_receiver = startNetworkReceiver(
-        m_socket,
-        m_running,
-        m_packetQueue,
-        m_packetMutex
-    );
-
-    auto lastSend = std::chrono::steady_clock::now();
-    gf::Log::info("Avant boucle principale\n");
-
-    while (m_running.load()) {
-        //gf::Log::info("Loop \n");
-
-        handleClientEvents(
-            m_renderer,
-            actions,
-            m_running,
-            screen,
-            welcomeScene,
-            lobbyScene,
-            endScene,
-            lobbyListScene,
-            m_socket,
-            askedToJoin,
-            amReady,
-            roomSettings,
-            myRole,
-            myId,
-            m_receiver
-        );
-        //gf::Log::info("Après handleClientEvents\n");
-
-
-        if (!m_running.load()) break;
-
-        if (screen == ClientScreen::Playing) {
-            auto now = std::chrono::steady_clock::now();
-            if (now - lastSend > std::chrono::milliseconds(1000 / CLIENT_MOVE_SPEED)) {
-                char dir = 0;
-                if (actions.getAction("Up").isActive()) dir = 'U';
-                else if (actions.getAction("Down").isActive()) dir = 'D';
-                else if (actions.getAction("Left").isActive()) dir = 'L';
-                else if (actions.getAction("Right").isActive()) dir = 'R';
-
-                if (dir != 0) {
-                    gf::Log::info("Envoi : touche '%c'\n", dir);
-                    gf::Packet packet;
-                    ClientMove cm;
-                    cm.moveDir = dir;
-                    packet.is(cm);
-                    m_socket.sendPacket(packet);
-                    lastSend = now;
-                }
-            }
-        }
-
-        handleNetworkPackets(
-            m_packetQueue,
-            m_packetMutex,
-            screen,
-            states,
-            board,
-            pacgommes,
-            timeLeft,
-            timeLeftPre,
-            lobbyPlayers,
-            roomSettings,
-            lobbyListScene,
-            myId,
-            myRole,
-            lastScore,
-            endReason,
-            amReady,
-            holeLinks
-        );
-
-        m_renderer.clearWindow();
-        m_renderer.getRenderWindow().display();
-         /*if (screen == ClientScreen::Welcome) {
-            welcomeScene.render();
-         }   */
-        if (screen == ClientScreen::Lobby) {
-            lobbyScene.render(lobbyPlayers, roomSettings, myId);
-        } else if (screen == ClientScreen::End) {
-            endScene.render(lastScore, endReason);
-        } else if (screen == ClientScreen::LobbyList) {
-            lobbyListScene.render();
-        } else { // Playing
-            gameScene.render(states, myId, board, pacgommes, timeLeftPre, timeLeft, holeLinks);
-        }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(8));
-    }
-
-    stopNetwork();
-    if (m_renderer.getWindow().isOpen()) {
-        m_renderer.getWindow().close();
-    }
-
-    gf::Log::info("ClientGame::run() terminé proprement\n");
+    gf::Log::info("ClientGame terminé proprement\n");
 }
+
+
+
+
+
