@@ -45,9 +45,9 @@ LobbyEntity::LobbyEntity(Renderer& renderer)
         w->setAnchor(gf::Anchor::Center);
     }
     m_readyBtn.setCharacterSize(20);
-    m_readyBtn.setAnchor(gf::Anchor::Center);
+    //m_readyBtn.setAnchor(gf::Anchor::Center);
     m_changeRoleBtn.setCharacterSize(18);
-    m_changeRoleBtn.setAnchor(gf::Anchor::Center);
+    //m_changeRoleBtn.setAnchor(gf::Anchor::Center);
 }
 
 LobbyAction LobbyEntity::processEvent(const gf::Event& event) {
@@ -101,7 +101,7 @@ void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, 
     gf::Vector2f settingsPos{textPosX, textStartPosY};
     gf::Vector2f playerListPos{textPosX, top + height * 0.5f};
     gf::Vector2f changeRolePos{right - (margin +uiOffsetX) - 120.f, textStartPosY+24.f};
-    gf::Vector2f readyPos{changeRolePos.x+50.f, top + height * 0.75f};
+    gf::Vector2f readyPos{changeRolePos.x, top + height * 0.8f};
     PlayerData clientData;
     for (auto& p : players) {
         if (p.id == clientID) {
@@ -117,7 +117,7 @@ void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, 
     const unsigned int READY_TEXT_SIZE  = 18u;
 
     m_readyBtn.setCharacterSize(READY_TEXT_SIZE);
-    m_readyBtn.setAnchor(gf::Anchor::TopCenter);
+    //m_readyBtn.setAnchor(gf::Anchor::TopCenter);
     m_readyBtn.setString(clientData.ready ? "PLUS PRÊT?" : "PRÊT");
     m_readyBtn.setPosition({readyPos.x,readyPos.y});
     m_readyBtn.setDefaultTextColor(gf::Color::White);
@@ -131,7 +131,7 @@ void LobbyEntity::render(std::vector<PlayerData> players,RoomSettings settings, 
     target.draw(m_readyBtn);
 
     m_leaveBtn.setCharacterSize(READY_TEXT_SIZE);
-    m_leaveBtn.setAnchor(gf::Anchor::TopCenter);
+    //m_leaveBtn.setAnchor(gf::Anchor::TopCenter);
     m_leaveBtn.setPosition({readyPos.x,readyPos.y + 50.f});
     m_leaveBtn.setDefaultTextColor(gf::Color::White);
     m_leaveBtn.setSelectedTextColor(gf::Color::Black);
@@ -157,7 +157,6 @@ void LobbyEntity::renderPlayerRow(gf::Vector2f position, PlayerData data, uint32
     else {
         iconTexture = gf::Texture("../client/assets/ghosts/inky.png");
     }
-    iconSprite.setAnchor(gf::Anchor::TopLeft);
     iconSprite.setTexture(iconTexture);
     iconSprite.setPosition({position.x,position.y-14.f});
 
@@ -166,9 +165,23 @@ void LobbyEntity::renderPlayerRow(gf::Vector2f position, PlayerData data, uint32
     playerListLabel.setCharacterSize(20);
     playerListLabel.setColor(gf::Color::White);
     playerListLabel.setString(data.name + (clientID == data.id ? "(vous)" : "") + (data.ready ? "(prêt)" : "(pas prêt)"));
-    playerListLabel.setPosition({position.x + 32.f, position.y});
+    playerListLabel.setPosition({position.x + 24.f, position.y});
     target.draw(iconSprite);
     target.draw(playerListLabel);
+
+    gf::TextButtonWidget removeBtn("X", m_font);
+    m_container.addWidget(removeBtn);
+    removeBtn.setCharacterSize(18u);
+    removeBtn.setPosition({position.x + 260.f, position.y});
+    removeBtn.setDefaultTextColor(gf::Color::White);
+    removeBtn.setSelectedTextColor(gf::Color::Black);
+    removeBtn.setDefaultBackgroundColor(gf::Color::Red);
+    removeBtn.setSelectedBackgroundColor(gf::Color::White);
+    removeBtn.setBackgroundOutlineThickness(1.f);
+    removeBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
+    removeBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
+    removeBtn.setPadding(18u *.25f);
+    target.draw(removeBtn);
 }
 
 void LobbyEntity::renderPLayerList(gf::Vector2f position, std::vector<PlayerData> players, unsigned int roomSize, uint32_t clientID)
@@ -202,7 +215,7 @@ void LobbyEntity::renderRoleSelection(gf::Vector2f position, PlayerData clientDa
 
     gf::Text pseudoLabel;
     pseudoLabel.setFont(m_font);
-    pseudoLabel.setAnchor(gf::Anchor::TopCenter);
+    //pseudoLabel.setAnchor(gf::Anchor::TopCenter);
     pseudoLabel.setCharacterSize(ROLE_TEXT_SIZE);
     pseudoLabel.setColor(gf::Color::White);
     pseudoLabel.setString(clientData.name);
@@ -217,7 +230,7 @@ void LobbyEntity::renderRoleSelection(gf::Vector2f position, PlayerData clientDa
     else {
         iconTexture = gf::Texture("../client/assets/ghosts/inky.png");
     }
-    iconSprite.setAnchor(gf::Anchor::TopLeft);
+    //iconSprite.setAnchor(gf::Anchor::TopLeft);
     iconSprite.setTexture(iconTexture);
 
     gf::Vector2f spritePos = {position.x,position.y+ROLE_TEXT_SIZE};
@@ -227,7 +240,7 @@ void LobbyEntity::renderRoleSelection(gf::Vector2f position, PlayerData clientDa
 
     gf::Text roleLabel;
     roleLabel.setFont(m_font);
-    roleLabel.setAnchor(gf::Anchor::TopLeft);
+    //roleLabel.setAnchor(gf::Anchor::TopLeft);
     roleLabel.setCharacterSize(ROLE_TEXT_SIZE);
     roleLabel.setColor(gf::Color::White);
     roleLabel.setString((clientData.role == PlayerRole::PacMan ? "Rôle : Pac-Man" : "Rôle : Fantôme"));
@@ -250,7 +263,7 @@ void LobbyEntity::renderRoleSelection(gf::Vector2f position, PlayerData clientDa
     m_changeRoleBtn.setDefaultBackgroundOutlineColor(gf::Color::White);
     m_changeRoleBtn.setSelectedBackgroundOutlineColor(gf::Color::White);
     m_changeRoleBtn.setPadding(CHANGE_ROLE_TEXT_SIZE * .65f);
-    m_changeRoleBtn.setAnchor(gf::Anchor::TopLeft);
+    //m_changeRoleBtn.setAnchor(gf::Anchor::TopLeft);
     target.draw(m_changeRoleBtn);
 }
 
@@ -294,7 +307,7 @@ void LobbyEntity::renderSettings(gf::Vector2f position, RoomSettings settings)
     target.draw(roomLabel);
 
     m_minusBtn.setCharacterSize(MINUS_SIZE);
-    m_minusBtn.setAnchor(gf::Anchor::CenterLeft);
+    //m_minusBtn.setAnchor(gf::Anchor::CenterLeft);
     m_minusBtn.setPosition(minusBtnPos);
 
     m_minusBtn.setDefaultTextColor(gf::Color::White);
@@ -308,7 +321,7 @@ void LobbyEntity::renderSettings(gf::Vector2f position, RoomSettings settings)
     target.draw(m_minusBtn);
 
     m_plusBtn.setCharacterSize(PLUS_SIZE);
-    m_plusBtn.setAnchor(gf::Anchor::CenterLeft);
+    //m_plusBtn.setAnchor(gf::Anchor::CenterLeft);
     m_plusBtn.setPosition(plusBtnPos);
     m_plusBtn.setDefaultTextColor(gf::Color::White);
     m_plusBtn.setSelectedTextColor(gf::Color::Black);
@@ -337,7 +350,7 @@ void LobbyEntity::renderSettings(gf::Vector2f position, RoomSettings settings)
     target.draw(botLabel);
 
     m_minusBotBtn.setCharacterSize(MINUS_SIZE);
-    m_minusBotBtn.setAnchor(gf::Anchor::CenterLeft);
+    //m_minusBotBtn.setAnchor(gf::Anchor::CenterLeft);
     m_minusBotBtn.setPosition(minusBotBtnPos);
     m_minusBotBtn.setDefaultTextColor(gf::Color::White);
     m_minusBotBtn.setSelectedTextColor(gf::Color::Black);
@@ -350,7 +363,7 @@ void LobbyEntity::renderSettings(gf::Vector2f position, RoomSettings settings)
     target.draw(m_minusBotBtn);
 
     m_plusBotBtn.setCharacterSize(PLUS_SIZE);
-    m_plusBotBtn.setAnchor(gf::Anchor::CenterLeft);
+    //m_plusBotBtn.setAnchor(gf::Anchor::CenterLeft);
     m_plusBotBtn.setPosition(plusBotBtnPos);
     m_plusBotBtn.setDefaultTextColor(gf::Color::White);
     m_plusBotBtn.setSelectedTextColor(gf::Color::Black);
@@ -375,7 +388,7 @@ void LobbyEntity::renderSettings(gf::Vector2f position, RoomSettings settings)
     target.draw(durationLabel);
 
     m_minusDurBtn.setCharacterSize(MINUS_SIZE);
-    m_minusDurBtn.setAnchor(gf::Anchor::CenterLeft);
+    //m_minusDurBtn.setAnchor(gf::Anchor::CenterLeft);
     m_minusDurBtn.setPosition(minusDurBtnPos);
     m_minusDurBtn.setDefaultTextColor(gf::Color::White);
     m_minusDurBtn.setSelectedTextColor(gf::Color::Black);
@@ -388,7 +401,7 @@ void LobbyEntity::renderSettings(gf::Vector2f position, RoomSettings settings)
     target.draw(m_minusDurBtn);
 
     m_plusDurBtn.setCharacterSize(PLUS_SIZE);
-    m_plusDurBtn.setAnchor(gf::Anchor::CenterLeft);
+    //m_plusDurBtn.setAnchor(gf::Anchor::CenterLeft);
     m_plusDurBtn.setPosition(plusDurBtnPos);
     m_plusDurBtn.setDefaultTextColor(gf::Color::White);
     m_plusDurBtn.setSelectedTextColor(gf::Color::Black);
