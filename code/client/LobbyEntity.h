@@ -32,7 +32,7 @@ public:
     void renderPLayerList(gf::Vector2f position, std::vector<PlayerData> players, unsigned int roomSize, uint32_t clientID);
     void renderRoleSelection(gf::Vector2f position, PlayerData clientData);
     void renderSettings(gf::Vector2f position, RoomSettings settings);
-
+    void defaultButtonColor(gf::TextButtonWidget& w);
 private:
     Renderer& m_renderer;
     gf::Font m_font;
