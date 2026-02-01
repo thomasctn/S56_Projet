@@ -46,7 +46,8 @@ void WelcomeScene::doUpdate(gf::Time time) {
 
             case ServerListRooms::type:{
                 auto data = packet.as<ServerListRooms>();
-                //ici faut changer de scene/demander a changer de scene
+                m_game.setLastRooms(data.rooms);
+                gf::Log::info("serverlistrooms reçu dans WelcomeScene : %zu\n", data.rooms.size());
                 break;
             }
 
@@ -61,6 +62,7 @@ void WelcomeScene::doUpdate(gf::Time time) {
         //faut envoyer en reseau notre requete et changer la scene...
         //enft non ici y a pas besoin de reseau, juste demander le schangement de scene et donc recup et affichage lobbylist
         //mais pr dautres scene ici y aura surement besoin de dire a scenemanager/gamemamaner d'envoyer des trucs!!!
+        m_game.requestScene(SceneRequest::GoToLobbyList);
     }
 }
 

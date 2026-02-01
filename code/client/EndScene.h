@@ -1,16 +1,26 @@
 #pragma once
-#include <gf/Event.h>
+
+#include <gf/Scene.h>
+#include <gf/Font.h>
+#include "../common/Protocol.h" 
+
 #include "EndEntity.h"
 
-class Renderer;
+class ClientGame;
 
-class EndScene {
+class EndScene : public gf::Scene {
 public:
-    explicit EndScene(Renderer& renderer);
+    explicit EndScene(ClientGame& game);
 
-    bool processEvent(const gf::Event& event); //true quand on clique sur enetrer
-    void render(int lastScore, GameEndReason endReason);
+    //init end info (appelée par ClientGame quand on switch vers End)
+    void initEnd(GameEndReason reason, int lastScore);
 
 private:
+    void doProcessEvent(gf::Event& event) override;
+    void doUpdate(gf::Time time) override;
+
+private:
+    ClientGame& m_game;
+    gf::Font m_font;
     EndEntity m_entity;
 };

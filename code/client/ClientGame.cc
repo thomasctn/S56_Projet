@@ -1,4 +1,6 @@
 #include "ClientGame.h"
+#include "GameScene.h"
+
 
 #include <gf/Log.h>
 #include <chrono>
@@ -11,10 +13,10 @@ ClientGame::ClientGame()
 , leftAction("Left")
 , rightAction("Right")
 , welcomeScene(*this)
-, lobbyListScene(m_renderer) //ou *this?
-, lobbyScene(m_renderer)
-, gameScene(m_renderer)
-, endScene(m_renderer)
+, lobbyListScene(*this) 
+, lobbyScene(*this)
+, gameScene(*this)
+, endScene(*this)
 , m_running(false)
 , roomSettings{ unsigned(MAX_PLAYERS), unsigned(NB_BOTS), unsigned(T_GAME) }
 {
@@ -48,9 +50,6 @@ void shutdownClient(std::atomic<bool>& running)
 }
 
 
-Renderer& ClientGame::getRenderer() {
-    return m_renderer;
-}
 
 gf::TcpSocket& ClientGame::getSocket() {
     return m_socket;
@@ -62,6 +61,40 @@ void ClientGame::setMyId(uint32_t id) {
 uint32_t ClientGame::getMyId() const {
     return myId;
 }
+
+void ClientGame::requestScene(SceneRequest req) {
+    switch (req) {
+        case SceneRequest::GoToLobbyList:
+            // remplace la pile entière par la scène LobbyList
+            replaceAllScenes(lobbyListScene);
+            lobbyListScene.getEntity().setRooms(m_lastRooms);
+            
+            break;
+
+        case SceneRequest::GoToLobby:
+            replaceAllScenes(lobbyScene);
+            break;
+
+          
+
+        default:
+            break;
+    }
+}
+
+void ClientGame::goToGameScene(const std::vector<PlayerData>& players,const BoardCommon& board,const std::map<Position, Position>& holeLinks){
+    gameScene.setInitialState(players, board, holeLinks);
+    replaceAllScenes(gameScene);
+
+}
+
+void ClientGame::goToEndScene(GameEndReason& endReason){
+    endScene.initEnd(endReason, lastScore);
+    replaceAllScenes(endScene);
+}
+
+
+
 
 
 //sort juste un packet

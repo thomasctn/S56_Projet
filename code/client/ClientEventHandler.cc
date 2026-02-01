@@ -60,7 +60,7 @@ void handleClientEvents(
                         screen = ClientScreen::LobbyList;
                     }
                 }*/
-
+/*/
                 if (screen == ClientScreen::LobbyList) {
                     LobbyListAction act = lobbyListScene.processEvent(event);
 
@@ -79,14 +79,14 @@ void handleClientEvents(
                         p.is(join);
                         socket.sendPacket(p);
                     }
-                }   
+                }   */
 
 
 
                 
 
                 // interaction lobby via LobbyScene
-                else if (screen == ClientScreen::Lobby) {
+                /*if (screen == ClientScreen::Lobby) {
                     LobbyAction act = lobbyScene.processEvent(event);
                     switch (act){
                         case LobbyAction::Leave: {
@@ -156,10 +156,10 @@ void handleClientEvents(
                         }
                         default: break;
                     }
-                }   
+                }   */
 
 
-                else if (screen == ClientScreen::End) {
+                /*if (screen == ClientScreen::End) {
                     if (endScene.processEvent(event)) {
                         gf::Log::info("Bouton retour au lobby cliqué (par EndScene)\n");
 
@@ -167,7 +167,7 @@ void handleClientEvents(
 
                         screen = ClientScreen::Lobby;
                     }
-                }
+                }*/
 
 
                 if (event.type == gf::EventType::Closed)

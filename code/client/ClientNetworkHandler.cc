@@ -63,11 +63,11 @@ void handleNetworkPackets(
                         break;
                     }
 
-                    case ServerListRooms::type: {
+                    /*case ServerListRooms::type: {
                         auto data = packet.as<ServerListRooms>();
                         lobbyListScene.setRooms(data.rooms);
                         break;
-                    }   
+                    }   */
 
 
                     case ServerConnect::type: {

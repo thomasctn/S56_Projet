@@ -1,51 +1,77 @@
 #pragma once
-#include <gf/Event.h>
+
+#include <gf/Entity.h>
 #include <gf/WidgetContainer.h>
 #include <gf/Widgets.h>
 #include <gf/Text.h>
 #include <gf/Font.h>
-#include "Renderer.h"
-#include "../common/Types.h"
+#include <vector>
+#include <memory>
 
-enum class LobbyAction {// actions possibles renvoyées par l'entity au main/scene
+#include "../common/Protocol.h" 
 
+
+enum class LobbyAction {
     None,
+
+    Leave,
+
     RoomDec,
     RoomInc,
+
     BotDec,
     BotInc,
+
     DurDec,
     DurInc,
+
     ToggleReady,
-    ChangeRole,
-    Leave
+    ChangeRole
 };
 
-class LobbyEntity {
+class LobbyEntity : public gf::Entity {
 public:
-    explicit LobbyEntity(Renderer& renderer);
+  LobbyEntity();
 
-    LobbyAction processEvent(const gf::Event& event);
+  void pointTo(gf::Vector2f coords);
+  void triggerAction();
+  void setPlayers(const std::vector<PlayerData>& players);
+  void setRoomSettings(const RoomSettings& settings);
+  void setClientId(uint32_t id);
 
-    void render(std::vector<PlayerData> players,RoomSettings settings, uint32_t clientID);
-    void renderPlayerRow(gf::Vector2f position,PlayerData data, uint32_t clientID);
-    void renderPLayerList(gf::Vector2f position, std::vector<PlayerData> players, unsigned int roomSize, uint32_t clientID);
-    void renderRoleSelection(gf::Vector2f position, PlayerData clientData);
-    void renderSettings(gf::Vector2f position, RoomSettings settings);
-    void defaultButtonColor(gf::TextButtonWidget& w);
+  LobbyAction getAndResetLastAction();
+
+  void render(gf::RenderTarget& target, const gf::RenderStates& states) override;
+
+
+    
 private:
-    Renderer& m_renderer;
-    gf::Font m_font;
-    gf::WidgetContainer m_container;
-    gf::TextButtonWidget m_leaveBtn;
-    gf::TextButtonWidget m_minusBtn;
-    gf::TextButtonWidget m_plusBtn;
-    gf::TextButtonWidget m_minusBotBtn;
-    gf::TextButtonWidget m_plusBotBtn;
-    gf::TextButtonWidget m_minusDurBtn;
-    gf::TextButtonWidget m_plusDurBtn;
-    gf::TextButtonWidget m_readyBtn;
-    gf::TextButtonWidget m_changeRoleBtn;
+  void renderPlayerRow(gf::RenderTarget& target, const gf::RenderStates& states, gf::Vector2f position, const PlayerData& data);
+  void renderPlayerList(gf::RenderTarget& target, const gf::RenderStates& states, gf::Vector2f position);
+  void renderRoleSelection(gf::RenderTarget& target, const gf::RenderStates& states, gf::Vector2f position);
+  void renderSettings(gf::RenderTarget& target, const gf::RenderStates& states, gf::Vector2f position);
+  void defaultButtonColor(gf::TextButtonWidget& w);
 
-    LobbyAction m_lastAction;
+
+
+private:
+  gf::Font m_font;
+
+  gf::WidgetContainer m_container;
+  gf::TextButtonWidget m_leaveBtn;
+  gf::TextButtonWidget m_minusBtn;
+  gf::TextButtonWidget m_plusBtn;
+  gf::TextButtonWidget m_minusBotBtn;
+  gf::TextButtonWidget m_plusBotBtn;
+  gf::TextButtonWidget m_minusDurBtn;
+  gf::TextButtonWidget m_plusDurBtn;
+  gf::TextButtonWidget m_readyBtn;
+  gf::TextButtonWidget m_changeRoleBtn;
+
+  LobbyAction m_lastAction = LobbyAction::None;
+
+  //état affiché
+  std::vector<PlayerData> m_players;
+  RoomSettings m_roomSettings{};
+  uint32_t m_clientId = 0;
 };

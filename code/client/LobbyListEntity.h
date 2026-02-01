@@ -1,15 +1,11 @@
 #pragma once
 
-#include <gf/Event.h>
+#include <gf/Entity.h>
+#include <gf/Font.h>
 #include <gf/WidgetContainer.h>
 #include <gf/Widgets.h>
-#include <gf/Text.h>
-#include <gf/Font.h>
-#include <vector>
-#include <memory>
 
-#include "Renderer.h"
-#include "../common/Types.h"
+#include "../common/Protocol.h"
 
 enum class LobbyListAction {
     None,
@@ -17,30 +13,24 @@ enum class LobbyListAction {
     JoinRoom
 };
 
-class LobbyListEntity {
+class LobbyListEntity : public gf::Entity {
 public:
-    explicit LobbyListEntity(Renderer& renderer);
+    LobbyListEntity();
 
-    LobbyListAction processEvent(const gf::Event& event);
-
-    // rendering
-    void render();
-
-    //maj des romms en fonction de ce que le server donne
     void setRooms(const std::vector<RoomData>& rooms);
 
+    void pointTo(gf::Vector2f position);
+    void triggerAction();
 
     LobbyListAction getAndResetLastAction();
     unsigned int getLastRoomId() const;
 
+    void render(gf::RenderTarget& target, const gf::RenderStates& states) override;
+
 private:
-    Renderer& m_renderer;
     gf::Font m_font;
     gf::WidgetContainer m_container;
-
     gf::TextButtonWidget m_createWidget;
-
-    //tt les boutons join
     std::vector<std::unique_ptr<gf::TextButtonWidget>> m_joinWidgets;
 
     std::vector<RoomData> m_rooms;

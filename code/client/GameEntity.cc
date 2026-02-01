@@ -1,14 +1,15 @@
 #include "GameEntity.h"
-#include "Renderer.h" // pour accéder à getRenderWindow()
 #include <gf/Text.h>
 #include <gf/Font.h>
 #include <gf/Log.h>
+#include <gf/RenderTarget.h>
+#include <gf/RenderStates.h>
+#include <gf/Shapes.h>
 #include <algorithm>
 
-GameEntity::GameEntity(Renderer& renderer)
-: m_renderer(renderer)
+GameEntity::GameEntity()
+: m_font("../common/fonts/arial.ttf")
 {
-    //chargement des textures
     m_inkyTexture = gf::Texture("../client/assets/ghosts/inky.png");
     m_inkySprite.setTexture(m_inkyTexture);
     m_inkySprite.setOrigin({0.f, 0.f});
@@ -25,7 +26,6 @@ GameEntity::GameEntity(Renderer& renderer)
     m_blinkySprite.setTexture(m_blinkyTexture);
     m_blinkySprite.setOrigin({0.f, 0.f});
 
-    //pacman anim
     m_pacmanRightTexture  = gf::Texture("../client/assets/pacman/right_pacman_sheet.png");
     m_pacmanLeftTexture   = gf::Texture("../client/assets/pacman/left_pacman_sheet.png");
     m_pacmanUpTexture     = gf::Texture("../client/assets/pacman/up_pacman_sheet.png");
@@ -46,13 +46,46 @@ GameEntity::GameEntity(Renderer& renderer)
     m_pacmanDir = 'R';
 }
 
-void GameEntity::calculateMovement(const BoardCommon &map, float &tileSize, float &offsetX, float &offsetY) {
-    //calcule d'après la view courante
-    gf::RenderWindow& win = m_renderer.getRenderWindow();
-    gf::View view = win.getView();
+void GameEntity::setGameState(const std::vector<PlayerData>& states) {
+    m_states = states;
+}
+
+void GameEntity::setBoard(const BoardCommon& board) {
+    m_board = board;
+}
+
+void GameEntity::setPacGommes(const std::vector<std::pair<Position, PacGommeType>>& pacgommes) {
+    m_pacgommes = pacgommes;
+}
+
+void GameEntity::setTimeLeft(int timeLeftPre, unsigned int timeLeft) {
+    m_timeLeftPre = timeLeftPre;
+    m_timeLeft = timeLeft;
+}
+
+void GameEntity::setGameTimeLeft(unsigned int timeLeft) {
+    m_timeLeft = timeLeft;
+}
+
+void GameEntity::setHoleLinks(const std::map<Position, Position>& holeLinks) {
+    m_holeLinks = holeLinks;
+}
+
+void GameEntity::setClientId(uint32_t id) {
+    m_clientId = id;
+}
+
+void GameEntity::update(gf::Time time) { //update anim pacman
+    m_pacmanSprite.update(time);
+}
+
+
+
+void GameEntity::calculateMovement(gf::RenderTarget& target, const BoardCommon &map, float &tileSize, float &offsetX, float &offsetY) {
+    gf::View view = target.getView();
     gf::Vector2f viewSize = view.getSize();
 
-    float topMargin = std::min(viewSize.y * 0.16f, 120.0f); //espace en haut pour texte
+    float topMargin = std::min(viewSize.y * 0.16f, 120.0f); //espace ou on met le texte en haut
     float availW = viewSize.x;
     float availH = viewSize.y - topMargin;
 
@@ -61,9 +94,7 @@ void GameEntity::calculateMovement(const BoardCommon &map, float &tileSize, floa
     offsetY = topMargin + (view.getCenter().y - viewSize.y * 0.5f);
 }
 
-void GameEntity::renderMap(const BoardCommon &map, float tileSize, float offsetX, float offsetY, std::map<Position, Position>& holeLinks) {
-    gf::RenderWindow& win = m_renderer.getRenderWindow();
-
+void GameEntity::renderMap(gf::RenderTarget& target, const gf::RenderStates& states, const BoardCommon &map, float tileSize, float offsetX, float offsetY) {
     for (unsigned int y = 0; y < map.height; ++y) {
         for (unsigned int x = 0; x < map.width; ++x) {
             const CaseCommon& cell = map.grid({ x, y });
@@ -78,43 +109,36 @@ void GameEntity::renderMap(const BoardCommon &map, float tileSize, float offsetX
                 default: tile.setColor(gf::Color::Black); break;
             }
 
-            win.draw(tile);
+            target.draw(tile, states);
         }
     }
 
-   if (holeLinks.size() >= 2) {
-        auto it = holeLinks.begin();
+    if (m_holeLinks.size() >= 2) {
+        auto it = m_holeLinks.begin();
 
         gf::RectangleShape portalTile({tileSize, tileSize});
 
         portalTile.setPosition({it->first.x * tileSize + offsetX, it->first.y * tileSize + offsetY});
         portalTile.setColor(gf::Color::Magenta);
-        win.draw(portalTile);
+        target.draw(portalTile, states);
 
         portalTile.setPosition({it->second.x * tileSize + offsetX, it->second.y * tileSize + offsetY});
-        win.draw(portalTile);
+        target.draw(portalTile, states);
 
         ++it;
 
         portalTile.setPosition({it->first.x * tileSize + offsetX, it->first.y * tileSize + offsetY});
         portalTile.setColor(gf::Color::Blue);
-        win.draw(portalTile);
+        target.draw(portalTile, states);
 
         portalTile.setPosition({it->second.x * tileSize + offsetX, it->second.y * tileSize + offsetY});
-        win.draw(portalTile);
-    }else{
-        //gf::Log::info("Pas de portal!\n");
-
+        target.draw(portalTile, states);
+    } else {
+        // gf::Log::info("Pas de portal!\n");
     }
-
-
-
 }
 
-
-void GameEntity::renderPacGommes(const std::vector<std::pair<Position, PacGommeType>>& pacgommes, float tileSize, float offsetX, float offsetY) {
-    gf::RenderWindow& win = m_renderer.getRenderWindow();
-
+void GameEntity::renderPacGommes(gf::RenderTarget& target, const gf::RenderStates& states, const std::vector<std::pair<Position, PacGommeType>>& pacgommes, float tileSize, float offsetX, float offsetY) {
     for (const auto& [pos, type] : pacgommes) {
         gf::CircleShape pacGomme(tileSize / 6.0f);
         pacGomme.setOrigin({tileSize / 12.0f, tileSize / 12.0f});
@@ -135,43 +159,40 @@ void GameEntity::renderPacGommes(const std::vector<std::pair<Position, PacGommeT
                 break;
         }
 
-        win.draw(pacGomme);
+        target.draw(pacGomme, states);
     }
 }
 
-
-void GameEntity::render(const std::vector<PlayerData>& states, uint32_t myId, const BoardCommon& board, const std::vector<std::pair<Position, PacGommeType>>& pacgommes, int timeLeftPre, unsigned int timeLeft, std::map<Position, Position>& holeLinks) {
-    gf::RenderWindow& win = m_renderer.getRenderWindow();
-
-    //clear via renderer helper
-    m_renderer.clearWindow();
+void GameEntity::render(gf::RenderTarget& target, const gf::RenderStates& states) {
+    
+    if (m_board.width == 0 || m_board.height == 0) {
+        return;
+    }
 
     float tileSize = 0.f;
     float offsetX = 0.f;
     float offsetY = 0.f;
-    calculateMovement(board, tileSize, offsetX, offsetY);
+    calculateMovement(target, m_board, tileSize, offsetX, offsetY);
 
-    //map
-    renderMap(board, tileSize, offsetX, offsetY, holeLinks);
+    renderMap(target, states, m_board, tileSize, offsetX, offsetY);
 
-    //pacgommes
-    renderPacGommes(pacgommes, tileSize, offsetX, offsetY);
+    renderPacGommes(target, states, m_pacgommes, tileSize, offsetX, offsetY);
 
-    static gf::Font font("../common/fonts/arial.ttf");
     gf::Text timer;
-    timer.setFont(font);
+    timer.setFont(m_font);
     timer.setCharacterSize(24);
     timer.setColor(gf::Color::White);
 
-    if(timeLeftPre != 0){
-        timer.setString("Temps avant le début de la partie : "+std::to_string(timeLeftPre));
+    if (m_timeLeftPre != 0) {
+
+        timer.setString("Temps avant le début de la partie : " + std::to_string(m_timeLeftPre));
     } else {
-        timer.setString("Temps avant la fin de la partie : "+std::to_string(timeLeft));
+        timer.setString("Temps avant la fin de la partie : " + std::to_string(m_timeLeft));
     }
     timer.setPosition({ offsetX, offsetY - 40.f });
-    win.draw(timer);
+    target.draw(timer, states);
 
-    //scale sprites pr tileSize
+    // Scale sprites pr tileSize
     auto texSize = m_inkyTexture.getSize();
     if (texSize.x > 0 && texSize.y > 0) {
         float scaleX = tileSize / float(texSize.x);
@@ -184,7 +205,7 @@ void GameEntity::render(const std::vector<PlayerData>& states, uint32_t myId, co
 
     int ghostIndex = 0;
 
-    for (const auto &s : states) {
+    for (const auto &s : m_states) {
         float px = s.x / 50.0f * tileSize + offsetX;
         float py = s.y / 50.0f * tileSize + offsetY;
 
@@ -205,45 +226,40 @@ void GameEntity::render(const std::vector<PlayerData>& states, uint32_t myId, co
                 m_pacmanSprite.setScale({tileSize / frameWidth, tileSize / frameHeight});
             }
 
-            m_pacmanSprite.update(gf::seconds(0.008f));
-            win.draw(m_pacmanSprite);
+            target.draw(m_pacmanSprite, states);
 
-            //score 
-            static gf::Font font("../common/fonts/arial.ttf");
+            //Score
             gf::Text scoreText;
-            scoreText.setFont(font);
+            scoreText.setFont(m_font);
             scoreText.setCharacterSize(16);
             scoreText.setColor(gf::Color::White);
             scoreText.setString(std::to_string(s.score));
             scoreText.setPosition({px + 5, py - 18});
-            win.draw(scoreText);
+            target.draw(scoreText, states);
 
             m_lastPacmanX = px;
             m_lastPacmanY = py;
             m_hasLastPacmanPos = true;
-        } else { //fantomes
+        } else { //Fantomes
             switch (ghostIndex) {
                 case 0:
                     m_inkySprite.setPosition({px, py});
-                    win.draw(m_inkySprite);
+                    target.draw(m_inkySprite, states);
                     break;
                 case 1:
                     m_clydeSprite.setPosition({px, py});
-                    win.draw(m_clydeSprite);
+                    target.draw(m_clydeSprite, states);
                     break;
                 case 2:
                     m_pinkySprite.setPosition({px, py});
-                    win.draw(m_pinkySprite);
+                    target.draw(m_pinkySprite, states);
                     break;
                 default:
                     m_blinkySprite.setPosition({px, py});
-                    win.draw(m_blinkySprite);
+                    target.draw(m_blinkySprite, states);
                     break;
             }
             ++ghostIndex;
         }
     }
-
-    //afficher
-    win.display();
 }

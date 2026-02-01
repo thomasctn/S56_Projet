@@ -1,19 +1,24 @@
 #pragma once
-#include <gf/Event.h>
+#include <gf/Scene.h>
+#include <chrono>
 #include "../common/Protocol.h"
 #include "GameEntity.h"
 
-class Renderer;
+class ClientGame;
 
-class GameScene {
+class GameScene : public gf::Scene {
 public:
-  explicit GameScene(Renderer& renderer);
+    explicit GameScene(ClientGame& game);
 
-  void processEvent(const gf::Event& event); //y a pas d'event pr l'instant mais bon
+  void setInitialState(const std::vector<PlayerData>& players,const BoardCommon& board,const std::map<Position, Position>& holeLinks);
 
-  // Render : passe au GameEntity
-  void render(const std::vector<PlayerData>& states,uint32_t myId,const BoardCommon& board,const std::vector<std::pair<Position, PacGommeType>>& pacgommes, int timeLeftPre, unsigned int timeLeft, std::map<Position, Position>& holeLinks);
 
 private:
-  GameEntity m_entity;
+    void doProcessEvent(gf::Event& event) override;
+    void doUpdate(gf::Time time) override;
+
+private:
+    ClientGame& m_game;
+    GameEntity m_entity;
+    std::chrono::steady_clock::time_point m_lastSend;
 };
