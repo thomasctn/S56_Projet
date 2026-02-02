@@ -31,6 +31,12 @@ void EndScene::doProcessEvent(gf::Event& event) {
             m_entity.triggerAction();
             break;
 
+        case gf::EventType::Closed: 
+            gf::Log::info("Fenêtre fermée (LobbyListScene)\n");
+            m_game.shutdown();
+            break;
+    
+
         default:
             break;
     }

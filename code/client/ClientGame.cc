@@ -138,6 +138,17 @@ void ClientGame::stopNetwork() {
     }
 }
 
+void ClientGame::shutdown() {
+    if (!m_running.load()) {
+        return;
+    }
+
+    gf::Log::info("Shutdown client demandé\n");
+    popAllScenes();   
+}
+
+
+
 void ClientGame::run(const std::string& host, const std::string& port) {
     gf::Log::info("Démarrage ClientGame::run()\n");
 
@@ -156,3 +167,10 @@ void ClientGame::run(const std::string& host, const std::string& port) {
 
 
 
+/*comment le resize fonctionnait:
+if (event.type == gf::EventType::Resized) { //changement taille
+                    auto size = renderer.getWindow().getSize();
+                    renderer.handleResize(size.x, size.y);
+                    //gf::Log::info("Handleresize appelé\n");
+
+                }*/

@@ -9,6 +9,7 @@
 
 #include "Renderer.h"
 #include "../common/Types.h"
+#include "../common/Constants.h"
 #include "SceneRequest.h"
 #include "WelcomeScene.h"
 #include "LobbyScene.h"
@@ -16,8 +17,6 @@
 #include "GameScene.h"
 #include "EndScene.h"
 #include "ClientNetworkHandler.h"
-#include "ClientEventHandler.h"
-#include "ClientScreen.h"
 
 
 class ClientGame : public gf::SceneManager {
@@ -29,7 +28,9 @@ public:
     ~ClientGame();
 
     void run(const std::string& host = "127.0.0.1", const std::string& port = "5000"); //debut
-    void shutdownClient(std::atomic<bool>& running);
+    void shutdown();
+
+
 
     
     gf::TcpSocket& getSocket();
@@ -71,6 +72,8 @@ private:
     void connectToServer(const std::string& host, const std::string& port);
     void stopNetwork();
 
+    
+
     std::vector<RoomData> m_lastRooms;
 
     gf::TcpSocket m_socket;
@@ -81,21 +84,9 @@ private:
     std::mutex m_packetMutex;
     std::thread m_receiver;
 
-    std::vector<PlayerData> states;
-    BoardCommon board;
-    std::vector<std::pair<Position, PacGommeType>> pacgommes;
-    unsigned int timeLeft = 999;
-    int timeLeftPre = 0;
-    std::map<Position, Position> holeLinks;
 
     RoomSettings roomSettings;
-    PlayerRole myRole = PlayerRole::Spectator;
     int lastScore = 0;
-    GameEndReason endReason = GameEndReason::TIME_OUT;
-    ClientScreen screen = ClientScreen::Welcome;
-    std::vector<PlayerData> lobbyPlayers;
-    bool askedToJoin = false;
-    bool amReady = false;
     uint32_t myId = 0;
 
     gf::ActionContainer actions;

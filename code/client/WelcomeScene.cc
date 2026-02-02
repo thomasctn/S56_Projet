@@ -16,17 +16,22 @@ WelcomeScene::WelcomeScene(ClientGame& game)
 void WelcomeScene::doProcessEvent(gf::Event& event) {
     switch (event.type) {
         case gf::EventType::MouseMoved:
-        m_entity.pointTo(
-            m_game.computeWindowToGameCoordinates(event.mouseCursor.coords, getHudView())
-        );
-        break;
+            m_entity.pointTo(
+                m_game.computeWindowToGameCoordinates(event.mouseCursor.coords, getHudView())
+            );
+            break;
 
         case gf::EventType::MouseButtonPressed:
-        m_entity.pointTo(
-            m_game.computeWindowToGameCoordinates(event.mouseButton.coords, getHudView())
-        );
-        m_entity.triggerAction();
-        break;
+            m_entity.pointTo(
+                m_game.computeWindowToGameCoordinates(event.mouseButton.coords, getHudView())
+            );
+            m_entity.triggerAction();
+            break;
+
+        case gf::EventType::Closed: 
+            gf::Log::info("Fenêtre fermée (LobbyListScene)\n");
+            m_game.shutdown();
+            break;
 
         default:
         break;

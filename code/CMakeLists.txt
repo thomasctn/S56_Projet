@@ -34,7 +34,6 @@ add_executable(client
     client/GameEntity.cc
     client/EndScene.cc
     client/EndEntity.cc
-    client/ClientEventHandler.cc
     client/ClientNetworkHandler.cc
     client/LobbyListScene.cc
     client/LobbyListEntity.cc

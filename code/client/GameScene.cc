@@ -26,6 +26,8 @@ void GameScene::setInitialState(
 void GameScene::doProcessEvent(gf::Event& event) {
     //gf::Log::info(" do process event\n");
 
+    
+
     m_game.getActions().processEvent(event);
 }
 
