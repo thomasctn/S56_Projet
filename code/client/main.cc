@@ -26,8 +26,6 @@
 #include "EndScene.h"
 #include "LobbyListScene.h"
 #include "ClientNetworkHandler.h"
-#include "ClientEventHandler.h"
-#include "ClientScreen.h"
 
 
 #include "ClientGame.h"
