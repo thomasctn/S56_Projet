@@ -9,7 +9,7 @@ constexpr int T_GAME                            = 60;      // durée de la parti
 constexpr int PRE_GAME_DELAY                    = 5; // délai avant début
 
 constexpr int SPEED = 30; // vitesse du serv
-constexpr int CLIENT_MOVE_SPEED = 30; // vitesse de déplacement du client
+constexpr int CLIENT_MOVE_SPEED = 10; // vitesse de déplacement du client
 
 constexpr size_t MAX_PLAYERS                    = 2;
 constexpr size_t NB_BOTS                        = 4;
@@ -34,8 +34,8 @@ static constexpr float SELF_GHOST_REPULSION     = 1.0f;
 static constexpr float RANDOM_NOISE             = 0.2f;
 static constexpr float DECAY_FACTOR             = 0.95f;
 
-static constexpr float PACMAN_SPEED_MOVERATE    = 10.0f;
-static constexpr float GHOST_SPEED_MOVERATE     = 6.0f;
+static constexpr float PACMAN_SPEED_MOVERATE    = 6.0f;
+static constexpr float GHOST_SPEED_MOVERATE     = 4.0f;
 static constexpr float DEFAULT_SPEED_MOVERATE   = 0.0f;
 
 static constexpr float CHASSEUR_MODE_TIME       = 10.0;

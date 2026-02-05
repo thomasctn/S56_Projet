@@ -79,7 +79,7 @@
     {\Large \textbf{Rapport de Projet} \\ Licence CMI Informatique - 3ème année \\ 2025-2026\par}
     \vspace{0.5cm}
 
-    \includegraphics[width=1\textwidth]{images/entete.png}\\
+    \includegraphics[width=0.7\textwidth]{images/entete.png}\\
     \vspace{0.5cm}
 
     {\LARGE \textbf{Thomas COUTANT}\\ \textbf{Benoît LITAMPHA}\\ \textbf{Auriane PETER}\par}
@@ -103,10 +103,7 @@
 \chapter*{Introduction}
 \addcontentsline{toc}{chapter}{Introduction}
 
-Ce projet s’inscrit dans le cadre de la licence 3 Informatique.
-L’objectif est la conception et la réalisation d’un jeu de type Pac-Man
-multijoueur en réseau, mettant en œuvre des notions de programmation,
-d’architecture logicielle et de communication client-serveur.
+
 
 \vfill
 
@@ -115,19 +112,34 @@ d’architecture logicielle et de communication client-serveur.
 
 \section{Contexte académique}
 
-Présentation du cadre universitaire du projet (UE, semestre, travail en groupe ou individuel,
-objectifs pédagogiques).
+Ce projet a été réalisé dans le cadre du sixième semestre de la licence informatique de l’Université Marie \& Louis Pasteur. Il s’inscrit dans un enseignement visant à mettre en pratique les connaissances acquises au cours de la formation, notamment à travers la réalisation d’un projet informatique de taille conséquente.
 
-\section{Présentation générale du jeu Pac-Man}
+Le travail a été mené en groupe de trois étudiants sur une période s’étendant de la mi-octobre à la fin du mois de mars, sous l’encadrement de Julien Bernard, maître de conférences à l’Université Marie \& Louis Pasteur. Le projet porte sur le développement d’un jeu vidéo en réseau, depuis sa conception jusqu’à son implémentation.
 
-Rappel du principe du jeu Pac-Man original et justification de son choix
-pour une adaptation en réseau.
+Les objectifs pédagogiques de ce projet sont multiples. Il vise en particulier à consolider les compétences en programmation C++, à approfondir la découverte du développement de jeux vidéo, ainsi qu’à mettre en œuvre une architecture réseau de type client–serveur. Le projet permet également de développer des compétences transversales telles que le travail en équipe et la gestion d’un projet informatique sur une durée prolongée.
+
+\section{Présentation générale du jeu \texttt{Pac-Man}}
+
+Le jeu \texttt{Pac-Man}, apparu au début des années 1980, est un jeu d’arcade dans lequel le joueur contrôle un personnage évoluant dans un labyrinthe. L’objectif principal est de parcourir l’ensemble du labyrinthe afin de consommer toutes les \texttt{pac-gommes} qui s’y trouvent, tout en évitant d’entrer en contact avec des fantômes. Ces derniers constituent les adversaires du joueur et cherchent à bloquer ou intercepter ses déplacements. Certaines \texttt{pac-gommes} spéciales permettent temporairement à \texttt{Pac-Man} d’inverser les rôles en devenant capable d’éliminer les fantômes, ajoutant ainsi une dimension stratégique au gameplay.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/pac_man_original.png}
+    \caption{PacMan : le jeu original}
+\end{figure}
+
+
+Dans le cadre de ce projet, le jeu a été adapté afin d’introduire une dimension multijoueur. Une partie oppose un joueur incarnant \texttt{Pac-Man} à plusieurs joueurs incarnant des fantômes. Lorsque le nombre de joueurs humains est insuffisant, certains fantômes peuvent être contrôlés par des intelligences artificielles afin de garantir un déroulement cohérent de la partie. Cette approche permet de conserver le principe asymétrique du jeu original, tout en introduisant des interactions directes entre joueurs humains.
+
+Le choix de \texttt{Pac-Man} comme base pour une adaptation en réseau s’explique par plusieurs raisons. Tout d’abord, ses règles simples et universellement connues permettent une prise en main rapide par les joueurs, ce qui facilite les phases de test et de démonstration. De plus, le gameplay asymétrique se prête naturellement à une séparation des rôles entre plusieurs joueurs connectés.
 
 \section{Objectifs généraux du projet}
 
-Objectifs fonctionnels (jeu jouable, multijoueur, synchronisation)
-et objectifs techniques (réseau, performance, architecture).
+Les objectifs du projet peuvent être divisés en deux catégories principales : les objectifs fonctionnels, liés à l’expérience de jeu, et les objectifs techniques, liés à la conception et à l’implémentation du système.
 
+Du point de vue fonctionnel, l’objectif principal était de concevoir un jeu Pac-Man jouable en réseau, permettant à plusieurs joueurs de participer simultanément à une même partie.
+
+Sur le plan technique, le projet visait à mettre en \oe uvre une architecture réseau robuste reposant sur un modèle client–serveur. Le serveur devait être capable de gérer les connexions simultanées des joueurs, la création et la gestion des parties, ainsi que l’échange des données nécessaires au bon déroulement du jeu.
 
 \chapter{Définition du sujet et problématique}
 
@@ -253,7 +265,7 @@ du développement réseau et de la conception logicielle.
     \addcontentsline
     {toc}{chapter}{Mots-Clés}
     \begin{center}
-     MathLive - JavaScript - TypeScript - HTML - Drag \& Drop
+     C++ - PacMan - GF - Réseau - [AUTRE]
     \end{center}
     \vspace*{\fill} % Espace vertical
 

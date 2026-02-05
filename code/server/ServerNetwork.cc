@@ -1,5 +1,9 @@
 #include "ServerNetwork.h"
 
+// --- Constructeur ---
+// - nextId correspond a l'id qui sera assigner au prochain client
+// - running pour couper la boucle de server
+// - lobby -> appartient a ServerNetwork
 ServerNetwork::ServerNetwork()
 : listener("5000")
 , nextId(1)
@@ -13,6 +17,8 @@ ServerNetwork::ServerNetwork()
     selector.addSocket(listener);
 }
 
+// --- Boucle du server ---
+// sert juste a accepter et/ou transmettre les packets des clients
 int ServerNetwork::run() {
     gf::Log::info("ServerNetwork démarré\n");
 
@@ -27,6 +33,7 @@ int ServerNetwork::run() {
     return 0;
 }
 
+// --- Gestion d'un nouveau client ---
 void ServerNetwork::handleNewClient() {
     if (!selector.isReady(listener))
         return;
@@ -56,7 +63,9 @@ void ServerNetwork::handleNewClient() {
     gf::Log::info("Client connecté (id=%u)\n", id);
 }
 
-
+// --- Gestion des packets du client ---
+// Soit disconnect soit transmis au lobby
+// TODO ammeliorer la deconnection
 void ServerNetwork::handleClientData() {
     std::vector<uint32_t> disconnected;
 
@@ -91,6 +100,7 @@ void ServerNetwork::handleClientData() {
     }
 }
 
+// --- Deconnexion client ---
 void ServerNetwork::disconnectPlayer(uint32_t id) {
     auto it = connections.find(id);
     if (it == connections.end())
@@ -105,6 +115,7 @@ void ServerNetwork::disconnectPlayer(uint32_t id) {
     gf::Log::info("Client %u déconnecté\n", id);
 }
 
+// --- Envoie des packets au client ---
 void ServerNetwork::send(uint32_t playerId, gf::Packet& packet) {
     auto it = connections.find(playerId);
     if (it == connections.end())
@@ -113,6 +124,7 @@ void ServerNetwork::send(uint32_t playerId, gf::Packet& packet) {
     it->second.socket.sendPacket(packet);
 }
 
+// --- Arret du server ---
 void ServerNetwork::stop() {
     running = false;
     gf::Log::info("ServerNetwork arrêté\n");

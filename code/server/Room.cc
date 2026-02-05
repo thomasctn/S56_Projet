@@ -2,13 +2,14 @@
 #include "BotController.h"
 
 
-Room::Room(uint32_t id, ServerNetwork& network)
-: id(id)
-, network(network)
-{
+Room::Room(uint32_t id, ServerNetwork& network): id(id), network(network) {
     gf::Log::info("[Room %u] Créée\n", id);
 }
 
+/****************************FONCTION GENERALE*************************/
+
+// ---Ajout d'un joueur ---
+// 
 void Room::addPlayer(uint32_t playerId) {
     if (players.size() >= settings.roomSize) {
         gf::Log::warning("[Room %u] Room pleine (%zu / %u), joueur %u refusé\n",
@@ -58,9 +59,6 @@ void Room::addPlayer(uint32_t playerId) {
     broadcastRoomSettings();
 }
 
-
-
-
 void Room::removePlayer(uint32_t playerId) {
     players.erase(playerId);
     preGamePlayers.erase(playerId);
@@ -79,6 +77,23 @@ void Room::removePlayer(uint32_t playerId) {
 
 }
 
+bool Room::allPlayersReady() const {
+    for (uint32_t pid : players) {
+        bool isReady = false;
+        if (game) {
+            const Player& p = game->getPlayerInfo(pid);
+            isReady = p.isReady();
+        } else {
+            auto it = preGamePlayers.find(pid);
+            if (it != preGamePlayers.end())
+                isReady = it->second.ready;
+        }
+
+        if (!isReady)
+            return false;
+    }
+    return true;
+}
 
 void Room::startGame() {
     if (game)
@@ -163,11 +178,68 @@ void Room::startGame() {
     gf::Log::info("[Room %u] Partie démarrée avec %zu joueurs\n", id, players.size());
 }
 
+void Room::endGame(GameEndReason reason) {
+    notifyGameEnded(reason);
+    resetPlayersState();
+    std::thread([this]() {
+        cleanupGame();
+    }).detach();
+}
+
+void Room::notifyGameEnded(GameEndReason reason) {
+    gf::Log::info("[Room %u] Notification de fin de partie\n", id);
+
+    ServerGameEnd msg;
+    msg.reason = reason;
+    gf::Packet packet;
+    packet.is(msg);
+
+    for (uint32_t pid : players) {
+        network.send(pid, packet);
+    }
+}
+
+void Room::cleanupGame() {
+    if (!game) return;
+
+    gf::Log::info("[Room %u] Nettoyage de la partie\n", id);
+
+    game->stopGameLoop();
+    game->joinGameLoop();
+
+    botManager.reset();
+    game.reset();
+    for (auto& [id, pdata] : preGamePlayers) {
+        pdata.ready = false;
+    }
+
+    gf::Log::info("[Room %u] Nettoyage fini\n", id);
+
+}
+
+uint32_t Room::generateBotId() {
+    static uint32_t nextBotId = 10000; // commence après les ID joueurs
+    return nextBotId++;
+}
+
+void Room::resetPlayersState() {
+    gf::Log::info("[Room %u] Reset états de joueurs\n", id);
+    for (auto& [id, pdata] : preGamePlayers) {
+        pdata.ready = false;
+    }
+
+}
+
+void Room::notifyGameEndedAsync(GameEndReason reason) {
+    notifyGameEnded(reason);
+    resetPlayersState();
+    std::thread([this]() {
+        cleanupGame();
+    }).detach();
+}
 
 
-
-
-
+/****************************HANDLER*************************/
 
 
 void Room::handlePacket(PacketContext& ctx) {
@@ -198,8 +270,6 @@ void Room::handlePacket(PacketContext& ctx) {
             break;
     }
 }
-
-
 
 void Room::handleClientMove(PacketContext& ctx) {
     auto data = ctx.packet.as<ClientMove>();
@@ -293,68 +363,20 @@ void Room::handleClientChange(PacketContext& ctx) {
     broadcastRoomPlayers();
 }
 
-bool Room::allPlayersReady() const {
-    for (uint32_t pid : players) {
-        bool isReady = false;
-        if (game) {
-            const Player& p = game->getPlayerInfo(pid);
-            isReady = p.isReady();
-        } else {
-            auto it = preGamePlayers.find(pid);
-            if (it != preGamePlayers.end())
-                isReady = it->second.ready;
-        }
+void Room::handleClientChangeRoomSettings(PacketContext& ctx) {
+    auto data = ctx.packet.as<ClientChangeRoomSettings>();
 
-        if (!isReady)
-            return false;
-    }
-    return true;
-}
-
-void Room::broadcastRoomPlayers()
-{
-    ServerListRoomPlayers list;
-
-    for (uint32_t pid : players) {
-        PlayerData pdata;
-
-        if (game) {
-            const Player& p = game->getPlayerInfo(pid);
-            pdata = p.getState();
-        } else {
-            pdata.id = pid;
-            auto it = preGamePlayers.find(pid);
-            if (it != preGamePlayers.end()) {
-                pdata = it->second;
-            } else {
-                pdata.role = PlayerRole::Spectator;
-                pdata.ready = false;
-            }
-        }
-
-        list.players.push_back(pdata);
-    }
+    // (optionnel) limiter au host
+    // if (ctx.senderId != *players.begin()) return;
+        // Ack uniquement au client demandeur
+    ServerChangeRoomSettings ack;
     gf::Packet packet;
-    packet.is(list);
-
-    for (uint32_t pid : players) {
-        network.send(pid, packet);
-    }
+    packet.is(ack);
+    network.send(ctx.senderId, packet);
+    setSettings(data.newSettings);
 }
 
-
-void Room::broadcastRoomSettings()
-{
-    ServerRoomSettings msg;
-    msg.settings = settings;
-    //gf::Log::info("[Room %u] Taille room %u\n",id, settings.roomSize);
-    gf::Packet packet;
-    packet.is(msg);
-
-    for (uint32_t pid : players) {
-        network.send(pid, packet);
-    }
-}
+/****************************BROADCAST*************************/
 
 void Room::broadcastState() {
     if (!game)
@@ -403,10 +425,61 @@ void Room::broadcastState() {
     }
 }
 
-uint32_t Room::generateBotId() {
-    static uint32_t nextBotId = 10000; // commence après les ID joueurs
-    return nextBotId++;
+void Room::broadcastRoomPlayers() {
+    ServerListRoomPlayers list;
+
+    for (uint32_t pid : players) {
+        PlayerData pdata;
+
+        if (game) {
+            const Player& p = game->getPlayerInfo(pid);
+            pdata = p.getState();
+        } else {
+            pdata.id = pid;
+            auto it = preGamePlayers.find(pid);
+            if (it != preGamePlayers.end()) {
+                pdata = it->second;
+            } else {
+                pdata.role = PlayerRole::Spectator;
+                pdata.ready = false;
+            }
+        }
+
+        list.players.push_back(pdata);
+    }
+    gf::Packet packet;
+    packet.is(list);
+
+    for (uint32_t pid : players) {
+        network.send(pid, packet);
+    }
 }
+
+void Room::broadcastRoomSettings() {
+    ServerRoomSettings msg;
+    msg.settings = settings;
+    //gf::Log::info("[Room %u] Taille room %u\n",id, settings.roomSize);
+    gf::Packet packet;
+    packet.is(msg);
+
+    for (uint32_t pid : players) {
+        network.send(pid, packet);
+    }
+}
+
+void Room::broadcastPreGame(unsigned int remaining) {
+    ServerGamePreStart msg;
+    msg.timeLeft = static_cast<uint32_t>(remaining);
+    //gf::Log::info("[Room %u] Broadcast PreGame time : %u\n",id,remaining);
+    gf::Packet packet;
+    packet.is(msg);
+
+    for (uint32_t pid : players) {
+        network.send(pid, packet);
+    }
+}
+
+/****************************SETER*************************/
 
 void Room::setSettings(const RoomSettings& newSettings){
     if (game) {
@@ -456,90 +529,13 @@ void Room::setSettings(const RoomSettings& newSettings){
     broadcastRoomSettings();
 }
 
-void Room::handleClientChangeRoomSettings(PacketContext& ctx)
-{
-    auto data = ctx.packet.as<ClientChangeRoomSettings>();
-
-    // (optionnel) limiter au host
-    // if (ctx.senderId != *players.begin()) return;
-        // Ack uniquement au client demandeur
-    ServerChangeRoomSettings ack;
-    gf::Packet packet;
-    packet.is(ack);
-    network.send(ctx.senderId, packet);
-    setSettings(data.newSettings);
-}
-
-void Room::endGame(GameEndReason reason) {
-    notifyGameEnded(reason);
-    resetPlayersState();
-    std::thread([this]() {
-        cleanupGame();
-    }).detach();
-}
-
-
-
-void Room::notifyGameEnded(GameEndReason reason) {
-    gf::Log::info("[Room %u] Notification de fin de partie\n", id);
-
-    ServerGameEnd msg;
-    msg.reason = reason;
-    gf::Packet packet;
-    packet.is(msg);
-
-    for (uint32_t pid : players) {
-        network.send(pid, packet);
-    }
-}
-
-void Room::cleanupGame() {
-    if (!game) return;
-
-    gf::Log::info("[Room %u] Nettoyage de la partie\n", id);
-
-    game->stopGameLoop();
-    game->joinGameLoop();
-
-    botManager.reset();
-    game.reset();
-    for (auto& [id, pdata] : preGamePlayers) {
-        pdata.ready = false;
-    }
-
-    gf::Log::info("[Room %u] Nettoyage fini\n", id);
-
-}
 
 
 
 
-void Room::resetPlayersState() {
-    gf::Log::info("[Room %u] Reset états de joueurs\n", id);
-    for (auto& [id, pdata] : preGamePlayers) {
-        pdata.ready = false;
-    }
-
-}
-
-void Room::notifyGameEndedAsync(GameEndReason reason) {
-    notifyGameEnded(reason);
-    resetPlayersState();
-    std::thread([this]() {
-        cleanupGame();
-    }).detach();
-}
 
 
-void Room::broadcastPreGame(unsigned int remaining)
-{
-    ServerGamePreStart msg;
-    msg.timeLeft = static_cast<uint32_t>(remaining);
-    //gf::Log::info("[Room %u] Broadcast PreGame time : %u\n",id,remaining);
-    gf::Packet packet;
-    packet.is(msg);
 
-    for (uint32_t pid : players) {
-        network.send(pid, packet);
-    }
-}
+
+
+
