@@ -12,6 +12,7 @@ public:
 
   void setInitialState(const std::vector<PlayerData>& players,const BoardCommon& board,const std::map<Position, Position>& holeLinks);
 
+    void resizeYourself() ;
 
 private:
     void doProcessEvent(gf::Event& event) override;

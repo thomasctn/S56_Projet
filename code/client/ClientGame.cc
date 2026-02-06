@@ -18,7 +18,8 @@ ClientGame::ClientGame()
 , gameScene(*this)
 , endScene(*this)
 , m_running(false)
-, roomSettings{ unsigned(MAX_PLAYERS), unsigned(NB_BOTS), unsigned(T_GAME) }
+, roomSettings{ unsigned(MAX_PLAYERS), unsigned(NB_BOTS), unsigned(T_GAME)  }
+, m_view(gf::vec(1280.f/2.f, 720.f/2.f), gf::vec(1280.f, 720.f))
 {
     upAction.addKeycodeKeyControl(gf::Keycode::Up);
     upAction.setContinuous();
@@ -68,11 +69,13 @@ void ClientGame::requestScene(SceneRequest req) {
             // remplace la pile entière par la scène LobbyList
             replaceAllScenes(lobbyListScene);
             lobbyListScene.getEntity().setRooms(m_lastRooms);
+            lobbyListScene.resizeYourself();
             
             break;
 
         case SceneRequest::GoToLobby:
             replaceAllScenes(lobbyScene);
+            lobbyScene.resizeYourself();
             break;
 
           
@@ -85,12 +88,14 @@ void ClientGame::requestScene(SceneRequest req) {
 void ClientGame::goToGameScene(const std::vector<PlayerData>& players,const BoardCommon& board,const std::map<Position, Position>& holeLinks){
     gameScene.setInitialState(players, board, holeLinks);
     replaceAllScenes(gameScene);
+    gameScene.resizeYourself();
 
 }
 
 void ClientGame::goToEndScene(GameEndReason& endReason){
     endScene.initEnd(endReason, lastScore);
     replaceAllScenes(endScene);
+    endScene.resizeYourself();
 }
 
 
@@ -125,13 +130,17 @@ void ClientGame::startNetwork(const std::string& host, const std::string& port) 
     connectToServer(host, port);
     m_socket.setNonBlocking();
     m_receiver = startNetworkReceiver(m_socket, m_running, m_packetQueue, m_packetMutex);
+    m_receiver.detach();
 }
 
-void ClientGame::stopNetwork() {
+void ClientGame::stopNetwork() {    
+    gf::Log::info("stop network1\n");
     if (m_receiver.joinable()) {
         m_running.store(false);
-        m_receiver.join();
+        //m_receiver.join();
     }
+    gf::Log::info("stop network2\n");
+
     //fermer socket proprement
     if (m_socket) {
         gf::TcpSocket tmp = std::move(m_socket);
@@ -154,7 +163,10 @@ void ClientGame::run(const std::string& host, const std::string& port) {
 
     startNetwork(host, port); //debut reseau
 
+
+
     pushScene(welcomeScene); //premiere scene
+    welcomeScene.resizeYourself();//resize des qu'une scene est appelée! essentiel!
 
     gf::SceneManager::run(); //on run
 
@@ -164,6 +176,25 @@ void ClientGame::run(const std::string& host, const std::string& port) {
 }
 
 
+void ClientGame::handleResize(unsigned int winW, unsigned int winH)
+{
+        gf::Log::info("handleresize appelé\n");
+
+    float windowRatio = float(winW) / float(winH);
+    float logicalRatio = m_logicalWidth / m_logicalHeight;
+
+    if (windowRatio > logicalRatio) {
+        m_view.setSize({m_logicalHeight * windowRatio, m_logicalHeight}); // fenêtre trop large
+    } else {
+        m_view.setSize({m_logicalWidth, m_logicalWidth / windowRatio}); // fenêtre trop haute
+    }
+
+    m_view.setCenter({m_logicalWidth / 2.f, m_logicalHeight / 2.f});
+    getRenderer().setView(m_view);
+}
+const gf::View& ClientGame::getMainView() const {
+    return m_view;
+}
 
 
 

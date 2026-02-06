@@ -12,6 +12,8 @@ class ClientGame;
 class WelcomeScene : public gf::Scene {
 public:
     explicit WelcomeScene(ClientGame& game);
+    void resizeYourself() ;
+
 
 private:
     void doProcessEvent(gf::Event& event) override;

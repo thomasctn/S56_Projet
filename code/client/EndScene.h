@@ -14,6 +14,8 @@ public:
 
     //init end info (appelée par ClientGame quand on switch vers End)
     void initEnd(GameEndReason reason, int lastScore);
+    void resizeYourself() ;
+
 
 private:
     void doProcessEvent(gf::Event& event) override;

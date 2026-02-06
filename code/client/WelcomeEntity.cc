@@ -32,19 +32,21 @@ void WelcomeEntity::resetClick() {
 }
 
 void WelcomeEntity::render(gf::RenderTarget& target, const gf::RenderStates& states) {
-    gf::Coordinates coords(target);
-    
+    const float LOGICAL_W = 1280.f;
+    const float LOGICAL_H = 720.f;
 
-    unsigned titleSize = coords.getRelativeCharacterSize(0.15f);
-    auto titlePos = coords.getRelativePoint({0.5f, 0.2f});
-    gf::Text title("PACMAN", m_font, titleSize);
+    unsigned titleSize = 64u; 
+    gf::Text title;
+    title.setFont(m_font);
+    title.setCharacterSize(titleSize);
+    title.setString("PACMAN");
     title.setAnchor(gf::Anchor::Center);
     title.setColor(gf::Color::White);
-    title.setPosition(titlePos);
+    title.setPosition({ LOGICAL_W * 0.5f, LOGICAL_H * 0.2f });
     target.draw(title, states);
 
-    unsigned charSize = coords.getRelativeCharacterSize(0.1f);
-    auto buttonPos = coords.getRelativePoint({0.5f, 0.5f});
+    unsigned charSize = 32u;
+    gf::Vector2f buttonPos{ LOGICAL_W * 0.5f, LOGICAL_H * 0.5f };
 
     m_enterWidget.setCharacterSize(charSize);
     m_enterWidget.setAnchor(gf::Anchor::Center);
@@ -57,3 +59,4 @@ void WelcomeEntity::render(gf::RenderTarget& target, const gf::RenderStates& sta
 
     target.draw(m_enterWidget, states);
 }
+
