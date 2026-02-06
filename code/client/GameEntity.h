@@ -8,6 +8,7 @@
 #include <gf/AnimatedSprite.h>
 #include <gf/Animation.h>
 #include "../common/Protocol.h"
+#include "../common/Constants.h"
 
 class GameEntity : public gf::Entity {
 public:
@@ -20,7 +21,9 @@ public:
     void setGameTimeLeft(unsigned int timeLeft); //ne touche que timeLeft, pas timeLeftPre
     void setHoleLinks(const std::map<Position, Position>& holeLinks);
     void setClientId(uint32_t id);
-    
+    bool posIsInRange(int oX,int oY,int dX,int dY,double range) {
+        return sqrt(pow(abs(oX-dX),2) + pow(abs(oY-dY),2)) <= range;
+    }
     void update(gf::Time time) override;
     
 void render(gf::RenderTarget& target, const gf::RenderStates& states) override;

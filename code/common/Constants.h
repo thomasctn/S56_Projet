@@ -17,6 +17,7 @@ constexpr unsigned int PACGOMME_COUNT           = 40;
 constexpr unsigned int POWER_PACGOMME_COUNT     = 4;
 
 static constexpr int VISION_RANGE_BOTS          = 6;
+static constexpr double VISION_RANGE_PLAYER     = 3.7;
 static constexpr float MOVE_INTERVAL            = 0.5f;
 static constexpr float CASE_SIZE                = 50;
 
