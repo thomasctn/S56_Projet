@@ -12,6 +12,8 @@ class LobbyListScene : public gf::Scene {
 public:
     explicit LobbyListScene(ClientGame& game);
     LobbyListEntity& getEntity() { return m_entity; }
+    void resizeYourself() ;
+
 
 
 private:

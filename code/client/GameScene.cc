@@ -9,7 +9,7 @@ GameScene::GameScene(ClientGame& game)
 , m_lastSend(std::chrono::steady_clock::now())
 {
     setClearColor(gf::Color::Black);
-    addHudEntity(m_entity);
+    addWorldEntity(m_entity);
 }
 
 void GameScene::setInitialState(
@@ -25,7 +25,8 @@ void GameScene::setInitialState(
 
 void GameScene::doProcessEvent(gf::Event& event) {
     //gf::Log::info(" do process event\n");
-
+    if(event.type==gf::EventType::Resized)
+        resizeYourself();
     
 
     m_game.getActions().processEvent(event);
@@ -101,4 +102,10 @@ void GameScene::doUpdate(gf::Time time) {
             m_lastSend = now;
         }
     }
+}
+
+void GameScene::resizeYourself(){
+    auto size = m_game.getWindow().getSize(); 
+    m_game.handleResize(size.x, size.y);
+    getWorldView() = m_game.getMainView();
 }

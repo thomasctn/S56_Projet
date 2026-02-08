@@ -1,5 +1,6 @@
 #pragma once
 #include <gf/SceneManager.h>
+#include <gf/View.h>
 #include <gf/TcpSocket.h>
 #include <gf/Packet.h>
 #include <thread>
@@ -7,7 +8,6 @@
 #include <queue>
 #include <mutex>
 
-#include "Renderer.h"
 #include "../common/Types.h"
 #include "../common/Constants.h"
 #include "SceneRequest.h"
@@ -64,6 +64,11 @@ public:
     gf::Action leftAction;
     gf::Action rightAction;
 
+    void handleResize(unsigned int winW, unsigned int winH);
+    const gf::View& getMainView() const;
+    
+
+
 
     
         
@@ -90,5 +95,9 @@ private:
     uint32_t myId = 0;
 
     gf::ActionContainer actions;
+
+    float m_logicalWidth = 1280.f;
+    float m_logicalHeight = 720.f;
+    gf::View m_view;
 
 };

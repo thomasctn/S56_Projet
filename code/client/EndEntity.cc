@@ -39,75 +39,58 @@ EndAction EndEntity::getAndResetLastAction() {
 }
 
 void EndEntity::render(gf::RenderTarget& target, const gf::RenderStates& states) {
+    const float LOGICAL_W = 1280.f;
+    const float LOGICAL_H = 720.f;
 
-    gf::View view = target.getView();
-    gf::Vector2f center = view.getCenter();
-    gf::Vector2f size = view.getSize();
-
-    float left = center.x - size.x * 0.5f;
-    float top  = center.y - size.y * 0.5f;
-    float width = size.x;
-    float height = size.y;
-
-    float margin = 20.f;
-
-    //titre
+    unsigned int titleSize = 64u;
     gf::Text title;
     title.setFont(m_font);
-    unsigned int titleSize = std::max(24u, (unsigned int)(height * 0.06f));
     title.setCharacterSize(titleSize);
-    title.setColor(gf::Color::White);
     title.setString("Fin de Jeu");
-    title.setAnchor(gf::Anchor::TopCenter);
-    title.setPosition({ left + width * 0.5f, top + height * 0.08f });
+    title.setAnchor(gf::Anchor::Center);
+    title.setColor(gf::Color::White);
+    title.setPosition({ LOGICAL_W * 0.5f, LOGICAL_H * 0.15f });
     target.draw(title, states);
 
-    //texte pour la raison
+    unsigned int reasonSize = 32u;
     gf::Text reasonText;
     reasonText.setFont(m_font);
-    unsigned int reasonSize = std::max(14u, (unsigned int)(height * 0.03f));
     reasonText.setCharacterSize(reasonSize);
     reasonText.setColor(gf::Color::White);
     reasonText.setAnchor(gf::Anchor::TopLeft);
 
     std::string reasonStr;
-    switch (m_endReason){
-        case GameEndReason::ALL_DOT_EATEN:
-            reasonStr = "Pacman a mangé toutes les pacgommes.\nPacman gagne !";
-            break;
-        case GameEndReason::TIME_OUT:
-            reasonStr = "Le temps est écoulé.\nLes fantômes gagnent.";
-            break;
-        case GameEndReason::PACMAN_DEATH:
-            reasonStr = "Pacman est mort trop de fois.\nLes fantômes gagnent.";
-            break;
-        default:
-            reasonStr = "Fin de la partie.";
-            break;
+    switch (m_endReason) {
+        case GameEndReason::ALL_DOT_EATEN: 
+            reasonStr = "Pacman a mangé toutes les pacgommes.\nPacman gagne !"; break;
+        case GameEndReason::TIME_OUT:       
+            reasonStr = "Le temps est écoulé.\nLes fantômes gagnent."; break;
+        case GameEndReason::PACMAN_DEATH:   
+            reasonStr = "Pacman est mort trop de fois.\nLes fantômes gagnent."; break;
+        default:                            
+            reasonStr = "Fin de la partie."; break;
     }
 
     reasonText.setString(reasonStr);
-    reasonText.setPosition({ left + width * 0.16f, top + height * 0.18f });
+    reasonText.setPosition({ LOGICAL_W * 0.1f, LOGICAL_H * 0.25f });
     target.draw(reasonText, states);
 
-    //le score
+    unsigned int scoreSize = 28u;
     gf::Text scoreText;
     scoreText.setFont(m_font);
-    unsigned int scoreSize = std::max(12u, (unsigned int)(height * 0.028f));
     scoreText.setCharacterSize(scoreSize);
     scoreText.setColor(gf::Color::White);
     scoreText.setAnchor(gf::Anchor::TopLeft);
     scoreText.setString("Score final de Pacman : " + std::to_string(m_lastScore));
-    scoreText.setPosition({ left + width * 0.16f, top + height * 0.30f });
+    scoreText.setPosition({ LOGICAL_W * 0.1f, LOGICAL_H * 0.40f });
     target.draw(scoreText, states);
 
-    //zone de bouton
-    float bw = width * 0.4f;
-    float bh = height * 0.12f;
-    float bx = left + (width - bw) * 0.5f;
-    float by = top + height * 0.55f;
+    float bw = 400.f; // largeur du bouton
+    float bh = 80.f;  // hauteur du bouton
+    float bx = (LOGICAL_W - bw) * 0.5f;
+    float by = LOGICAL_H * 0.60f;
 
-    unsigned int btnChar = std::max(16u, (unsigned int)(height * 0.035f));
+    unsigned int btnChar = 32u;
 
     m_enterWidget.setCharacterSize(btnChar);
     m_enterWidget.setAnchor(gf::Anchor::Center);
@@ -117,10 +100,10 @@ void EndEntity::render(gf::RenderTarget& target, const gf::RenderStates& states)
     m_enterWidget.setSelectedTextColor(gf::Color::Black);
     m_enterWidget.setDefaultBackgroundColor(gf::Color::Black);
     m_enterWidget.setSelectedBackgroundColor(gf::Color::White);
-    m_enterWidget.setBackgroundOutlineThickness(btnChar * .05f);
+    m_enterWidget.setBackgroundOutlineThickness(btnChar * 0.05f);
     m_enterWidget.setDefaultBackgroundOutlineColor(gf::Color::White);
     m_enterWidget.setSelectedBackgroundOutlineColor(gf::Color::White);
-    m_enterWidget.setPadding(btnChar * .4f);
+    m_enterWidget.setPadding(btnChar * 0.4f);
 
     target.draw(m_enterWidget, states);
 }

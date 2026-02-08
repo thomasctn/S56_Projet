@@ -64,23 +64,15 @@ unsigned int LobbyListEntity::getLastRoomId() const {
 }
 
 void LobbyListEntity::render(gf::RenderTarget& target, const gf::RenderStates& states) {
-    //gf::Log::info("renderlobbylist\n");
-
-    gf::View view = target.getView();
-    gf::Vector2f center = view.getCenter();
-    gf::Vector2f size = view.getSize();
-
-    float left = center.x - size.x * 0.5f;
-    float top  = center.y - size.y * 0.5f;
-    float width = size.x;
-    float height = size.y;
+    const float LOGICAL_W = 1280.f;
+    const float LOGICAL_H = 720.f;
 
     float margin = 16.f;
-    float y = top + margin;
+    float y = margin;
 
-    float bw = width * 0.3f;
-    float bh = height * 0.08f;
-    float bx = left + (width - bw) * 0.5f;
+    float bw = LOGICAL_W * 0.3f;
+    float bh = LOGICAL_H * 0.08f;
+    float bx = (LOGICAL_W - bw) * 0.5f;
     float by = y;
 
     m_createWidget.setCharacterSize(26);
@@ -104,49 +96,42 @@ void LobbyListEntity::render(gf::RenderTarget& target, const gf::RenderStates& s
     header.setCharacterSize(18);
     header.setColor(gf::Color::White);
     header.setString("Rooms disponibles :");
-    header.setPosition({ left + margin, y });
+    header.setPosition({ margin, y });
     target.draw(header, states);
 
     y += 28.f;
 
     float rowH = std::max(28.f, bh * 0.8f);
-    float btnW = width * 0.2f;
+    float btnW = LOGICAL_W * 0.2f;
 
     for (size_t i = 0; i < m_rooms.size(); ++i) {
         const RoomData& rd = m_rooms[i];
 
-        float rowX = left + margin;
+        float rowX = margin;
         float rowY = y + float(i) * (rowH + 8.f);
 
-        gf::RectangleShape rowBg({ width - margin * 2.f, rowH });
+        gf::RectangleShape rowBg({ LOGICAL_W - margin * 2.f, rowH });
         rowBg.setPosition({ rowX, rowY });
-        rowBg.setColor((i % 2 == 0)? gf::Color::fromRgb(30,30,30) : gf::Color::fromRgb(45,45,45));
+        rowBg.setColor((i % 2 == 0) ? gf::Color::fromRgb(30,30,30) : gf::Color::fromRgb(45,45,45));
         target.draw(rowBg, states);
 
         gf::Text roomText;
         roomText.setFont(m_font);
         roomText.setCharacterSize(16);
         roomText.setColor(gf::Color::Black);
-        roomText.setString(
-            rd.hostName + " (" +
-            std::to_string(rd.nbPlayer) + " / " +
-            std::to_string(rd.roomSize) + ")"
-        );
+        roomText.setString(rd.hostName + " (" + std::to_string(rd.nbPlayer) + " / " + std::to_string(rd.roomSize) + ")");
         roomText.setPosition({ rowX + 8.f, rowY + rowH * 0.175f });
         target.draw(roomText, states);
 
         if (i < m_joinWidgets.size()) {
             auto& w = *m_joinWidgets[i];
 
-            float joinX = left + width - margin - btnW;
+            float joinX = LOGICAL_W - margin - btnW;
             float joinY = rowY + (rowH - rowH * 0.8f) * 0.5f;
 
             w.setCharacterSize(16);
             w.setAnchor(gf::Anchor::Center);
-            w.setPosition({
-                joinX + btnW * 0.5f,
-                joinY + (rowH * 0.8f) * 0.5f
-            });
+            w.setPosition({ joinX + btnW * 0.5f, joinY + (rowH * 0.8f) * 0.5f });
 
             w.setDefaultTextColor(gf::Color::White);
             w.setSelectedTextColor(gf::Color::Black);

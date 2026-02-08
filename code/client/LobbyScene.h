@@ -16,6 +16,7 @@ public:
         const std::vector<PlayerData>& players,
         const RoomSettings& settings
     );
+    void resizeYourself() ;
 
 private:
     void doProcessEvent(gf::Event& event) override;

@@ -8,7 +8,7 @@ LobbyListScene::LobbyListScene(ClientGame& game)
 , m_entity()
 {
     setClearColor(gf::Color::Black);
-    addHudEntity(m_entity);
+    addWorldEntity(m_entity);
 
 }
 
@@ -16,13 +16,13 @@ void LobbyListScene::doProcessEvent(gf::Event& event) {
     switch (event.type) {
         case gf::EventType::MouseMoved:
             m_entity.pointTo(
-                m_game.computeWindowToGameCoordinates(event.mouseCursor.coords, getHudView())
+                m_game.computeWindowToGameCoordinates(event.mouseCursor.coords, getWorldView())
             );
             break;
 
         case gf::EventType::MouseButtonPressed:
             m_entity.pointTo(
-                m_game.computeWindowToGameCoordinates(event.mouseButton.coords, getHudView())
+                m_game.computeWindowToGameCoordinates(event.mouseButton.coords, getWorldView())
             );
             m_entity.triggerAction();
             break;
@@ -31,6 +31,11 @@ void LobbyListScene::doProcessEvent(gf::Event& event) {
             gf::Log::info("Fenêtre fermée (LobbyListScene)\n");
             m_game.shutdown();
             break;
+
+        case gf::EventType::Resized: {
+            resizeYourself();
+            break;
+        }
 
         default:
             break;
@@ -92,3 +97,8 @@ void LobbyListScene::doUpdate(gf::Time time) {
 
 }
 
+void LobbyListScene::resizeYourself(){
+    auto size = m_game.getWindow().getSize(); 
+    m_game.handleResize(size.x, size.y);
+    getWorldView() = m_game.getMainView();
+}
