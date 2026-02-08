@@ -145,18 +145,25 @@ Sur le plan technique, le projet visait à mettre en \oe uvre une architecture r
 
 \section{Problématique du jeu en réseau}
 
-Contraintes liées au multijoueur en temps réel :
-latence, synchronisation des états, cohérence entre clients.
+La conception d’un jeu multijoueur en temps réel implique plusieurs contraintes techniques et architecturales. La première difficulté réside dans la latence des communications réseau, qui peut perturber la réactivité du jeu et l’expérience du joueur. Il est donc essentiel de minimiser le décalage entre les actions d’un joueur et leur effet visible pour tous les participants.
+
+Une autre contrainte majeure concerne la synchronisation des états du jeu entre les différents clients. Chaque joueur doit avoir une vision cohérente de l’ensemble de la partie, incluant les positions de Pac-Man, des fantômes et l’état des pac-gommes. Pour garantir cette cohérence, le projet a opté pour un modèle de serveur autoritaire : toutes les décisions critiques sont validées côté serveur, qui diffuse ensuite les informations mises à jour à tous les clients. Les clients, de leur côté, envoient uniquement leurs intentions de déplacement, qui sont ensuite traitées et synchronisées par le serveur. Les données transitent via des buffers et des queues avant d’être appliquées, assurant un traitement ordonné et fiable des événements du jeu.
 
 \section{Choix techniques}
 
-Choix du langage, des bibliothèques, du modèle réseau
-(client-serveur, protocole, gestion des messages).
+Le projet a été développé en C++ en utilisant la bibliothèque \textit{Gamedev Framework} (gf), adaptée au développement de jeux vidéo et compatible avec la gestion de l’architecture réseau. La communication réseau repose exclusivement sur le protocole TCP, assurant la fiabilité des échanges entre le serveur et les clients. Les messages échangés sont sérialisés afin de structurer et standardiser les informations transmises.
+
+Le serveur a été conçu selon un modèle multithreadé, reflétant la logique de fonctionnement du jeu : un thread principal gère le serveur et le lobby, tandis que d’autres threads s’occupent des rooms, de la boucle de jeu, des fantômes contrôlés par l’IA et de la communication avec les clients. Cette architecture permet de traiter simultanément les interactions multiples des joueurs et d’assurer une exécution fluide et cohérente des parties.
 
 \section{Répartition des rôles}
 
-Description de la collaboration, répartition des tâches et organisation du travail.
+La réalisation de ce projet a été organisée de manière collaborative entre les trois membres du groupe. 
 
+Thomas Coutant a principalement travaillé sur le développement du serveur, ainsi que sur la conception de la logique du jeu. Il a également développé un prototype minimal de démarrage, permettant de tester la communication client–serveur avec un simple cube représentant un joueur en mouvement.
+
+Auriane Peter s’est concentrée sur le développement du client, en implémentant l’interface et la gestion des interactions côté joueur.
+
+Benoît Litampha a assuré la communication entre le serveur et le client, participant également à certaines tâches sur le serveur et le client lorsque nécessaire. Cette répartition a permis une progression simultanée sur plusieurs fronts du projet, tout en garantissant une cohérence globale de l’application.
 
 %\chapter{L'Organisation du stage}
 
